@@ -1,0 +1,569 @@
+﻿@model customerseller.Models.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<style>
+    body {
+        background: #fafafa;
+    }
+
+    .checkout-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        gap: 44px;
+        margin: 40px 0;
+        padding: 0 20px;
+    }
+
+    .checkout-left {
+        background: #fff;
+        padding: 38px 36px 28px 36px;
+        border-radius: 12px;
+        box-shadow: 0 4px 32px rgba(160, 50, 95, 0.08);
+        min-width: 400px;
+        width: 420px;
+    }
+
+    .checkout-right {
+        background: #fff;
+        padding: 28px 28px 18px 28px;
+        border-radius: 12px;
+        box-shadow: 0 4px 32px rgba(160, 50, 95, 0.08);
+        min-width: 330px;
+        width: 370px;
+    }
+
+    .logo-heading {
+        color: #a64d79;
+        font-size: 2.1rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        margin-bottom: 34px;
+    }
+
+    .section-title {
+        font-size: 1.09rem;
+        font-weight: bold;
+        margin: 26px 0 12px 0;
+    }
+
+    input[type="text"], input[type="email"], select {
+        width: 100%;
+        padding: 9px 12px;
+        font-size: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        margin-bottom: 16px;
+        box-sizing: border-box;
+        background: #faf8fa;
+    }
+
+    .inline-inputs {
+        display: flex;
+        gap: 14px;
+    }
+
+        .inline-inputs input {
+            width: 100%;
+        }
+
+    .shipping-box {
+        background: #f8faf7;
+        border: 1.5px solid #dbe8d0;
+        border-radius: 7px;
+        padding: 13px 18px;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+        .shipping-box span {
+            font-weight: 500;
+        }
+
+    .payment-group {
+        margin-bottom: 30px;
+    }
+
+    .radio-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .radio-row {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+        .radio-row label {
+            font-size: 1.02rem;
+            cursor: pointer;
+            user-select: none;
+            color: #3b3542;
+        }
+
+    .pay-btn {
+        width: 100%;
+        background: #a64d79;
+        color: #fff;
+        font-size: 1.15rem;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        padding: 14px 0;
+        margin-top: 16px;
+        cursor: pointer;
+        letter-spacing: 1px;
+        transition: background 0.2s;
+    }
+
+        .pay-btn:hover {
+            background: #873b63;
+        }
+
+        .pay-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+    .checkout-links {
+        text-align: left;
+        margin-top: 36px;
+        font-size: 0.95rem;
+        color: #777;
+    }
+
+        .checkout-links a {
+            color: #a64d79;
+            text-decoration: none;
+            margin-right: 14px;
+        }
+
+            .checkout-links a:hover {
+                text-decoration: underline;
+            }
+
+    .custom-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .custom-modal-overlay.show {
+            display: flex;
+        }
+
+    .custom-modal-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 380px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+
+    .custom-modal-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+
+    .custom-modal-box h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e1033;
+        margin-bottom: 8px;
+    }
+
+    .custom-modal-box p {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    .custom-modal-btn {
+        padding: 10px 28px;
+        border-radius: 9px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background: #a64d79;
+        color: #fff;
+    }
+
+    @@media (max-width: 950px) {
+        .checkout-wrapper {
+            flex-direction: column;
+            align-items: center;
+            gap: 26px;
+            margin: 20px 0;
+            padding: 0 12px;
+        }
+
+        .checkout-left, .checkout-right {
+            min-width: 0;
+            width: 100%;
+            padding: 24px 20px 18px;
+        }
+
+        .logo-heading {
+            font-size: 1.6rem;
+            margin-bottom: 22px;
+        }
+
+        .inline-inputs {
+            flex-direction: column;
+            gap: 0;
+        }
+    }
+</style>
+
+<div class="checkout-wrapper">
+    <div class="checkout-left">
+        <div class="logo-heading">ARTISAN VALLEY</div>
+
+        @if (TempData["Error"] != null)
+        {
+            <div style="color:red; background:#ffe0e0; padding:10px; border-radius:6px; margin-bottom:15px;">
+                ⚠️ @TempData["Error"]
+            </div>
+        }
+
+        <form id="checkoutForm">
+
+            <input type="hidden" name="cartData" id="cartDataInput" />
+            <input type="hidden" name="deliveryFee" id="deliveryFeeInput" value="0" />
+
+            <div class="section-title">Contact</div>
+            <input type="text" asp-for="Email" id="phoneInput" placeholder="03XX-XXXXXXX" maxlength="12" />
+
+            <div class="section-title">Delivery</div>
+            <select asp-for="Country">
+                <option value="Pakistan" selected>Pakistan</option>
+            </select>
+
+            <div class="inline-inputs">
+                <input type="text" id="FirstName" name="FirstName" placeholder="First name">
+                <input type="text" id="LastName" name="LastName" placeholder="Last name">
+            </div>
+
+           
+            
+            <textarea asp-for="Address" id="addressInput" rows="3"
+                      placeholder="Full address (e.g. Shop 5, behind KFC, Saddar, Rawalpindi)" required
+                      style="width:100%; padding:9px 12px; font-size:1rem; font-family:inherit; border:1px solid #e0e0e0; border-radius:4px; margin-bottom:8px; box-sizing:border-box; background:#faf8fa; resize:none; line-height:1.4;"></textarea>
+           
+
+            <small style="color:#888; font-size:0.82rem; display:block; margin-top:0; margin-bottom:12px;">
+                📍 Delivery charge will be auto-detected from your address
+            </small>
+            <input type="hidden" asp-for="City" id="cityHidden" value="Rawalpindi" />
+
+            <div id="areaNotFound" style="display:none; background:#fff3cd; border:1.5px solid #ffc107; border-radius:8px; padding:10px 16px; margin-bottom:16px; font-size:0.88rem; color:#856404;">
+                ⚠️ Area not recognized. We deliver within Rawalpindi only. Please include your area name in the address.
+            </div>
+
+            <div class="section-title">Shipping method</div>
+            <div class="shipping-box">
+                <span>Standard Delivery</span>
+                <span style="color:#a64d79; font-weight:700;" id="shippingDisplay">Enter address first</span>
+            </div>
+
+            <div class="section-title">Payment</div>
+            <div class="payment-group">
+                <div class="radio-list">
+                    <div class="radio-row">
+                        <input type="radio" asp-for="PaymentMethod" value="COD" id="cod" checked>
+                        <label for="cod">Cash on Delivery (COD)</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="pay-btn" id="payBtn">Complete Order</button>
+        </form>
+
+        <div class="checkout-links">
+            <a href="#">Refund policy</a>
+            <a href="#">Privacy policy</a>
+        </div>
+    </div>
+
+    <div class="checkout-right">
+        <div id="orderSummary"></div>
+    </div>
+</div>
+
+
+<div class="custom-modal-overlay" id="customModal">
+    <div class="custom-modal-box">
+        <div class="custom-modal-icon" id="customModalIcon"></div>
+        <h3 id="customModalTitle"></h3>
+        <p id="customModalMsg"></p>
+        <button class="custom-modal-btn" id="customModalBtn">OK</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let deliveryFee = 0;
+        let subtotal = 0;
+        let displayItems = [];
+        let isSubmitting = false;
+
+        function showCustomModal(icon, title, msg, callback) {
+            document.getElementById('customModalIcon').textContent = icon;
+            document.getElementById('customModalTitle').textContent = title;
+            document.getElementById('customModalMsg').textContent = msg;
+            document.getElementById('customModal').classList.add('show');
+            document.getElementById('customModalBtn').onclick = function () {
+                closeCustomModal();
+                if (callback) callback();
+            };
+        }
+
+        function closeCustomModal() {
+            document.getElementById('customModal').classList.remove('show');
+        }
+
+        function updateSummary() {
+            const summaryDiv = document.getElementById('orderSummary');
+            let html = '<h3 style="margin-bottom:20px; font-weight:800; color:#333;">Order Summary</h3>';
+            displayItems.forEach(item => {
+                let price = parseFloat(item.price) || 0;
+                let qty = parseInt(item.qty) || 1;
+                html += `
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <img src="${item.img}" style="width:50px; border-radius:5px; object-fit:cover;">
+                            <div style="font-weight:600;">${item.title} (x${qty})</div>
+                        </div>
+                        <div style="color:#a64d79; font-weight:bold;">Rs.${(price * qty).toLocaleString()}</div>
+                    </div>`;
+            });
+            html += `
+                <hr>
+                <div style="display:flex; justify-content:space-between; margin:8px 0; color:#555;">
+                    <span>Subtotal</span><span>Rs.${subtotal.toLocaleString()}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin:8px 0; color:#555;">
+                    <span>Delivery</span>
+                    <span>${deliveryFee > 0 ? 'Rs.' + deliveryFee.toLocaleString() : '<span style="color:#999;">Enter address</span>'}</span>
+                </div>
+                <hr>
+                <div style="display:flex; justify-content:space-between; font-weight:800; font-size:1.2rem; margin-top:8px;">
+                    <span>Total</span>
+                    <span style="color:#a64d79;">Rs.${(subtotal + deliveryFee).toLocaleString()}</span>
+                </div>`;
+            summaryDiv.innerHTML = html;
+        }
+
+        async function detectAreaFromAddress(address) {
+            if (address.length < 4) return;
+            const words = address.split(/[\s,]+/).filter(w => w.length > 2);
+            for (let word of words) {
+                try {
+                    const res = await fetch(`/Cart/GetAreas?term=${encodeURIComponent(word)}`);
+                    const areas = await res.json();
+                    if (areas.length > 0) {
+                        await applyDeliveryZone(areas[0]);
+                        return;
+                    }
+                } catch (err) {
+                    console.error('Area detection error:', err);
+                }
+            }
+            deliveryFee = 0;
+            document.getElementById('areaNotFound').style.display = 'block';
+            document.getElementById('shippingDisplay').textContent = 'Area not found';
+            updateSummary();
+        }
+
+        async function applyDeliveryZone(area) {
+            try {
+                const res = await fetch(`/Cart/GetDeliveryCharge?area=${encodeURIComponent(area)}`);
+                const data = await res.json();
+                if (data.found) {
+                    deliveryFee = parseFloat(data.charge);
+                    document.getElementById('areaNotFound').style.display = 'none';
+                    document.getElementById('shippingDisplay').textContent = 'Rs. ' + deliveryFee.toLocaleString();
+                    document.getElementById('deliveryFeeInput').value = deliveryFee;
+                    updateSummary();
+                }
+            } catch (err) {
+                console.error('Delivery charge error:', err);
+            }
+        }
+
+        async function submitOrder(event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (isSubmitting) return;
+            isSubmitting = true;
+
+            const cartDataInput = document.getElementById('cartDataInput');
+            const phoneInput = document.getElementById('phoneInput');
+            const addressInput = document.getElementById('addressInput');
+            const payBtn = document.getElementById('payBtn');
+
+            payBtn.disabled = true;
+            payBtn.textContent = 'Processing...';
+
+            const phoneVal = phoneInput ? phoneInput.value.replace('-', '') : '';
+
+            if (phoneVal.length !== 11 || isNaN(phoneVal)) {
+                showCustomModal('Warning', 'Invalid Phone Number',
+                    'Please enter a valid 11-digit mobile number (e.g. 03XX-XXXXXXX).');
+                isSubmitting = false;
+                payBtn.disabled = false;
+                payBtn.textContent = 'Complete Order';
+                return;
+            }
+
+            if (deliveryFee === 0) {
+                showCustomModal('Pin', 'Area Not Detected',
+                    'Please include your area name in the address (e.g. Saddar, DHA Phase 1, Westridge).');
+                isSubmitting = false;
+                payBtn.disabled = false;
+                payBtn.textContent = 'Complete Order';
+                return;
+            }
+
+            if (!cartDataInput.value || cartDataInput.value === '[]') {
+                showCustomModal('Cart', 'Cart is Empty',
+                    'Please add items to your cart before checking out.');
+                isSubmitting = false;
+                payBtn.disabled = false;
+                payBtn.textContent = 'Complete Order';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('Email', phoneInput.value);
+            formData.append('FirstName', document.querySelector('[name="FirstName"]')?.value || '');
+            formData.append('LastName', document.querySelector('[name="LastName"]')?.value || '');
+            formData.append('Address', addressInput.value);
+            formData.append('City', 'Rawalpindi');
+            formData.append('Country', 'Pakistan');
+            formData.append('PaymentMethod', 'COD');
+            formData.append('cartData', cartDataInput.value);
+            formData.append('deliveryFee', deliveryFee.toString());
+
+            try {
+                const response = await fetch('/Cart/ProcessOrder', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        localStorage.removeItem('cart');
+                        localStorage.removeItem('buyNowItem');
+                        window.location.href = result.redirectUrl;
+                    } else {
+                        showCustomModal('Error', 'Error', result.message || 'Something went wrong. Please try again.');
+                        isSubmitting = false;
+                        payBtn.disabled = false;
+                        payBtn.textContent = 'Complete Order';
+                    }
+                } else {
+                    const errorText = await response.text();
+                    console.error('Server error:', errorText);
+                    showCustomModal('Error', 'Error', 'Server error. Please try again.');
+                    isSubmitting = false;
+                    payBtn.disabled = false;
+                    payBtn.textContent = 'Complete Order';
+                }
+            } catch (err) {
+                console.error('Submission error:', err);
+                showCustomModal('Error', 'Error', 'Network error: ' + err.message);
+                isSubmitting = false;
+                payBtn.disabled = false;
+                payBtn.textContent = 'Complete Order';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const cartDataInput = document.getElementById('cartDataInput');
+            const checkoutForm = document.getElementById('checkoutForm');
+            const addressInput = document.getElementById('addressInput');
+            const phoneInput = document.getElementById('phoneInput');
+            const payBtn = document.getElementById('payBtn');
+
+            let buyNowData = localStorage.getItem('buyNowItem');
+            let cartData = localStorage.getItem('cart');
+            if (buyNowData) displayItems = [JSON.parse(buyNowData)];
+            else if (cartData) displayItems = JSON.parse(cartData);
+
+            if (displayItems && displayItems.length > 0) {
+                subtotal = 0;
+                displayItems.forEach(item => {
+                    subtotal += (parseFloat(item.price) || 0) * (parseInt(item.qty) || 1);
+                });
+                cartDataInput.value = JSON.stringify(displayItems.map(i => ({
+                    ProductId: (i.id || "0").toString(),
+                    Title: i.title,
+                    Price: parseFloat(i.price),
+                    Quantity: parseInt(i.qty),
+                    ImageUrl: i.img
+                })));
+                updateSummary();
+            }
+
+            fetch('/Account/GetUserRole')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.role === 'Seller') {
+                        showCustomModal('Block', 'Not Allowed',
+                            'Sellers cannot place orders. Please login as a customer.',
+                            () => window.location.href = '/');
+                    }
+                })
+                .catch(err => console.error('Role check error:', err));
+
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function () {
+                    let val = this.value.replace(/\D/g, '');
+                    if (val.length > 11) val = val.slice(0, 11);
+                    this.value = val.length > 4 ? val.slice(0, 4) + '-' + val.slice(4) : val;
+                });
+            }
+
+            let detectTimeout;
+            if (addressInput) {
+                addressInput.addEventListener('input', function () {
+                    clearTimeout(detectTimeout);
+                    detectTimeout = setTimeout(() => {
+                        detectAreaFromAddress(this.value.trim());
+                    }, 600);
+                });
+            }
+
+            if (payBtn) {
+                payBtn.addEventListener('click', submitOrder);
+            }
+
+            checkoutForm.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+}
+    

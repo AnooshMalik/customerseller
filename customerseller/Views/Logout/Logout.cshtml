@@ -1,0 +1,29 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content="3;url=@Url.Action("Login", "Login")" />
+
+    <title>Logging Out</title>
+    <link href="~/dashboard.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="logout-body">
+    <div class="logout-card">
+        <div class="icon-circle" style="color: #a64d79; font-size: 3rem; margin-bottom: 1rem;">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+
+        <h2 style="margin: 0; color: #1f2937;">Logging Out</h2>
+        <p style="color: #6b7280;">Securely redirecting you to login page...</p>
+
+        <div class="progress-wrapper">
+            @* Animation CSS se khud chalay gi *@
+            <div class="progress-fill"></div>
+        </div>
+    </div>
+</body>
+</html>

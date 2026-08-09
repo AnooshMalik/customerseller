@@ -1,0 +1,230 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify OTP - Artisan Valley</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                background: linear-gradient(135deg, #a64d79, #880e4f);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .login-box {
+                background: #fff;
+                border-radius: 18px;
+                padding: 40px 36px;
+                width: 100%;
+                max-width: 380px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            }
+
+            .login-icon {
+                width: 64px;
+                height: 64px;
+                background: #fdf0f5;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 16px;
+                color: #a64d79;
+                font-size: 1.8rem;
+            }
+
+            .login-box h2 {
+                text-align: center;
+                font-size: 1.3rem;
+                font-weight: 700;
+                color: #1a1a2e;
+                margin-bottom: 6px;
+            }
+
+            .login-box p.sub {
+                text-align: center;
+                font-size: 0.85rem;
+                color: #888;
+                margin-bottom: 24px;
+            }
+
+            .otp-inputs {
+                display: flex;
+                gap: 8px;
+                justify-content: center;
+                margin-bottom: 18px;
+            }
+
+                .otp-inputs input {
+                    width: 46px;
+                    height: 54px;
+                    text-align: center;
+                    font-size: 1.3rem;
+                    font-weight: 700;
+                    border: 1.5px solid #e0e0e0;
+                    border-radius: 8px;
+                    outline: none;
+                }
+
+                    .otp-inputs input:focus {
+                        border-color: #a64d79;
+                    }
+
+            #otpHidden {
+                display: none;
+            }
+
+            .timer-row {
+                text-align: center;
+                font-size: 0.83rem;
+                color: #888;
+                margin-bottom: 18px;
+            }
+
+                .timer-row span {
+                    color: #a64d79;
+                    font-weight: 700;
+                }
+
+            .btn-login {
+                width: 100%;
+                padding: 13px;
+                background: #a64d79;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                font-size: 0.95rem;
+                font-weight: 700;
+                cursor: pointer;
+                margin-top: 4px;
+            }
+
+            .error-box {
+                background: #ffebee;
+                color: #c62828;
+                padding: 10px 14px;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                margin-bottom: 16px;
+            }
+
+            .bottom-links {
+                text-align: center;
+                font-size: 0.83rem;
+                color: #888;
+                margin-top: 18px;
+            }
+
+                .bottom-links a {
+                    color: #a64d79;
+                    font-weight: 600;
+                    text-decoration: none;
+                    cursor: pointer;
+                }
+
+            #resendMsg {
+                text-align: center;
+                font-size: 0.8rem;
+                margin-top: 8px;
+                display: none;
+            }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="login-icon"><i class="fas fa-envelope-open-text"></i></div>
+        <h2>Verify OTP</h2>
+        <p class="sub">Enter the 6-digit code sent to your email</p>
+
+        @if (TempData["OtpError"] != null)
+        {
+            <div class="error-box">⚠️ @TempData["OtpError"]</div>
+        }
+
+        <form method="post" asp-action="VerifyOtp" asp-controller="Courier" onsubmit="combineOtp()">
+            <div class="otp-inputs">
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+                <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+            </div>
+            <input type="hidden" name="otp" id="otpHidden">
+
+            <div class="timer-row">OTP expires in: <span id="countdown">05:00</span></div>
+
+            <button type="submit" class="btn-login">Verify & Continue</button>
+        </form>
+
+        <div class="bottom-links">
+            Did not get the code? <a href="javascript:void(0)" onclick="resendOtp()">Resend OTP</a>
+        </div>
+        <div id="resendMsg"></div>
+    </div>
+
+    <script>
+            const digits = document.querySelectorAll('.otp-digit');
+            digits.forEach((input, index) => {
+                input.addEventListener('input', () => {
+                    input.value = input.value.replace(/[^0-9]/g, '');
+                    if (input.value && index < digits.length - 1)
+                        digits[index + 1].focus();
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !input.value && index > 0)
+                        digits[index - 1].focus();
+                });
+            });
+
+            function combineOtp() {
+                let otp = '';
+                digits.forEach(d => otp += d.value);
+                document.getElementById('otpHidden').value = otp;
+            }
+
+            let seconds = 300;
+            const timer = setInterval(() => {
+                seconds--;
+                const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                document.getElementById('countdown').textContent = `${m}:${s}`;
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('countdown').textContent = 'Expired!';
+                }
+            }, 1000);
+
+            async function resendOtp() {
+                const res = await fetch('/Courier/ResendCourierOtp', { method: 'POST' });
+                const data = await res.json();
+                const msgBox = document.getElementById('resendMsg');
+                if (data.success) {
+                    seconds = 300;
+                    document.getElementById('countdown').textContent = '05:00';
+                    msgBox.style.color = '#2e7d32';
+                    msgBox.textContent = 'OTP sent successfully.';
+                    msgBox.style.display = 'block';
+                } else {
+                    msgBox.style.color = '#c62828';
+                    msgBox.textContent = data.message || 'Failed to resend OTP.';
+                    msgBox.style.display = 'block';
+                }
+                setTimeout(() => { msgBox.style.display = 'none'; }, 4000);
+            }
+    </script>
+</body>
+</html>

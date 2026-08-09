@@ -1,0 +1,402 @@
+﻿@{
+    Layout = null;
+    var userName = Context.Session.GetString("UserName") ?? "";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shop Setup — ArtisanValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: #f5f3ff; min-height: 100vh; padding: 30px 20px; }
+        .setup-card { background: #fff; border-radius: 18px; border: 1px solid #ddd6fe; max-width: 750px; width: 100%; margin: 0 auto; }
+        .setup-header { background: #a64d79; padding: 24px 32px; color: #fff; border-radius: 18px 18px 0 0; }
+        .setup-header h1 { font-size: 1.3rem; font-weight: 700; margin-bottom: 3px; }
+        .setup-header p { font-size: 0.83rem; opacity: 0.85; }
+        .setup-body { padding: 28px 32px; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #a64d79; margin-bottom: 7px; }
+        .form-group input { width: 100%; padding: 11px 14px; border: 1.5px solid #ddd6fe; border-radius: 10px; font-size: 0.9rem; font-family: inherit; outline: none; background: #f5f3ff; transition: border 0.2s; }
+        .form-group input:focus { border-color: #a64d79; background: #fff; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .section-label { font-size: 0.8rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; margin-top: 6px; padding-bottom: 8px; border-bottom: 1px solid #ede9fe; }
+        .main-cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .main-cat-item { background: #f5f3ff; border: 1.5px solid #ddd6fe; border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; font-size: 0.82rem; color: #374151; display: flex; align-items: center; gap: 8px; user-select: none; }
+        .main-cat-item.selected { border-color: #a64d79; background: #fdf0f6; color: #a64d79; font-weight: 600; }
+        .sub-cat-box { display: none; background: #f9f7ff; border: 1.5px solid #ddd6fe; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+        .sub-cat-box.show { display: block; }
+        .sub-cat-title { font-size: 0.78rem; font-weight: 700; color: #a64d79; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+        .sub-cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .sub-cat-item { display: flex; align-items: center; gap: 7px; background: #fff; border: 1.5px solid #e0d9f7; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 0.78rem; color: #374151; transition: all 0.15s; }
+        .sub-cat-item input[type="checkbox"] { accent-color: #a64d79; width: 13px; height: 13px; flex-shrink: 0; }
+        .sub-cat-item:has(input:checked) { border-color: #a64d79; background: #fdf0f6; color: #a64d79; font-weight: 600; }
+        .btn-submit { width: 100%; padding: 13px; background: #a64d79; color: #fff; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.2s; margin-top: 6px; }
+        .btn-submit:hover { background: #880e4f; }
+        .error-box { background: #ffebee; color: #c62828; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.85rem; border: 1px solid #ffcdd2; }
+        .hint { font-size: 0.78rem; color: #6b7280; margin-bottom: 12px; }
+    
+        @@media (max-width: 480px) {
+    body { padding: 16px 12px; }
+    .setup-header { padding: 20px 18px; }
+    .setup-body { padding: 20px 18px; }
+    .form-row { grid-template-columns: 1fr; }
+    .main-cat-grid { grid-template-columns: repeat(2, 1fr); }
+    .sub-cat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+        </style>
+</head>
+<body>
+<div class="setup-card">
+    <div class="setup-header">
+        <h1><i class="fas fa-store"></i> Set Up Your Shop</h1>
+        <p>Tell us about yourself and your shop — this helps buyers find you!</p>
+    </div>
+
+    <div class="setup-body">
+
+        @if (TempData["SetupError"] != null)
+        {
+            <div class="error-box">@TempData["SetupError"]</div>
+        }
+
+        @if ((bool)(ViewBag.RejectedShop ?? false))
+        {
+            <div style="text-align:center; padding:30px 20px;">
+                <div style="font-size:3rem; margin-bottom:12px;">❌</div>
+                <h3 style="color:#dc2626; font-size:1.1rem; margin-bottom:8px;">Shop Request Rejected</h3>
+                <p style="color:#666; font-size:0.88rem;">Your shop request was rejected by admin.<br>Please resubmit with correct information.</p>
+                <a href="/Account/ShopSetup" style="display:inline-block; margin-top:20px; background:#a64d79; color:#fff; padding:10px 24px; border-radius:8px; text-decoration:none; font-size:0.88rem; font-weight:600;">
+                    <i class="fas fa-redo"></i> Resubmit Shop
+                </a>
+            </div>
+        }
+        else if ((bool)(ViewBag.HasShop ?? false))
+        {
+            @if (TempData["SetupSuccess"] != null)
+            {
+                <div id="successPopup" style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;">
+                    <div style="background:#fff; border-radius:16px; padding:36px 32px; max-width:380px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+                        <div style="font-size:3rem; margin-bottom:12px;">🎉</div>
+                        <h3 style="color:#a64d79; font-size:1.2rem; margin-bottom:8px;">Shop Request Submitted!</h3>
+                        <p style="color:#666; font-size:0.88rem; line-height:1.6;">Your shop is under review. You will be <strong>notified via email</strong> once approved by admin.</p>
+                        <button onclick="document.getElementById('successPopup').style.display='none'" style="margin-top:16px; background:#a64d79; color:#fff; border:none; padding:10px 24px; border-radius:8px; cursor:pointer; font-size:0.88rem; font-weight:600;">OK</button>
+                    </div>
+                </div>
+            }
+
+            <div style="text-align:center; padding:30px 20px;">
+                <div style="font-size:3rem; margin-bottom:12px;">⏳</div>
+                <h3 style="color:#a64d79; font-size:1.1rem; margin-bottom:8px;">Shop Request Submitted!</h3>
+                <p style="color:#666; font-size:0.88rem;">Your shop is currently under <strong>admin review</strong>.<br>You will receive an email once your shop is approved.</p>
+                <a href="/" style="display:inline-block; margin-top:20px; background:#a64d79; color:#fff; padding:10px 24px; border-radius:8px; text-decoration:none; font-size:0.88rem; font-weight:600;">
+                    <i class="fas fa-home"></i> Go to Home
+                </a>
+            </div>
+        }
+        else
+        {
+            <div id="validationError" style="display:none;" class="error-box"></div>
+
+            <form asp-action="ShopSetup" asp-controller="Account" method="post" id="setupForm">
+                <div class="section-label">Personal Information</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="OwnerName" placeholder="Your full name" value="@userName" required/>
+                    </div>
+                    <div class="form-group">
+                        <label>CNIC *</label>
+                     <input type="text" name="CNIC" id="cnicInput"
+       placeholder="12345-1234567-1" required maxlength="15"
+       pattern="^\d{5}-\d{7}-\d{1}$"
+       title="Format must be: 12345-1234567-1"/>
+                    </div>
+                </div>
+                <div class="form-group">
+    <label>Shop Address <span class="req">*</span></label>
+    <input type="text" name="SellerAddress" 
+           placeholder="e.g. Shop 5, Street 3, Raja Bazaar" 
+           required />
+</div>
+
+
+<div class="form-group">
+    <label>Phone Number <span class="req">*</span></label>
+    <input type="text" name="SellerPhone" 
+           id="sellerPhone"
+           placeholder="03XX-XXXXXXX" 
+           maxlength="12"
+           required />
+</div>
+                <div class="form-group">
+                    <label>Shop Name *</label>
+                    <input type="text" name="ShopName" placeholder="Your shop name" required/>
+                </div>
+
+                <div class="section-label">Shop Categories</div>
+                <p class="hint">Click a category to select it, then pick sub-categories:</p>
+
+                <div class="main-cat-grid">
+                    <div class="main-cat-item" onclick="toggleCat('FabricTextile', this)">🧵 Fabric & Textile</div>
+                    <div class="main-cat-item" onclick="toggleCat('WoolYarn', this)">🧶 Wool & Yarn</div>
+                    <div class="main-cat-item" onclick="toggleCat('Leather', this)">👜 Leather</div>
+                    <div class="main-cat-item" onclick="toggleCat('Wood', this)">🪵 Wood</div>
+                    <div class="main-cat-item" onclick="toggleCat('ClayPottery', this)">🏺 Clay & Pottery</div>
+                    <div class="main-cat-item" onclick="toggleCat('Jewels', this)">💎 Jewels</div>
+                    <div class="main-cat-item" onclick="toggleCat('PaperCards', this)">📄 Paper & Cards</div>
+                    <div class="main-cat-item" onclick="toggleCat('JuteNatural', this)">🌿 Jute & Natural</div>
+                    <div class="main-cat-item" onclick="toggleCat('ResinEpoxy', this)">🔮 Resin & Epoxy</div>
+                    <div class="main-cat-item" onclick="toggleCat('MetalWire', this)">⚙️ Metal & Wire</div>
+                </div>
+
+                <div class="sub-cat-box" id="sub-FabricTextile">
+                    <div class="sub-cat-title">🧵 Fabric & Textile</div>
+                    <div class="sub-cat-grid">
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="CushionCovers"/> Cushion Covers</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="PrintedKurtas"/> Printed Kurtas</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="TieDyeDupattas"/> Tie-Dye Dupattas</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="FabricToteBags"/> Tote Bags</label>
+                       
+                    </div>
+                </div>
+
+                <div class="sub-cat-box" id="sub-WoolYarn">
+                    <div class="sub-cat-title">🧶 Wool & Yarn</div>
+                    <div class="sub-cat-grid">
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Sweaters"/> Sweaters</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="CrochetBags"/> Crochet Bags</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="StorageBaskets"/> Storage Baskets</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Beanies"/> Beanies</label>
+                      
+                    </div>
+                </div>
+
+                <div class="sub-cat-box" id="sub-Leather">
+                    <div class="sub-cat-title">👜 Leather</div>
+                    <div class="sub-cat-grid">
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="LeatherHandbags"/> Handbags</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Wallets"/> Wallets</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Belts"/> Belts</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="LeatherKeychains"/> Keychains</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Journals"/> Journals</label>
+                      
+                    </div>
+                </div>
+
+                <div class="sub-cat-box" id="sub-Wood">
+                    <div class="sub-cat-title">🪵 Wood</div>
+                    <div class="sub-cat-grid">
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="PhotoFrames"/> Photo Frames</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="WoodNecklaces"/> Necklaces</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="WoodToys"/> Toys</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ServingTrays"/> Serving Trays</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="WoodShowpieces"/> Showpieces</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="WoodKeychains"/> Keychains</label>
+                       
+                    </div>
+                </div>
+
+                <div class="sub-cat-box" id="sub-ClayPottery">
+                    <div class="sub-cat-title">🏺 Clay & Pottery</div>
+                    <div class="sub-cat-grid">
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="FlowerPots"/> Flower Pots</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="CoffeeMugs"/> Coffee Mugs</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ClayVases"/> Vases</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ClayEarrings"/> Earrings</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ClayFigurines"/> Figurines</label>
+                      
+                    </div>
+                </div>
+
+                <div class="sub-cat-box" id="sub-Jewels">
+                    <div class="sub-cat-title">💎 Jewels</div>
+                    <div class="sub-cat-grid">
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Necklaces"/> Necklaces</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Bracelets"/> Bracelets</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Rings"/> Rings</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Bangles"/> Bangles</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="JewelEarrings"/> Earrings</label>
+                     
+                    </div>
+                </div>
+
+                <div class="sub-cat-box" id="sub-PaperCards">
+                    <div class="sub-cat-title">📄 Paper & Cards</div>
+                    <div class="sub-cat-grid">
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="GreetingCards"/> Greeting Cards</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="GiftBoxes"/> Gift Boxes</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="PaperFlowers"/> Paper Flowers</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="PaperShowpieces"/> Showpieces</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Scrapbooks"/> Scrapbooks</label>
+           
+                    </div>
+                </div>
+
+                <div class="sub-cat-box" id="sub-JuteNatural">
+                    <div class="sub-cat-title">🌿 Jute & Natural</div>
+                    <div class="sub-cat-grid">
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="JuteBags"/> Bags</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Baskets"/> Baskets</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Trays"/> Trays</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="DriedBouquets"/> Dried Bouquets</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Paintings"/> Paintings</label>
+           
+                    </div>
+                </div>
+
+                <div class="sub-cat-box" id="sub-ResinEpoxy">
+                    <div class="sub-cat-title">🔮 Resin & Epoxy</div>
+                    <div class="sub-cat-grid">
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Coasters"/> Coasters</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ResinEarrings"/> Earrings</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ResinKeychains"/> Keychains</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="WallArt"/> Wall Art</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ResinServingTrays"/> Serving Trays</label>
+              
+                    </div>
+                </div>
+
+                <div class="sub-cat-box" id="sub-MetalWire">
+                    <div class="sub-cat-title">⚙️ Metal & Wire</div>
+                    <div class="sub-cat-grid">
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="MetalEarrings"/> Earrings</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="MetalVases"/> Vases</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="MetalFigurines"/> Figurines</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="MetalWallArt"/> Wall Art</label>
+                        <label class="sub-cat-item"><input type="checkbox" name="Categories" value="CandleHolders"/> Candle Holders</label>
+         
+                    </div>
+                </div>
+
+                <div class="section-label">Subscription</div>
+                <div style="background:#f5f3ff; border:1px solid #ddd6fe; border-radius:10px; padding:14px 18px; margin-bottom:20px; font-size:0.85rem; color:#374151;">
+                    <i class="fas fa-calendar-check" style="color:#a64d79; margin-right:6px;"></i>
+                    <strong>1 Month Free Trial</strong> — After 30 days, PKR 500/month subscription applies.
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-rocket"></i> Launch My Shop
+                </button>
+            </form>
+        }
+
+    </div>
+</div>
+
+<script>
+    document.getElementById('cnicInput')?.addEventListener('input', function () {
+        let raw = this.value.replace(/[^0-9]/g, '');
+        if (raw.length > 13) raw = raw.slice(0, 13);
+        let formatted = '';
+        if (raw.length <= 5) {
+            formatted = raw;
+        } else if (raw.length <= 12) {
+            formatted = raw.slice(0, 5) + '-' + raw.slice(5);
+        } else {
+            formatted = raw.slice(0, 5) + '-' + raw.slice(5, 12) + '-' + raw.slice(12, 13);
+        }
+        this.value = formatted;
+    });
+
+    document.getElementById('cnicInput')?.addEventListener('blur', function () {
+        const pattern = /^\d{5}-\d{7}-\d{1}$/;
+        if (this.value && !pattern.test(this.value)) {
+            this.style.borderColor = '#e74c3c';
+            showError('Invalid CNIC! Format must be: 12345-1234567-1');
+        } else {
+            this.style.borderColor = '#ddd6fe';
+        }
+    });
+
+    // Phone masking
+    document.getElementById('sellerPhone')?.addEventListener('input', function () {
+        let val = this.value.replace(/\D/g, '');
+        if (val.length > 11) val = val.slice(0, 11);
+        if (val.length >= 2 && !val.startsWith('03')) {
+            val = '03' + val.slice(2);
+        }
+        this.value = val.length > 4 ? val.slice(0, 4) + '-' + val.slice(4) : val;
+    });
+
+    function toggleCat(catId, el) {
+        el.classList.toggle('selected');
+        const subBox = document.getElementById('sub-' + catId);
+        if (el.classList.contains('selected')) {
+            subBox.classList.add('show');
+        } else {
+            subBox.classList.remove('show');
+            subBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        }
+    }
+
+    document.getElementById('setupForm')?.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const name = document.querySelector('input[name="OwnerName"]').value.trim();
+        const cnic = document.querySelector('input[name="CNIC"]').value.trim();
+        const shop = document.querySelector('input[name="ShopName"]').value.trim();
+        const address = document.querySelector('input[name="SellerAddress"]').value.trim();
+        
+        const phoneRaw = document.getElementById('sellerPhone').value.replace(/\D/g, '').trim();
+        const checked = document.querySelectorAll('input[name="Categories"]:checked');
+
+        // Name
+        if (name.length < 3) { showError('Full name must be at least 3 characters!'); return; }
+        if (!/^[a-zA-Z\s]+$/.test(name)) { showError('Full name must contain letters only!'); return; }
+
+        // CNIC
+        const cnicPattern = /^\d{5}-\d{7}-\d{1}$/;
+        const rawCnic = cnic.replace(/-/g, '');
+        if (!cnicPattern.test(cnic)) {
+            showError('Invalid CNIC format! Must be: 12345-1234567-1');
+            document.getElementById('cnicInput').style.borderColor = '#e74c3c';
+            return;
+        }
+        if (rawCnic.length !== 13) {
+            showError('CNIC must have exactly 13 digits!');
+            document.getElementById('cnicInput').style.borderColor = '#e74c3c';
+            return;
+        }
+        if (rawCnic.startsWith('00000')) {
+            showError('Invalid CNIC number!');
+            document.getElementById('cnicInput').style.borderColor = '#e74c3c';
+            return;
+        }
+
+        // Address
+        if (address.length < 5) { showError('Please enter a valid shop address!'); return; }
+
+       
+
+        // Phone
+        if (phoneRaw.length !== 11) {
+            showError('Phone number must be exactly 11 digits!');
+            return;
+        }
+        if (!phoneRaw.startsWith('03')) {
+            showError('Phone number must start with 03 (e.g. 0300-1234567)!');
+            return;
+        }
+
+        // Shop name
+        if (shop.length < 3) { showError('Shop name must be at least 3 characters!'); return; }
+
+        // Categories
+        if (checked.length === 0) { showError('Please select at least 1 sub-category!'); return; }
+
+        this.submit();
+    });
+
+    function showError(msg) {
+        const box = document.getElementById('validationError');
+        if (box) {
+            box.textContent = '⚠️ ' + msg;
+            box.style.display = 'block';
+            setTimeout(() => box.style.display = 'none', 3000);
+        }
+    }
+</script>
+</body>
+</html>

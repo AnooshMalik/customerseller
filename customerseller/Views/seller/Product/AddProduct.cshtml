@@ -1,0 +1,546 @@
+﻿@model customerseller.Models.Product
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Add Product";
+}
+
+<style>
+    .add-product-container {
+        max-width: 700px;
+        margin: 30px auto;
+        background: #fff;
+        border-radius: 16px;
+        padding: 35px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    }
+    .add-product-container h2 {
+        font-size: 1.5rem;
+        color: #1a1a2e;
+        margin-bottom: 25px;
+        font-weight: 700;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #555;
+        margin-bottom: 7px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .form-group label span.required { color: #e74c3c; margin-left: 3px; }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 0.92rem;
+        outline: none;
+        transition: border 0.3s;
+        background: #fafafa;
+        font-family: inherit;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus { border-color: #a64d79; background: #fff; }
+    .form-group textarea { min-height: 100px; resize: vertical; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .upload-box {
+        border: 2px dashed #e0e0e0;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: border 0.3s;
+        background: #fafafa;
+    }
+    .upload-box:hover { border-color: #a64d79; }
+    .upload-box i { font-size: 2rem; color: #bbb; margin-bottom: 8px; display: block; }
+    .upload-box p { font-size: 0.85rem; color: #888; margin: 0; }
+    .upload-box input { display: none; }
+    .video-required {
+        background: #fff3e0;
+        border: 1px solid #ffcc80;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 0.82rem;
+        color: #e65100;
+        margin-bottom: 15px;
+    }
+    .video-already {
+        background: #e8f5e9;
+        border: 1px solid #a5d6a7;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 0.82rem;
+        color: #2e7d32;
+        margin-bottom: 15px;
+    }
+    .preview-img {
+        max-height: 120px;
+        border-radius: 8px;
+        margin-top: 10px;
+        display: none;
+    }
+    .video-name { font-size: 0.82rem; color: #2e7d32; margin-top: 8px; display: none; }
+    .form-buttons { display: flex; gap: 12px; margin-top: 25px; }
+    .btn-save {
+        flex: 1;
+        padding: 14px;
+        background: linear-gradient(135deg, #a64d79, #880e4f);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.3s;
+    }
+    .btn-save:hover { opacity: 0.9; }
+    .btn-cancel {
+        padding: 14px 25px;
+        background: #f5f5f5;
+        color: #555;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+    #videoSection { display: none; }
+
+    @@media (max-width: 480px) {
+        .add-product-container {
+            margin: 15px 10px;
+            padding: 20px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-buttons {
+            flex-wrap: wrap;
+        }
+
+        .btn-save, .btn-cancel {
+            flex: 1 1 100%;
+        }
+    }
+</style>
+
+<div class="add-product-container">
+    <h2><i class="fa-solid fa-plus" style="color:#8b5cf6; margin-right:8px;"></i>Add New Product</h2>
+
+    @if (TempData["ProductSuccess"] != null)
+    {
+        <div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:12px 16px; margin-bottom:20px; color:#2e7d32; font-size:0.88rem;">
+            <i class="fa-solid fa-check"></i> @TempData["ProductSuccess"]
+        </div>
+    }
+
+    @if (TempData["ProductError"] != null)
+    {
+        <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:8px; padding:12px 16px; margin-bottom:20px; color:#c62828; font-size:0.88rem;">
+            <i class="fa-solid fa-circle-exclamation"></i> @TempData["ProductError"]
+        </div>
+    }
+
+    @if ((bool)(ViewBag.ShopPendingApproval ?? false))
+    {
+        <div style="background:#fff3e0; border:1px solid #ffcc80; border-radius:8px; padding:12px 16px; margin-bottom:20px; color:#e65100; font-size:0.88rem;">
+            <i class="fa-solid fa-circle-info"></i> Your shop is under admin review. But you can upload products and videos in the meantime.
+        </div>
+    }
+
+    <form method="post" asp-action="AddProduct" asp-controller="Products" enctype="multipart/form-data" id="productForm">
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Product Name <span class="required">*</span></label>
+                <input type="text" name="Title" placeholder="Enter product name" required />
+            </div>
+            <div class="form-group">
+                <label>Price (Rs.) <span class="required">*</span></label>
+                <input type="number" name="Price" placeholder="0.00" min="1" required />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Main Category <span class="required">*</span></label>
+                <select id="mainCategory" onchange="loadSubCategories()" required>
+                    <option value="">-- Select Category --</option>
+                    <option value="FabricTextile">🧵 Fabric & Textile</option>
+                    <option value="WoolYarn">🧶 Wool & Yarn</option>
+                    <option value="Leather">👜 Leather</option>
+                    <option value="Wood">🪵 Wood</option>
+                    <option value="ClayPottery">🏺 Clay & Pottery</option>
+                    <option value="Jewels">💎 Jewels</option>
+                    <option value="PaperCards">📄 Paper & Cards</option>
+                    <option value="JuteNatural">🌿 Jute & Natural</option>
+                    <option value="ResinEpoxy">🔮 Resin & Epoxy</option>
+                    <option value="MetalWire">⚙️ Metal & Wire</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Sub Category <span class="required">*</span></label>
+                <select id="subCategory" name="Category" required onchange="checkVideoStatus()">
+                    <option value="">-- Select Main Category First --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Stock <span class="required">*</span></label>
+                <input type="number" name="Stock" placeholder="0" min="1" required />
+            </div>
+            <div class="form-group">
+                <label>Sizes (optional)</label>
+                <input type="text" name="sizes" placeholder="e.g. S, M, L, XL" />
+            </div>
+            <div class="form-group">
+                <label>Color (optional)</label>
+                <select name="Color">
+                    <option value="">-- Select Color --</option>
+                    <option value="red">Red</option>
+                    <option value="orange">Orange</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="green">Green</option>
+                    <option value="blue">Blue</option>
+                    <option value="purple">Purple</option>
+                    <option value="pink">Pink</option>
+                    <option value="brown">Brown</option>
+                    <option value="grey">Grey</option>
+                    <option value="black">Black</option>
+                    <option value="white">White</option>
+                    <option value="beige">Beige</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            <textarea name="Description" placeholder="Describe your product..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Product Image <span class="required">*</span></label>
+            <div class="upload-box" onclick="document.getElementById('imageFile').click()">
+                <i class="fa-solid fa-image" id="imageIcon"></i>
+                <p id="imageText">Click to upload product image</p>
+                <p style="font-size:0.75rem; color:#bbb;">JPG, PNG (Max 5MB)</p>
+                <input type="file" id="imageFile" name="ImageFile" accept="image/*" required onchange="previewImage(this)">
+                <img id="imgPreview" class="preview-img" style="max-height:120px; border-radius:8px; margin-top:10px; display:none;">
+            </div>
+        </div>
+        <!-- Video Section — conditionally shown -->
+        <div id="videoSection" class="form-group">
+            <label>Making Video <span class="required">*</span></label>
+            <div id="videoStatusMsg"></div>
+            <div id="videoUploadBox" class="upload-box" onclick="document.getElementById('videoFile').click()">
+                <i class="fa-solid fa-video"></i>
+                <p>Click to upload making video for this sub-category</p>
+                <p style="font-size:0.75rem; color:#bbb;">MP4, MOV (Max 50MB) — Only required once per sub-category</p>
+                <input type="file" id="videoFile" name="VideoFile" accept="video/*" onchange="showVideoName(this)">
+           <p id="videoName" class="video-name" style="font-size:0.82rem; color:#2e7d32; margin-top:8px; display:none;">
+    <i class="fa-solid fa-check"></i> <span></span>
+</p>
+            
+            </div>
+           
+        </div>
+
+
+<div class="form-buttons">
+    <button type="submit" class="btn-save" id="submitBtn">
+        <i class="fa-solid fa-paper-plane"></i> Submit for Review
+    </button>
+    <button type="button" class="btn-save" id="addMoreBtn" 
+            onclick="saveAndAddMore()"
+            style="background:linear-gradient(135deg,#6b7280,#4b5563);">
+        <i class="fa-solid fa-plus"></i> Add More Product
+    </button>
+            <a href="/Products/SellerProduct" class="btn-cancel">Cancel</a>
+</div>
+
+<div id="toastMsg" style="display:none; position:fixed; bottom:30px; right:30px; background:#a64d79; color:#fff; padding:14px 24px; border-radius:10px; font-weight:600; z-index:9999; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+    ✅ Product saved! Fill in the next one.
+</div>
+    </form>
+</div>
+
+<script>
+    const subCategoryMap = {
+        'FabricTextile': [
+            { val: 'CushionCovers', label: 'Cushion Covers' },
+            { val: 'PrintedKurtas', label: 'Printed Kurtas' },
+            { val: 'TieDyeDupattas', label: 'Tie-Dye Dupattas' },
+            { val: 'FabricToteBags', label: 'Tote Bags' },
+            { val: 'FabricTextile', label: 'General Fabric' }
+        ],
+        'WoolYarn': [
+            { val: 'Sweaters', label: 'Sweaters' },
+            { val: 'CrochetBags', label: 'Crochet Bags' },
+            { val: 'StorageBaskets', label: 'Storage Baskets' },
+            { val: 'Beanies', label: 'Beanies' },
+            { val: 'WoolYarn', label: 'General Wool' }
+        ],
+        'Leather': [
+            { val: 'LeatherHandbags', label: 'Handbags' },
+            { val: 'Wallets', label: 'Wallets' },
+            { val: 'Belts', label: 'Belts' },
+            { val: 'LeatherKeychains', label: 'Keychains' },
+            { val: 'Journals', label: 'Journals' },
+            { val: 'Leather', label: 'General Leather' }
+        ],
+        'Wood': [
+            { val: 'PhotoFrames', label: 'Photo Frames' },
+            { val: 'WoodNecklaces', label: 'Necklaces' },
+            { val: 'WoodToys', label: 'Toys' },
+            { val: 'ServingTrays', label: 'Serving Trays' },
+            { val: 'WoodShowpieces', label: 'Showpieces' },
+            { val: 'WoodKeychains', label: 'Keychains' },
+            { val: 'Wood', label: 'General Wood' }
+        ],
+        'ClayPottery': [
+            { val: 'FlowerPots', label: 'Flower Pots' },
+            { val: 'CoffeeMugs', label: 'Coffee Mugs' },
+            { val: 'ClayVases', label: 'Vases' },
+            { val: 'ClayEarrings', label: 'Earrings' },
+            { val: 'ClayFigurines', label: 'Figurines' },
+            { val: 'ClayPottery', label: 'General Clay' }
+        ],
+        'Jewels': [
+            { val: 'Necklaces', label: 'Necklaces' },
+            { val: 'Bracelets', label: 'Bracelets' },
+            { val: 'Rings', label: 'Rings' },
+            { val: 'Bangles', label: 'Bangles' },
+            { val: 'JewelEarrings', label: 'Earrings' },
+            { val: 'Jewels', label: 'General Jewels' }
+        ],
+        'PaperCards': [
+            { val: 'GreetingCards', label: 'Greeting Cards' },
+            { val: 'GiftBoxes', label: 'Gift Boxes' },
+            { val: 'PaperFlowers', label: 'Paper Flowers' },
+            { val: 'PaperShowpieces', label: 'Showpieces' },
+            { val: 'Scrapbooks', label: 'Scrapbooks' },
+            { val: 'PaperCards', label: 'General Paper' }
+        ],
+        'JuteNatural': [
+            { val: 'JuteBags', label: 'Bags' },
+            { val: 'Baskets', label: 'Baskets' },
+            { val: 'Trays', label: 'Trays' },
+            { val: 'DriedBouquets', label: 'Dried Bouquets' },
+            { val: 'Paintings', label: 'Paintings' },
+            { val: 'JuteNatural', label: 'General Jute' }
+        ],
+        'ResinEpoxy': [
+            { val: 'Coasters', label: 'Coasters' },
+            { val: 'ResinEarrings', label: 'Earrings' },
+            { val: 'ResinKeychains', label: 'Keychains' },
+            { val: 'WallArt', label: 'Wall Art' },
+            { val: 'ResinServingTrays', label: 'Serving Trays' },
+            { val: 'ResinEpoxy', label: 'General Resin' }
+        ],
+        'MetalWire': [
+            { val: 'MetalEarrings', label: 'Earrings' },
+            { val: 'MetalVases', label: 'Vases' },
+            { val: 'MetalFigurines', label: 'Figurines' },
+            { val: 'MetalWallArt', label: 'Wall Art' },
+            { val: 'CandleHolders', label: 'Candle Holders' },
+            { val: 'MetalWire', label: 'General Metal' }
+        ]
+    };
+
+    function loadSubCategories() {
+        const main = document.getElementById('mainCategory').value;
+        const sub = document.getElementById('subCategory');
+        sub.innerHTML = '<option value="">-- Select Sub Category --</option>';
+        document.getElementById('videoSection').style.display = 'none';
+
+        if (main && subCategoryMap[main]) {
+            subCategoryMap[main].forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item.val;
+                opt.textContent = item.label;
+                sub.appendChild(opt);
+            });
+        }
+    }
+
+    async function checkVideoStatus() {
+        const subCat = document.getElementById('subCategory').value;
+        if (!subCat) return;
+
+        const videoSection = document.getElementById('videoSection');
+        const videoStatusMsg = document.getElementById('videoStatusMsg');
+        const videoUploadBox = document.getElementById('videoUploadBox');
+        const videoFileInput = document.getElementById('videoFile');
+
+        videoSection.style.display = 'block';
+
+        // Check karo video already uploaded hai ya nahi
+        const res = await fetch('/Products/CheckSubCategoryVideo?subCategory=' + subCat);
+        const data = await res.json();
+
+        if (data.hasVideo) {
+            videoStatusMsg.innerHTML = `
+                <div class="video-already">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Making video for this sub-category is already uploaded (${data.status}).
+                    No need to upload again.
+                </div>`;
+            videoUploadBox.style.display = 'none';
+            videoFileInput.removeAttribute('required');
+        } else {
+            videoStatusMsg.innerHTML = `
+                <div class="video-required">
+                    <i class="fa-solid fa-circle-info"></i>
+                    No making video found for this sub-category. Please upload one — required only once.
+                </div>`;
+            videoUploadBox.style.display = 'block';
+            videoFileInput.setAttribute('required', 'required');
+        }
+    }
+
+        function previewImage(input) {
+        const preview = document.getElementById('imgPreview');
+        const icon = document.getElementById('imageIcon');
+        const text = document.getElementById('imageText');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                icon.style.display = 'none';
+                text.style.display = 'none';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function showVideoName(input) {
+        const nameEl = document.getElementById('videoName');
+        if (input.files && input.files[0]) {
+            nameEl.querySelector('span').textContent = input.files[0].name;
+            nameEl.style.display = 'block';
+        }
+    }
+
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+        const videoSection = document.getElementById('videoSection');
+        const videoUploadBox = document.getElementById('videoUploadBox');
+        const videoFile = document.getElementById('videoFile');
+
+        // Agar video section visible hai aur upload box dikh raha hai
+        if (videoSection.style.display === 'block' &&
+            videoUploadBox.style.display !== 'none') {
+
+            if (!videoFile.files || videoFile.files.length === 0) {
+                e.preventDefault();
+                document.getElementById('videoStatusMsg').innerHTML = `
+                    <div class="video-required">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        Please upload a making video for this sub-category before submitting.
+                    </div>`;
+                videoSection.scrollIntoView({ behavior: 'smooth' });
+                return false;
+            }
+        }
+    });
+
+    async function saveAndAddMore() {
+    const form = document.getElementById('productForm');
+    
+    // Basic validation
+    const title = form.querySelector('input[name="Title"]').value.trim();
+    const price = form.querySelector('input[name="Price"]').value.trim();
+    const stock = form.querySelector('input[name="Stock"]').value.trim();
+    const subCat = document.getElementById('subCategory').value;
+    const imageFile = document.getElementById('imageFile').files[0];
+
+    if (!title) { alert('Please enter product name!'); return; }
+    if (!price) { alert('Please enter price!'); return; }
+    if (!stock) { alert('Please enter stock!'); return; }
+    if (!subCat) { alert('Please select sub category!'); return; }
+    if (!imageFile) { alert('Please upload product image!'); return; }
+
+// Video check
+const videoSection = document.getElementById('videoSection');
+const videoUploadBox = document.getElementById('videoUploadBox');
+const videoFile = document.getElementById('videoFile');
+if (videoSection.style.display === 'block' && 
+    videoUploadBox.style.display !== 'none') {
+    if (!videoFile.files || videoFile.files.length === 0) {
+        document.getElementById('videoStatusMsg').innerHTML = `
+            <div class="video-required">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                Please upload a making video for this sub-category before submitting.
+            </div>`;
+        videoSection.scrollIntoView({ behavior: 'smooth' });
+        return;
+    }
+}
+
+    const formData = new FormData(form);
+    
+    const btn = document.getElementById('addMoreBtn');
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('/Products/AddProduct', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Add-More': 'true' }
+        });
+
+        if (res.ok || res.redirected) {
+            // Form reset
+            form.reset();
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('videoSection').style.display = 'none';
+            document.getElementById('subCategory').innerHTML = '<option value="">-- Select Main Category First --</option>';
+            
+            // Toast show karo
+            const toast = document.getElementById('toastMsg');
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+    } catch(e) {
+        alert('Error saving product. Please try again.');
+    }
+
+    btn.innerHTML = '<i class="fa-solid fa-plus"></i> Add More Product';
+    btn.disabled = false;
+}
+    // Page load pe seller ki categories fetch karo
+document.addEventListener('DOMContentLoaded', async function() {
+    const res = await fetch('/Products/GetSellerCategories');
+    const data = await res.json();
+    
+    if (data.categories && data.categories.length > 0) {
+        // Main category dropdown mein sirf seller ki categories dikhao
+        const mainCatSelect = document.getElementById('mainCategory');
+        const allOptions = mainCatSelect.querySelectorAll('option');
+        
+        allOptions.forEach(opt => {
+            if (opt.value === '') return; // placeholder rakho
+            // Check karo koi bhi seller ki subcategory is main category se match karti hai
+            const subCats = subCategoryMap[opt.value] || [];
+            const hasMatch = subCats.some(sc => data.categories.includes(sc.val));
+            if (!hasMatch) {
+                opt.style.display = 'none'; // hide karo jo seller ki nahi
+            }
+        });
+    }
+});
+</script>

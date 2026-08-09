@@ -1,0 +1,344 @@
+﻿@model customerseller.Models.Order
+@{
+    ViewData["Title"] = "Track Your Order";
+}
+
+<style>
+    .tracking-wrapper {
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .track-popup-card {
+        background: #ffffff;
+        width: 100%;
+        max-width: 480px;
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(166, 77, 121, 0.12);
+        text-align: center;
+    }
+
+    .search-container {
+        display: flex;
+        background: #fdf7f9;
+        border: 2px solid #f1e1e9;
+        border-radius: 15px;
+        padding: 6px;
+        margin: 25px 0 15px 0;
+    }
+
+    .track-input {
+        flex-grow: 1;
+        border: none;
+        background: transparent;
+        padding: 12px;
+        outline: none;
+        font-size: 1rem;
+    }
+
+    .btn-search-main {
+        background: #2196F3;
+        color: white;
+        border: none;
+        padding: 0 25px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .status-timeline {
+        text-align: left;
+        margin-top: 25px;
+        border-top: 1px solid #eee;
+        padding-top: 25px;
+    }
+
+    .status-step {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .status-dot-active {
+        width: 12px;
+        height: 12px;
+        background: #2196F3;
+        border-radius: 50%;
+        margin-top: 5px;
+        box-shadow: 0 0 0 4px #e3f2fd;
+        flex-shrink: 0;
+    }
+
+    .status-dot-inactive {
+        width: 12px;
+        height: 12px;
+        background: #ddd;
+        border-radius: 50%;
+        margin-top: 5px;
+        flex-shrink: 0;
+    }
+    .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal-box {
+    background: #fff;
+    border-radius: 20px;
+    padding: 35px 30px;
+    text-align: center;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+.modal-box h3 {
+    font-size: 1.3rem;
+    color: #222;
+    margin-bottom: 10px;
+}
+
+.modal-box p {
+    color: #888;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.modal-btn-cancel {
+    padding: 11px 28px;
+    border-radius: 10px;
+    border: 2px solid #ddd;
+    background: #fff;
+    color: #555;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.modal-btn-confirm {
+    padding: 11px 28px;
+    border-radius: 10px;
+    border: none;
+    background: #d32f2f;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+    .btn-cancel-order {
+        background: #fff;
+        color: #c0392b;
+        border: 2px solid #e74c3c;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        font-family: 'Segoe UI', sans-serif;
+        margin-top: 10px;
+    }
+
+        .btn-cancel-order:hover {
+            background: #fff5f5;
+            border-color: #c0392b;
+        }
+
+    .btn-return-order {
+        background: #fff;
+        color: #1565c0;
+        border: 2px solid #2196F3;
+        padding: 10px 24px;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        font-family: 'Segoe UI', sans-serif;
+        margin-top: 10px;
+    }
+
+        .btn-return-order:hover {
+            background: #e3f2fd;
+            border-color: #1565c0;
+        }
+
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+    @@media (max-width: 480px) {
+        .track-popup-card {
+            padding: 24px 20px;
+            border-radius: 18px;
+        }
+
+        .search-container {
+            flex-direction: column;
+            gap: 8px;
+            padding: 8px;
+        }
+
+        .btn-search-main {
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn-cancel-order, .btn-return-order {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .modal-box {
+            padding: 24px 20px;
+        }
+
+        .modal-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="tracking-wrapper">
+    <div class="track-popup-card">
+        <h2 style="color:#333; margin:0; font-weight:800;">Order Tracking</h2>
+        <p style="color:#888; font-size:0.9rem;">Enter your Order ID to see status.</p>
+
+        <form method="get" action="/Cart/TrackOrder">
+            <div class="search-container">
+                <input type="text" name="orderId"
+                       placeholder="e.g. AV-001"
+                       class="track-input"
+                       value="@(Model?.OrderId ?? "")" />
+                <button type="submit" class="btn-search-main">Search</button>
+            </div>
+        </form>
+
+        @* Error Messages *@
+        @if (TempData["TrackError"] != null)
+        {
+            <div style="color:#d32f2f; background:#ffebee; padding:10px; border-radius:8px; margin-bottom:15px; font-size:0.85rem;">
+                ❌ @TempData["TrackError"]
+            </div>
+        }
+
+        @* Order Found *@
+        @if (Model != null)
+        {
+            <div style="background:#f0f7ff; color:#007bff; padding:10px; border-radius:10px; margin-bottom:20px; font-weight:bold; font-size:0.9rem;">
+                Order ID: <span>@Model.OrderId</span>
+            </div>
+
+            <div style="text-align:left; background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:20px; font-size:0.9rem;">
+                <div><strong>Name:</strong> @Model.FirstName @Model.LastName</div>
+                <div><strong>Status:</strong> <span style="color:#a64d79; font-weight:700;">@Model.Status</span></div>
+                <div><strong>Total:</strong> Rs. @Model.Total.ToString("N0")</div>
+                <div><strong>Order Date:</strong> @Model.OrderDate.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("en-US"))</div>
+            </div>
+
+            @if (Model.TrackingTimeline != null && Model.TrackingTimeline.Any())
+            {
+                <div class="status-timeline">
+                    @foreach (var step in Model.TrackingTimeline.OrderBy(s => s.Id))
+                    {
+                        <div class="status-step">
+                            <div class="@(step.Completed ? "status-dot-active" : "status-dot-inactive")"></div>
+                            <div>
+                                <strong style="color:@(step.Completed ? "#333" : "#999"); font-size:0.95rem;">
+                                    @step.Status
+                                </strong><br>
+                                <small style="color:@(step.Completed ? "#666" : "#bbb");">
+                                    @step.Description
+                                    @if (step.Timestamp.HasValue)
+                                    {
+                                        <span> — @step.Timestamp.Value.ToString("dd MMM, hh:mm tt", new System.Globalization.CultureInfo("en-US"))</span>
+                                    }
+                                </small>
+                            </div>
+                        </div>
+
+
+
+                    }
+                    @{
+                        bool canCancel = Model.Status == "Pending" || Model.Status == "Processing";
+                        
+                    }
+
+                    @if (canCancel)
+                    {
+                        <div class="action-buttons">
+                            @if (canCancel)
+                            {
+                                <form method="post" action="/Cart/CancelOrder" id="cancelForm">
+                                                                   <input type="hidden" name="orderId" value="@Model.OrderId" />
+                                    <button type="submit" class="btn-cancel-order">
+                                        ❌ Cancel Order
+                                    </button>
+                                </form>
+                                <!-- Cancel Modal -->
+<div class="modal-overlay" id="cancelModal">
+    <div class="modal-box">
+        <h3>Cancel Order?</h3>
+        <p>Are you sure you want to cancel this order? This action cannot be undone.</p>
+        <div class="modal-actions">
+            <button class="modal-btn-cancel" onclick="closeCancelModal()">No, Keep it</button>
+            <button class="modal-btn-confirm" onclick="confirmCancel()">Yes, Cancel</button>
+        </div>
+    </div>
+</div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+<script>
+    function openCancelModal() {
+        document.getElementById('cancelModal').classList.add('active');
+    }
+    function closeCancelModal() {
+        document.getElementById('cancelModal').classList.remove('active');
+    }
+    function confirmCancel() {
+        document.getElementById('cancelForm').submit();
+    }
+
+    // Button click pe modal open ho
+    document.querySelector('#cancelForm button[type=submit]').addEventListener('click', function(e) {
+        e.preventDefault();
+        openCancelModal();
+    });
+</script>

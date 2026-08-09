@@ -1,0 +1,224 @@
+﻿@model customerseller.Models.PaymentViewModel
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Cash Collection";
+}
+<link href="~/seller/css/Dashboard.css" rel="stylesheet" />
+<style>
+    .payments-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px 20px;
+    }
+
+    .header-section {
+        background: #fff;
+        padding: 20px 26px;
+        border-radius: 14px;
+        border: 1px solid #ddd6fe;
+        margin-bottom: 22px;
+    }
+
+    .main-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1e1033 !important;
+    }
+
+    .sub-title {
+        font-size: 0.85rem;
+        color: #8b5cf6;
+        margin-top: 4px;
+    }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .card {
+        border-radius: 14px;
+        padding: 20px 22px;
+        border: 1px solid #ddd6fe;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        background: #8b5cf6;
+    }
+
+    .card-white { background: #fff; }
+
+    .card-berry {
+        background: #a64d79;
+        border-color: #a64d79;
+    }
+
+    .card-berry::before { background: #6d28d9; }
+
+    .card-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #8b5cf6;
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .card-amount {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: #1e1033;
+    }
+
+    .text-white { color: #fff !important; }
+
+    .table-wrapper {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #ddd6fe;
+        overflow: hidden;
+    }
+
+    .table-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #1e1033;
+        padding: 16px 20px;
+        border-bottom: 1px solid #ede9fe;
+    }
+
+    .data-table { width: 100%; border-collapse: collapse; }
+
+    .data-table thead tr { background: #f5f3ff; }
+
+    .data-table th {
+        padding: 12px 18px;
+        text-align: left;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #7c3aed;
+        border-bottom: 1px solid #ede9fe;
+    }
+
+    .data-table td {
+        padding: 13px 18px;
+        font-size: 0.875rem;
+        color: #374151;
+        border-bottom: 1px solid #f5f3ff;
+    }
+
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #f5f3ff; }
+
+    .font-bold { font-weight: 600; color: #1e1033; }
+    .font-black { font-weight: 700; color: #7c3aed; }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .status-success { background: #d1fae5; color: #065f46; }
+    .status-pending { background: #ede9fe; color: #7c3aed; }
+    @@media (max-width: 700px) {
+        .payments-container {
+            padding: 16px 14px;
+        }
+
+        .header-section {
+            padding: 16px 18px;
+        }
+
+        .stats-row {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            min-width: 420px;
+        }
+    }
+</style>
+<main class="payments-container">
+    <header class="header-section">
+        <h1 class="main-title" style="color: #a64d79; font-weight: 800;">Cash Collection</h1>
+        <p class="sub-title">Tracking your Cash on Delivery (COD) revenue.</p>
+    </header>
+
+    @* Stats Cards *@
+    <div class="stats-row">
+        <div class="card card-white">
+            <span class="card-label">Cash in Hand</span>
+            <h2 class="card-amount">PKR @(Model?.CashInHand.ToString("N0") ?? "0")</h2>
+        </div>
+
+        <div class="card card-white">
+            <span class="card-label">In-Transit</span>
+            <h2 class="card-amount">PKR @(Model?.InTransitCash.ToString("N0") ?? "0")</h2>
+        </div>
+
+        <div class="card card-berry">
+            <span class="card-label" style="color: rgba(255,255,255,0.8);">Total COD Sales</span>
+            <h2 class="card-amount text-white">PKR @(Model?.TotalCODSales.ToString("N0") ?? "0")</h2>
+        </div>
+    </div>
+
+    @* Transactions Table *@
+    <div class="table-wrapper">
+        <h3 class="table-title">Recent Transactions</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th style="text-align: right;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model?.Transactions != null && Model.Transactions.Any())
+                {
+                    @foreach (var item in Model.Transactions)
+                    {
+                        <tr>
+                            <td class="font-bold">@item.OrderId</td>
+                            <td>@item.CustomerName</td>
+                            <td class="font-black">PKR @item.Amount.ToString("N0")</td>
+                            <td style="text-align: right;">
+                                <span class="status-badge @(item.Status == "Collected" ? "status-success" : "status-pending")">
+                                    @item.Status
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding: 40px; color: #999; font-style: italic;">
+                            No recent transactions found.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</main>

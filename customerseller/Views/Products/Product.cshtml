@@ -1,0 +1,791 @@
+﻿@model IEnumerable<customerseller.Models.Product>
+@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Products";
+
+    var grouped = (Model ?? Enumerable.Empty<customerseller.Models.Product>())
+        .GroupBy(p => p.Category ?? "Uncategorized")
+        .ToDictionary(
+            g => g.Key,
+            g => g.GroupBy(p => p.SubCategory ?? "General")
+                  .ToDictionary(sg => sg.Key, sg => sg.ToList())
+        );
+
+    int totalProducts = (Model ?? Enumerable.Empty<customerseller.Models.Product>()).Count();
+    int inStockCount = (Model ?? Enumerable.Empty<customerseller.Models.Product>())
+                            .Count(p => int.TryParse(p.Stock, out int s) && s > 0);
+    int outStockCount = totalProducts - inStockCount;
+
+    var jsonData = new System.Text.StringBuilder();
+    jsonData.Append("{");
+    bool firstCat = true;
+    foreach (var cat in grouped)
+    {
+        string catId = cat.Key.Replace(" ", "_").Replace("&", "and").Replace("'", "");
+        if (!firstCat) jsonData.Append(",");
+        firstCat = false;
+        jsonData.Append("\"").Append(catId).Append("\":{");
+        bool firstSub = true;
+        foreach (var sub in cat.Value)
+        {
+            string subId = catId + "_" + sub.Key.Replace(" ", "_").Replace("&", "and").Replace("'", "");
+            if (!firstSub) jsonData.Append(",");
+            firstSub = false;
+            jsonData.Append("\"").Append(subId).Append("\":[");
+            bool firstProd = true;
+            foreach (var p in sub.Value)
+            {
+                if (!firstProd) jsonData.Append(",");
+                firstProd = false;
+                string safeTitle = (p.Title ?? "").Replace("\\", "\\\\").Replace("\"", "\\\"");
+                string safeSubcat = (sub.Key ?? "").Replace("\"", "\\\"");
+                string safeStatus = (p.IsAdminApproved ? "Approved" : "Pending");
+                string safeImg = (p.ImageUrl ?? "").Replace("\"", "\\\"");
+                string safeId = (p.Id ?? "").Replace("\"", "\\\"");
+                string stockVal = p.Stock ?? "0";
+                jsonData.Append("{");
+                jsonData.Append("\"id\":\"").Append(safeId).Append("\",");
+                jsonData.Append("\"name\":\"").Append(safeTitle).Append("\",");
+                jsonData.Append("\"subcat\":\"").Append(safeSubcat).Append("\",");
+                jsonData.Append("\"price\":").Append(p.Price.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)).Append(",");
+                jsonData.Append("\"stock\":\"").Append(stockVal).Append("\",");
+                jsonData.Append("\"status\":\"").Append(safeStatus).Append("\",");
+                jsonData.Append("\"img\":\"").Append(safeImg).Append("\"");
+                jsonData.Append("}");
+            }
+            jsonData.Append("]");
+        }
+        jsonData.Append("}");
+    }
+    jsonData.Append("}");
+    string allProductsJson = jsonData.ToString();
+}
+
+<style>
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    .inv-wrap {
+        padding: 28px 24px;
+        background: #f5f4f2;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .inv-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 22px;
+    }
+
+    .inv-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1a1a2e;
+    }
+
+    .inv-sub {
+        font-size: 12px;
+        color: #999;
+        margin-top: 3px;
+    }
+
+    .btn-add {
+        background: #ad2882;
+        color: #fff;
+        border: none;
+        padding: 9px 18px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .btn-add:hover {
+            background: #8e1f6b;
+            color: #fff;
+        }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .stat-card {
+        background: #fff;
+        border: 0.5px solid #e5e5e5;
+        border-top: 3px solid #ad2882;
+        border-radius: 10px;
+        padding: 14px 16px;
+    }
+
+    .stat-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.9px;
+        color: #aaa;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-top: 4px;
+    }
+
+    .search-wrap {
+        position: relative;
+        margin-bottom: 18px;
+    }
+
+        .search-wrap input {
+            width: 100%;
+            padding: 9px 12px 9px 36px;
+            border: 1px solid #e0e0e0;
+            border-radius: 9px;
+            font-size: 13px;
+            background: #fff;
+            color: #1a1a2e;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+            .search-wrap input:focus {
+                border-color: #ad2882;
+            }
+
+        .search-wrap .s-icon {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #bbb;
+            font-size: 15px;
+            pointer-events: none;
+        }
+
+    .cat-section {
+        background: #fff;
+        border: 0.5px solid #e5e5e5;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .cat-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 18px;
+        cursor: pointer;
+        border-bottom: 0.5px solid #f0f0f0;
+        transition: background 0.12s;
+        user-select: none;
+    }
+
+        .cat-row:hover {
+            background: #fdf0f9;
+        }
+
+        .cat-row.active {
+            background: #fce4f3;
+            border-left: 3px solid #ad2882;
+        }
+
+    .cat-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .cat-icon {
+        font-size: 16px;
+        color: #ad2882;
+    }
+
+    .cat-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a2e;
+    }
+
+    .cat-badge {
+        font-size: 11px;
+        font-weight: 600;
+        background: #f5e0f0;
+        color: #ad2882;
+        padding: 2px 9px;
+        border-radius: 12px;
+    }
+
+    .cat-chevron {
+        font-size: 14px;
+        color: #ccc;
+        transition: transform 0.2s;
+    }
+
+    .cat-row.active .cat-chevron {
+        transform: rotate(90deg);
+        color: #ad2882;
+    }
+
+    .subcat-panel {
+        display: none;
+        background: #fdf6fb;
+        border-top: 0.5px solid #f0d8ea;
+        padding: 6px 0;
+    }
+
+        .subcat-panel.open {
+            display: block;
+        }
+
+    .subcat-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 18px 9px 40px;
+        font-size: 13px;
+        color: #666;
+        cursor: pointer;
+        transition: color 0.12s, background 0.12s;
+    }
+
+        .subcat-item:hover {
+            color: #ad2882;
+            background: #fce4f3;
+        }
+
+        .subcat-item.active {
+            color: #ad2882;
+            font-weight: 600;
+            background: #fce4f3;
+        }
+
+        .subcat-item::before {
+            content: "";
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: transparent;
+            margin-right: 10px;
+            flex-shrink: 0;
+            transition: background 0.12s;
+        }
+
+        .subcat-item.active::before {
+            background: #ad2882;
+        }
+
+    .subcat-count {
+        font-size: 11px;
+        color: #bbb;
+    }
+
+    .prod-panel {
+        background: #fff;
+        border: 0.5px solid #e5e5e5;
+        border-radius: 12px;
+        overflow: hidden;
+        display: none;
+        margin-bottom: 18px;
+    }
+
+        .prod-panel.open {
+            display: block;
+        }
+
+    .prod-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 13px 18px;
+        border-bottom: 0.5px solid #f0f0f0;
+        background: #fafafa;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+    }
+
+    .bc-cat {
+        color: #ad2882;
+        font-weight: 600;
+    }
+
+    .bc-sep {
+        color: #ccc;
+        font-size: 12px;
+    }
+
+    .bc-sub {
+        color: #1a1a2e;
+        font-weight: 600;
+    }
+
+    .prod-count-pill {
+        font-size: 12px;
+        font-weight: 600;
+        background: #fce4f3;
+        color: #ad2882;
+        padding: 3px 12px;
+        border-radius: 12px;
+    }
+
+    .prod-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .prod-table th {
+            text-align: left;
+            padding: 10px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.7px;
+            text-transform: uppercase;
+            color: #aaa;
+            background: #fafafa;
+            border-bottom: 0.5px solid #f0f0f0;
+        }
+
+        .prod-table td {
+            padding: 13px 16px;
+            border-bottom: 0.5px solid #f7f7f7;
+            vertical-align: middle;
+        }
+
+        .prod-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .prod-table tr:hover td {
+            background: #fdf6fb;
+        }
+
+    .prod-img-box {
+        width: 46px;
+        height: 46px;
+        border-radius: 9px;
+        background: #fce4f3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ad2882;
+        font-size: 20px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+        .prod-img-box img {
+            width: 46px;
+            height: 46px;
+            border-radius: 9px;
+            object-fit: cover;
+            display: block;
+        }
+
+    .prod-name-text {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1a1a2e;
+        max-width: 150px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .subcat-pill {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 12px;
+        background: #ede7f6;
+        color: #5c35a0;
+        white-space: nowrap;
+    }
+
+    .price-text {
+        font-size: 13px;
+        font-weight: 700;
+        color: #ad2882;
+        white-space: nowrap;
+    }
+
+    .stock-text {
+        font-size: 13px;
+        color: #555;
+        white-space: nowrap;
+    }
+
+    .badge-approved {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 12px;
+        border-radius: 12px;
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-pending {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 12px;
+        border-radius: 12px;
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-rejected {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 3px 12px;
+        border-radius: 12px;
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .action-btns {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .btn-edit {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 8px;
+        border: 1px solid #c084d0;
+        background: #f5eaff;
+        color: #7c3aed;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.12s;
+    }
+
+        .btn-edit:hover {
+            background: #ede4ff;
+            color: #7c3aed;
+        }
+
+    .btn-delete {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid #fca5a5;
+        background: #fff5f5;
+        color: #dc2626;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none;
+        transition: background 0.12s;
+    }
+
+        .btn-delete:hover {
+            background: #fee2e2;
+        }
+
+    .empty-row td {
+        text-align: center;
+        padding: 40px;
+        color: #bbb;
+        font-size: 13px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: #fff;
+        border-radius: 12px;
+        border: 0.5px solid #e5e5e5;
+        color: #bbb;
+    }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .empty-state a {
+            display: inline-block;
+            margin-top: 14px;
+            background: #ad2882;
+            color: #fff;
+            padding: 9px 20px;
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+    @@media (max-width: 600px) {
+        .inv-wrap {
+            padding: 16px 14px;
+        }
+
+        .inv-topbar {
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+        }
+
+        .btn-add {
+            justify-content: center;
+        }
+
+        .stats-row {
+            grid-template-columns: 1fr;
+        }
+
+        .prod-table th:first-child,
+        .prod-table td:first-child {
+            display: none;
+        }
+
+        .prod-panel {
+            overflow-x: auto;
+        }
+
+        .prod-table {
+            min-width: 500px;
+        }
+
+        .prod-name-text {
+            max-width: 100px;
+        }
+    }
+</style>
+
+<div class="inv-wrap">
+
+    <div class="inv-topbar">
+        <div>
+            <div class="inv-title">Product Inventory</div>
+            <div class="inv-sub">Click a category, then a subcategory to view products</div>
+        </div>
+        <a href="/Products/AddProduct" class="btn-add">
+            <i class="fas fa-plus"></i> Add New Product
+        </a>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">Total Products</div>
+            <div class="stat-value">@totalProducts</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">In Stock</div>
+            <div class="stat-value">@inStockCount</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Out of Stock</div>
+            <div class="stat-value">@outStockCount</div>
+        </div>
+    </div>
+
+    <div class="search-wrap">
+        <i class="fas fa-search s-icon"></i>
+        <input type="text" id="searchInput" placeholder="Search products…" />
+    </div>
+
+    @if (grouped.Any())
+    {
+        <div class="cat-section">
+            @foreach (var cat in grouped)
+            {
+                string catId = cat.Key.Replace(" ", "_").Replace("&", "and").Replace("'", "");
+                int catTotal = cat.Value.Sum(s => s.Value.Count);
+
+                <div class="cat-row" id="catRow_@catId" onclick="toggleCat('@catId')">
+                    <div class="cat-left">
+                        <i class="fas fa-tag cat-icon"></i>
+                        <span class="cat-name">@cat.Key</span>
+                        <span class="cat-badge">@catTotal</span>
+                    </div>
+                    <i class="fas fa-chevron-right cat-chevron" id="chevron_@catId"></i>
+                </div>
+
+                <div class="subcat-panel" id="subPanel_@catId">
+                    @foreach (var sub in cat.Value)
+                    {
+                        string subId = catId + "_" + sub.Key.Replace(" ", "_").Replace("&", "and").Replace("'", "");
+                        <div class="subcat-item"
+                             id="subItem_@subId"
+                             onclick="showProducts('@catId', '@subId', '@Html.Raw(cat.Key)', '@Html.Raw(sub.Key)')">
+                            @sub.Key
+                            <span class="subcat-count">@sub.Value.Count</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="prod-panel" id="prodPanel">
+            <div class="prod-panel-header">
+                <div class="breadcrumb">
+                    <span class="bc-cat" id="bcCat"></span>
+                    <i class="fas fa-chevron-right bc-sep"></i>
+                    <span class="bc-sub" id="bcSub"></span>
+                </div>
+                <span class="prod-count-pill" id="prodCountPill"></span>
+            </div>
+            <table class="prod-table">
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Product</th>
+                        <th>SubCategory</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="prodTbody"></tbody>
+            </table>
+        </div>
+
+        <script>
+                var ALL_PRODUCTS = @Html.Raw(allProductsJson);
+        </script>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <p>No products found in your inventory.</p>
+            <a href="/Products/AddProduct">+ Add Your First Product</a>
+        </div>
+    }
+
+</div>
+
+<script>
+    var activeCatId = null;
+    var activeSubId = null;
+    var searchQuery = "";
+
+    function toggleCat(catId) {
+        var wasActive = activeCatId === catId;
+
+        document.querySelectorAll(".cat-row").forEach(function(r) { r.classList.remove("active"); });
+        document.querySelectorAll(".subcat-panel").forEach(function(p) { p.classList.remove("open"); });
+        document.querySelectorAll(".subcat-item").forEach(function(i) { i.classList.remove("active"); });
+
+        if (wasActive) {
+            activeCatId = null;
+            activeSubId = null;
+            hideProdPanel();
+            return;
+        }
+
+        activeCatId = catId;
+        activeSubId = null;
+
+        var rowEl = document.getElementById("catRow_" + catId);
+        var panEl = document.getElementById("subPanel_" + catId);
+        if (rowEl) rowEl.classList.add("active");
+        if (panEl) panEl.classList.add("open");
+
+        hideProdPanel();
+    }
+
+    function showProducts(catId, subId, catName, subName) {
+        document.querySelectorAll(".subcat-item").forEach(function(i) { i.classList.remove("active"); });
+        var subEl = document.getElementById("subItem_" + subId);
+        if (subEl) subEl.classList.add("active");
+
+        activeSubId = subId;
+
+        document.getElementById("bcCat").textContent = catName;
+        document.getElementById("bcSub").textContent = subName;
+
+        renderTable(catId, subId);
+
+        var panel = document.getElementById("prodPanel");
+        panel.classList.add("open");
+        panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function hideProdPanel() {
+        document.getElementById("prodPanel").classList.remove("open");
+    }
+
+    function renderTable(catId, subId) {
+        var tbody  = document.getElementById("prodTbody");
+        var catObj = ALL_PRODUCTS[catId];
+        if (!catObj) { tbody.innerHTML = emptyRow(); return; }
+
+        var prods = catObj[subId] || [];
+        var q     = searchQuery.toLowerCase();
+        var items = q ? prods.filter(function(p) { return p.name.toLowerCase().indexOf(q) !== -1; }) : prods;
+
+        document.getElementById("prodCountPill").textContent =
+            items.length + " product" + (items.length !== 1 ? "s" : "");
+
+        if (!items.length) { tbody.innerHTML = emptyRow(); return; }
+
+        var rows = "";
+        for (var i = 0; i < items.length; i++) {
+            var p = items[i];
+
+            var imgHtml = p.img
+                ? "<img src=\"" + p.img + "\" alt=\"" + p.name + "\">"
+                : "<i class=\"fas fa-shopping-bag\"></i>";
+
+            var statusClass = "badge-pending";
+            if (p.status === "Approved") statusClass = "badge-approved";
+            if (p.status === "Rejected") statusClass = "badge-rejected";
+
+            rows += "<tr>";
+            rows += "<td><div class=\"prod-img-box\">" + imgHtml + "</div></td>";
+            rows += "<td><div class=\"prod-name-text\" title=\"" + p.name + "\">" + p.name + "</div></td>";
+            rows += "<td><span class=\"subcat-pill\">" + p.subcat + "</span></td>";
+            rows += "<td><span class=\"price-text\">PKR " + parseFloat(p.price).toFixed(2) + "</span></td>";
+            rows += "<td><span class=\"stock-text\">" + p.stock + " units</span></td>";
+            rows += "<td><span class=\"" + statusClass + "\">" + p.status + "</span></td>";
+            rows += "<td><div class=\"action-btns\">";
+            rows += "<a href=\"/Products/EditProduct/" + p.id + "\" class=\"btn-edit\"><i class=\"fas fa-edit\"></i> Edit</a>";
+            rows += "<a href=\"/Products/DeleteProduct/" + p.id + "\" onclick=\"return confirm('Delete this product?')\" class=\"btn-delete\"><i class=\"fas fa-trash\"></i></a>";
+            rows += "</div></td>";
+            rows += "</tr>";
+        }
+        tbody.innerHTML = rows;
+    }
+
+    function emptyRow() {
+        return "<tr class=\"empty-row\"><td colspan=\"7\">No products found.</td></tr>";
+    }
+
+    document.getElementById("searchInput").addEventListener("input", function() {
+        searchQuery = this.value;
+        if (activeCatId && activeSubId) {
+            renderTable(activeCatId, activeSubId);
+        }
+    });
+</script>

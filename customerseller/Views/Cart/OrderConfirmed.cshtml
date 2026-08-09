@@ -1,0 +1,482 @@
+﻿@model customerseller.Models.Order
+@{
+    ViewData["Title"] = "Order Confirmed";
+    var orderId = Model?.OrderId ?? TempData["OrderId"]?.ToString() ?? "";
+    var total = Model?.Total ?? Convert.ToDecimal(TempData["Total"] ?? 0);
+}
+
+<style>
+    .confirmation-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 40px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 32px rgba(160, 50, 95, 0.08);
+        text-align: center;
+        font-family: sans-serif;
+    }
+    .success-icon {
+        width: 80px; height: 80px;
+        background: #4caf50;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 25px auto;
+        color: white; font-size: 40px;
+    }
+    .order-items-list {
+        margin: 20px 0; text-align: left;
+        border: 1px solid #eee; border-radius: 8px;
+        overflow: hidden; background: #fff;
+    }
+    .item-row {
+        display: flex; align-items: center;
+        padding: 15px; border-bottom: 1px solid #eee; gap: 15px;
+    }
+    .item-row img {
+        width: 60px; height: 60px;
+        object-fit: cover; border-radius: 6px; border: 1px solid #eee;
+    }
+    .item-info { flex-grow: 1; }
+    .item-price { font-weight: bold; color: #a64d79; }
+    .order-details {
+        background: #f9f9f9; padding: 20px;
+        border-radius: 8px; text-align: left;
+        margin-bottom: 20px; border: 1px solid #eee; line-height: 1.8;
+    }
+    .history-card {
+        border: 1px solid #eee; padding: 15px;
+        margin-bottom: 15px; border-radius: 10px;
+        text-align: left; position: relative; background: #fff;
+    }
+    .btn-track {
+        background: #2196F3; color: white; border: none;
+        padding: 15px; border-radius: 8px; cursor: pointer;
+        font-weight: bold; width: 100%; margin-top: 20px;
+        display: block; text-align: center; text-decoration: none;
+    }
+    .btn-complain {
+        background: #fff; color: #c0392b;
+        border: 1.5px solid #e8a0a0;
+        padding: 7px 14px; border-radius: 7px;
+        cursor: pointer; font-size: 0.82rem; font-weight: 600;
+        font-family: sans-serif;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-complain:hover { background: #fff5f5; border-color: #c0392b; }
+    .modal-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.45); z-index: 1000;
+        align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+        background: #fff; border-radius: 16px; width: 100%;
+        max-width: 580px; max-height: 90vh; overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2); font-family: sans-serif;
+    }
+    .modal-header {
+        background: #1a1a1a; color: #fff;
+        padding: 22px 28px 18px; border-radius: 16px 16px 0 0;
+    }
+    .modal-header h2 { font-size: 1.15rem; margin: 0 0 4px; }
+    .modal-header p  { font-size: 0.82rem; color: rgba(255,255,255,0.5); margin: 0; }
+    .modal-body { padding: 24px 28px 28px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-field { display: flex; flex-direction: column; gap: 5px; }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-field label { font-size: 0.8rem; font-weight: 600; color: #444; }
+    .form-field label span { color: #e74c3c; margin-left: 2px; }
+    .form-field input, .form-field select, .form-field textarea {
+        width: 100%; font-family: sans-serif; font-size: 0.88rem;
+        padding: 9px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px;
+        background: #fafafa; color: #1a1a1a; outline: none;
+        box-sizing: border-box; transition: border-color 0.15s; -webkit-appearance: none;
+    }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+        border-color: #a64d79; background: #fff;
+    }
+    .form-field input[readonly] { color: #888; background: #f3f3f3; cursor: not-allowed; }
+    .form-field textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+    .priority-row { display: flex; gap: 8px; }
+    .p-btn {
+        flex: 1; padding: 8px 6px; border: 1.5px solid #e5e7eb;
+        border-radius: 8px; background: #fafafa; font-size: 0.78rem;
+        font-weight: 600; cursor: pointer; color: #888;
+        text-align: center; font-family: sans-serif;
+    }
+    .p-btn.low.active    { border-color: #27ae60; background: #eafaf1; color: #1e8449; }
+    .p-btn.medium.active { border-color: #f39c12; background: #fef9e7; color: #b7770d; }
+    .p-btn.high.active   { border-color: #e74c3c; background: #fdedec; color: #c0392b; }
+    .modal-footer { display: flex; gap: 10px; margin-top: 22px; }
+    .btn-cancel-modal {
+        padding: 11px 18px; border: 1.5px solid #e5e7eb; border-radius: 9px;
+        background: transparent; font-family: sans-serif;
+        font-size: 0.88rem; font-weight: 600; cursor: pointer; color: #888;
+    }
+    .btn-submit-complaint {
+        flex: 1; padding: 11px; background: #1a1a1a; color: #fff;
+        border: none; border-radius: 9px; font-family: sans-serif;
+        font-size: 0.92rem; font-weight: 700; cursor: pointer;
+    }
+    .btn-submit-complaint:hover { background: #333; }
+    .complaint-success { display: none; text-align: center; padding: 40px 28px; }
+    .complaint-success h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .complaint-success p  { font-size: 0.85rem; color: #888; line-height: 1.6; }
+    .ticket-badge {
+        display: inline-block; margin-top: 14px; font-size: 0.78rem;
+        background: #f3f4f6; border-radius: 6px; padding: 5px 12px;
+        color: #555; font-family: monospace;
+    }
+
+    @@media (max-width: 600px) {
+        .confirmation-container {
+            margin: 20px auto;
+            padding: 24px 18px;
+        }
+
+        .item-row {
+            flex-wrap: wrap;
+            padding: 12px;
+        }
+
+            .item-row img {
+                width: 50px;
+                height: 50px;
+            }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-field.full {
+            grid-column: 1;
+        }
+
+        .priority-row {
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 18px 20px 14px;
+        }
+
+        .modal-body {
+            padding: 18px 20px 20px;
+        }
+
+        .modal-footer {
+            flex-direction: column;
+        }
+
+        .btn-cancel-modal, .btn-submit-complaint {
+            width: 100%;
+        }
+    }
+</style>
+
+<!-- COMPLAINT MODAL -->
+<div class="modal-overlay" id="complaintModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>🚩 File a Complaint</h2>
+      <p>Your complaint will be reviewed within 24 hours</p>
+    </div>
+    <div class="modal-body" id="complaintFormBody">
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Your Name <span>*</span></label>
+          <input type="text" id="cf-name" placeholder="e.g. Ali Hassan">
+        </div>
+        <div class="form-field">
+          <label>Phone Number <span>*</span></label>
+          <input type="tel" id="cf-phone" placeholder="+92 3XX XXXXXXX">
+        </div>
+        <div class="form-field full">
+          <label>Email Address</label>
+          <input type="email" id="cf-email" placeholder="your@email.com">
+        </div>
+        <div class="form-field">
+          <label>Order ID</label>
+          <input type="text" id="cf-orderid" readonly>
+        </div>
+        <div class="form-field">
+          <label>Amount Paid (Rs.)</label>
+          <input type="text" id="cf-amount" readonly>
+        </div>
+        <div class="form-field">
+          <label>Seller / Shop Name <span>*</span></label>
+          <input type="text" id="cf-seller" placeholder="e.g. Khan Crafts">
+        </div>
+        <div class="form-field">
+          <label>Purchase Date</label>
+          <input type="date" id="cf-date">
+        </div>
+        <div class="form-field full">
+          <label>Complaint Type <span>*</span></label>
+          <select id="cf-type">
+            <option value="" disabled selected>Select a reason...</option>
+            <option>Wrong / Damaged product received</option>
+            <option>Product never arrived</option>
+            <option>Delivery was very late</option>
+            <option>Seller fraud / scam</option>
+            <option>Rude or unprofessional seller</option>
+            <option>Return / Refund not processed</option>
+            <option>Other issue</option>
+          </select>
+        </div>
+        <div class="form-field full">
+          <label>Priority Level <span>*</span></label>
+          <div class="priority-row">
+            <button type="button" class="p-btn low" onclick="setPrio(this)">🟢 Low</button>
+            <button type="button" class="p-btn medium active" onclick="setPrio(this)">🟡 Medium</button>
+            <button type="button" class="p-btn high" onclick="setPrio(this)">🔴 High</button>
+          </div>
+        </div>
+        <div class="form-field full">
+          <label>Describe Your Complaint <span>*</span></label>
+          <textarea id="cf-desc" placeholder="What happened, when it happened, and what the seller said..."></textarea>
+        </div>
+        <div class="form-field full">
+          <label>Attach Evidence (photos / screenshots)</label>
+          <input type="file" id="cf-files" accept="image/*,.pdf" multiple
+            style="padding:7px 12px; background:#fafafa; cursor:pointer;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel-modal" onclick="closeComplaintModal()">Cancel</button>
+        <button class="btn-submit-complaint" onclick="submitComplaint()">Submit Complaint →</button>
+      </div>
+    </div>
+    <div class="complaint-success" id="complaintSuccess">
+      <div style="font-size:2.5rem; margin-bottom:12px;">✅</div>
+      <h3>Complaint Submitted!</h3>
+      <p>We will review your complaint within 24 hours<br>and contact you via phone or email.</p>
+      <span class="ticket-badge" id="complaintTicket">Ticket #CMP-0000</span>
+      <br><br>
+      <button class="btn-cancel-modal" onclick="closeComplaintModal()" style="margin-top:8px;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE CONTENT -->
+<div class="confirmation-container">
+    <div class="success-icon">✓</div>
+    <h1>Order Confirmed!</h1>
+    <p style="font-size: 1.1rem; color: #444;">Thank you for shopping with <strong>Artisan Valley</strong>!</p>
+
+    @if (Model != null)
+    {
+        <p style="color: #666; margin-top: -10px;">We have received your order details and are preparing it for shipment.</p>
+
+        <div class="order-items-list">
+            @foreach (var item in Model.Items)
+            {
+                <div class="item-row">
+                    <img src="@item.ImageUrl" alt="Product">
+                    <div class="item-info">
+                        <small style="color:#a64d79; font-weight:700; display:block; margin-bottom:2px;">🏪 @item.SellerShopName</small>
+                        <div style="font-weight:600;">@item.Title</div>
+                        <small style="color:#888;">Qty: @item.Quantity</small><br />
+                        <small style="color: #2196F3; font-weight: bold;">Order ID: @orderId</small>
+                    </div>
+                    <div class="item-price">Rs. @((item.Price * item.Quantity).ToString("N0"))</div>
+                </div>
+            }
+        </div>
+
+        <div class="order-details">
+            <div><strong>Order ID:</strong> #@orderId</div>
+            <div><strong>Total Amount:</strong> Rs. @total.ToString("N0")</div>
+        </div>
+    }
+
+    <div id="orderHistoryContainer"></div>
+    <button onclick="goToTracking()" class="btn-track">
+        🔍 Track Your Order
+    </button>
+
+    <a href="/Cart/Complaint?orderId=@orderId&amount=@total.ToString("N0")"
+       class="btn-track"
+       style="background:#fff; color:#c0392b; border:2px solid #e74c3c; margin-top:10px; display:block; text-align:center; text-decoration:none; padding:15px; border-radius:8px; font-weight:bold;">
+        🚩 File a Complaint
+    </a>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    saveOrderData();
+    renderHistory();
+});
+
+function goToTracking() {
+    let orderId = "@orderId";
+    if (!orderId || orderId === "") {
+        const history = JSON.parse(localStorage.getItem('myOrders')) || [];
+        if (history.length > 0) orderId = history[0].id;
+    }
+    if (orderId) location.href = '/Cart/TrackOrder?orderId=' + orderId;
+    else location.href = '/Cart/TrackOrder';
+}
+
+function saveOrderData() {
+    const orderId = "@orderId";
+    const hasModel = "@(Model != null ? "true" : "false")" === "true";
+    if (!hasModel || !orderId || orderId === "" || orderId === "0") return;
+
+    let history = JSON.parse(localStorage.getItem('myOrders')) || [];
+    if (!history.find(o => o.id === orderId)) {
+           let items = @Html.Raw(Model != null ? System.Text.Json.JsonSerializer.Serialize(Model.Items.Select(i => new
+        {
+            img = i.ImageUrl,
+            title = i.Title,
+            shop = i.SellerShopName,
+            price = "Rs. " + (i.Price * i.Quantity).ToString("N0")
+    })) : "[]");
+
+        history.unshift({
+            id: orderId,
+            total: "@total.ToString("N0")",
+            date: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }),
+            items: items
+        });
+        if (history.length > 5) history = history.slice(0, 5);
+        localStorage.setItem('myOrders', JSON.stringify(history));
+    }
+}
+
+function renderHistory() {
+    const history = JSON.parse(localStorage.getItem('myOrders')) || [];
+    const container = document.getElementById('orderHistoryContainer');
+    const currentId = "@orderId";
+    const oldOrders = history.filter(o => o.id !== currentId || currentId === "");
+
+    if (oldOrders.length === 0) { container.innerHTML = ''; return; }
+
+    let html = '<div style="text-align:left; margin-top:40px; margin-bottom:15px; color:#888; font-weight:bold; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">Previous Orders History</div>';
+
+    oldOrders.forEach(order => {
+        html += `
+        <div class="history-card">
+            <button onclick="deleteOrder('${order.id}')"
+                style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.3rem; color:#ccc; cursor:pointer; line-height:1;"
+                onmouseover="this.style.color='red'"
+                onmouseout="this.style.color='#ccc'">&times;</button>
+            <div style="font-size:0.85rem; color:#888; margin-bottom:10px;">
+                Order ID: <strong style="color:#2196F3;">#${order.id}</strong> | Placed on: <strong>${order.date}</strong>
+            </div>
+               ${order.items.map(item => `
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+            <img src="${item.img}" style="width:45px; height:45px; border-radius:6px; object-fit:cover; border:1px solid #eee;">
+            <div style="flex-grow:1;">
+                <small style="color:#a64d79; font-weight:700; display:block;"> ${item.shop || ''}</small>
+                <div style="font-size:0.9rem; color:#333;">${item.title}</div>
+            </div>
+            <div style="font-size:0.85rem; font-weight:bold; color:#a64d79;">${item.price}</div>
+        </div>
+    `).join('')}
+            <div style="border-top:1px solid #f5f5f5; padding-top:10px; margin-top:10px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                <span style="font-weight:bold;">Total Paid: Rs. ${order.total}</span>
+               
+
+            </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function deleteOrder(orderId) {
+    let history = JSON.parse(localStorage.getItem('myOrders')) || [];
+    history = history.filter(o => o.id !== orderId);
+    localStorage.setItem('myOrders', JSON.stringify(history));
+    renderHistory();
+}
+
+function openComplaintModal(orderId, amount) {
+    document.getElementById('cf-orderid').value = orderId ? '#' + orderId : '';
+    document.getElementById('cf-amount').value  = amount  ? 'Rs. ' + amount : '';
+    document.getElementById('complaintFormBody').style.display = 'block';
+    document.getElementById('complaintSuccess').style.display  = 'none';
+    document.getElementById('complaintModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeComplaintModal() {
+    document.getElementById('complaintModal').classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('complaintModal').addEventListener('click', function(e) {
+    if (e.target === this) closeComplaintModal();
+});
+
+function setPrio(btn) {
+    document.querySelectorAll('.p-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+async function submitComplaint() {
+    const name   = document.getElementById('cf-name').value.trim();
+    const phone  = document.getElementById('cf-phone').value.trim();
+    const seller = document.getElementById('cf-seller').value.trim();
+    const type   = document.getElementById('cf-type').value;
+    const desc   = document.getElementById('cf-desc').value.trim();
+    const email  = document.getElementById('cf-email').value.trim();
+    const orderId  = document.getElementById('cf-orderid').value.trim();
+    const amount   = document.getElementById('cf-amount').value.trim();
+    const fileInput = document.getElementById('cf-files');
+
+    if (!name || !phone || !seller || !type || !desc) {
+        alert('Please fill in all required fields (*).');
+        return;
+    }
+
+    // Priority get karo
+    const activePrio = document.querySelector('.p-btn.active');
+    const priority = activePrio ? activePrio.textContent.trim().replace(/[^a-zA-Z]/g, '') : 'Medium';
+
+    const formData = new FormData();
+    formData.append('customerName',   name);
+    formData.append('customerPhone',  phone);
+    formData.append('customerEmail',  email);
+    formData.append('orderId',        orderId);
+    formData.append('amountPaid',     amount);
+    formData.append('sellerName',     seller);
+    formData.append('complaintType',  type);
+    formData.append('priority',       priority);
+    formData.append('description',    desc);
+
+    if (fileInput.files.length > 0) {
+        formData.append('evidenceFile', fileInput.files[0]);
+    }
+
+    try {
+        const btn = document.querySelector('.btn-submit-complaint');
+        btn.textContent = 'Submitting...';
+        btn.disabled = true;
+
+        const res = await fetch('/Complaint/Submit', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            document.getElementById('complaintTicket').textContent = 'Ticket #' + data.ticket;
+            document.getElementById('complaintFormBody').style.display = 'none';
+            document.getElementById('complaintSuccess').style.display  = 'block';
+        } else {
+            alert('Something went wrong. Please try again.');
+            btn.textContent = 'Submit Complaint →';
+            btn.disabled = false;
+        }
+    } catch (e) {
+        alert('Network error. Please try again.');
+    }
+}
+</script>
+
+<script>
+    localStorage.removeItem('cart');
+    localStorage.removeItem('buyNowItem');
+</script>

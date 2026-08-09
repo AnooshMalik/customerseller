@@ -1,0 +1,173 @@
+﻿@model customerseller.Models.DashboardViewModel
+@{
+    Layout = "_DashboardLayout";
+}
+<style>
+    @@media (max-width: 600px) {
+        .dashboard-main div[style*="justify-content:space-between"] {
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start !important;
+        }
+    }
+</style>
+<div class="dashboard-main">
+
+    <header class="page-header">
+        <div class="header-left">
+            <h1 class="page-title">Overview</h1>
+        </div>
+        <div class="header-right">
+            <div class="profile-info">
+                <p class="name" style="font-size:1.1rem; font-weight:700; color:#a64d79; letter-spacing:0.5px;">
+                    @Model.ShopName
+                </p>
+                <p style="font-size:0.78rem; color:#888; margin:2px 0 6px 0;">
+                    <i class="fas fa-user" style="margin-right:4px;"></i> @Model.SellerName
+                </p>
+               
+            </div>
+            <div class="icon-box">
+                <i class="fas fa-store"></i>
+            </div>
+        </div>
+    </header>
+
+    @{
+        var rejectedAlerts = ViewBag.RejectedAlerts as List<object>;
+    }
+
+    @if (rejectedAlerts != null && rejectedAlerts.Count > 0)
+    {
+        <div style="background:#fff5f5; border:1.5px solid #fecaca; border-radius:12px; padding:18px 20px; margin-bottom:20px;">
+            <div style="font-size:0.85rem; font-weight:700; color:#dc2626; margin-bottom:10px;">
+                <i class="fas fa-triangle-exclamation"></i> Action Required — Rejected Sub-Categories
+            </div>
+            @foreach (dynamic alert in rejectedAlerts)
+            {
+                <div style="background:#fff; border-left:3px solid #dc2626; border-radius:8px; padding:14px; margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <div style="font-size:0.88rem; font-weight:700; color:#1a1a2e;">
+                                @alert.SubCategory
+                                <span style="font-size:0.7rem; font-weight:600; color:#fff; background:#dc2626; padding:2px 8px; border-radius:10px; margin-left:8px;">
+                                    Rejected by @alert.RejectedBy
+                                </span>
+                            </div>
+                            <div style="font-size:0.8rem; color:#666; margin-top:4px;">
+                                <strong>Reason:</strong> @(string.IsNullOrWhiteSpace((string)alert.Reason) ? "No reason provided" : alert.Reason)
+                            </div>
+                        </div>
+                        <a href="/Products/UploadSubCategoryVideo?subcategory=@Uri.EscapeDataString((string)alert.SubCategory)"
+                           style="background:#dc2626; color:#fff; padding:6px 14px; border-radius:6px; text-decoration:none; font-size:0.8rem; font-weight:600; white-space:nowrap; display:inline-block;">
+                            ↻ Re-upload Video
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @{
+        var rejectedProducts = ViewBag.RejectedProducts as List<object>;
+    }
+
+    @if (rejectedProducts != null && rejectedProducts.Count > 0)
+    {
+        <div style="background:#fff5f5; border:1.5px solid #fecaca; border-radius:12px; padding:18px 20px; margin-bottom:20px;">
+            <div style="font-size:0.85rem; font-weight:700; color:#dc2626; margin-bottom:10px;">
+                <i class="fas fa-box"></i> Action Required — Rejected Products
+            </div>
+            @foreach (dynamic product in rejectedProducts)
+            {
+                <div style="background:#fff; border-left:3px solid #dc2626; border-radius:8px; padding:14px; margin-bottom:8px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div>
+                            <div style="font-size:0.88rem; font-weight:700; color:#1a1a2e;">
+                                @product.Title
+                                <span style="font-size:0.7rem; font-weight:600; color:#fff; background:#dc2626; padding:2px 8px; border-radius:10px; margin-left:8px;">
+                                    Rejected by @product.RejectedBy
+                                </span>
+                            </div>
+                            <div style="font-size:0.8rem; color:#666; margin-top:4px;">
+                                <strong>Reason:</strong> @(string.IsNullOrWhiteSpace((string)product.Reason) ? "No reason provided" : product.Reason)
+                            </div>
+                        </div>
+                        <a href="/Products/EditProduct?id=@product.Id"
+                           style="background:#dc2626; color:#fff; padding:6px 14px; border-radius:6px; text-decoration:none; font-size:0.8rem; font-weight:600; white-space:nowrap; display:inline-block;">
+                            ✎ Edit Product
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="stats-grid">
+
+        <div class="stat-card revenue">
+            <div class="stat-label">Net Revenue</div>
+            <div class="stat-value">Rs. @Model.NetRevenue</div>
+            <div class="stat-badge up">
+                <i class="fas fa-arrow-up"></i> @Model.RevenueGrowth% this month
+            </div>
+        </div>
+
+        <div class="stat-card orders">
+            <div class="stat-label">Orders</div>
+            <div class="stat-value">@Model.TotalOrders</div>
+            <div class="stat-meta">Pending: <strong>@Model.PendingOrders</strong></div>
+        </div>
+
+        <div class="stat-card rating">
+            <div class="stat-label">Store Rating</div>
+            <div class="stat-value">
+                @Model.Rating <span class="stat-value-sub">/ 5</span>
+            </div>
+            <div class="stars-row">
+                @for (int i = 0; i < 5; i++)
+                {
+                    <span class="star @(i < Math.Floor(Model.Rating) ? "filled" : "")">★</span>
+                }
+            </div>
+        </div>
+
+        <div class="stat-card visitors">
+            <div class="stat-label">Live Visitors</div>
+            <div class="stat-value">@Model.LiveVisitors</div>
+            <div class="stat-meta">
+                <span class="live-dot"></span> Active now
+            </div>
+        </div>
+
+    </div>
+
+    <div class="activity-box">
+        <div class="section-title">Recent Sales Activity</div>
+        @if (Model.RecentSales != null && Model.RecentSales.Any())
+        {
+            <div class="activity-list">
+                @foreach (var sale in Model.RecentSales)
+                {
+                    <div class="sale-item">
+                        <span class="sale-detail">@sale.Detail</span>
+                        <span class="sale-amount">@sale.Amount</span>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="activity-empty">
+                <div class="activity-icon">
+                    <i class="fas fa-circle-check"></i>
+                </div>
+                <div class="activity-text">
+                    <p>No new alerts. Your store is running smoothly.</p>
+                    <span>All systems operational</span>
+                </div>
+            </div>
+        }
+    </div>
+   
+</div>

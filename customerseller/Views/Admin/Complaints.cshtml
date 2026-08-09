@@ -1,0 +1,544 @@
+﻿@model List<customerseller.Models.Complaint>
+@{
+    Layout = "_AdminLayout";
+}
+
+<style>
+    .page-header { padding: 28px 35px 0; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; color: #1e1033; }
+    .page-header p { color: #6b7280; font-size: 0.9rem; margin-top: 4px; }
+    .content-area { padding: 24px 35px; }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 14px;
+        margin-bottom: 24px;
+    }
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 16px 18px;
+        border: 1px solid #ede9fe;
+        text-align: center;
+    }
+    .stat-card h3 { font-size: 1.4rem; font-weight: 700; color: #1e1033; }
+    .stat-card p  { font-size: 0.75rem; color: #6b7280; margin-top: 3px; }
+
+    .filter-bar {
+        display: flex; gap: 10px; margin-bottom: 20px;
+        flex-wrap: wrap; align-items: center;
+        justify-content: space-between;
+    }
+    .filter-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-btn {
+        padding: 7px 16px; border-radius: 20px;
+        border: 1.5px solid #ede9fe; background: #fff;
+        color: #6b7280; font-size: 0.82rem; font-weight: 600;
+        cursor: pointer; font-family: inherit;
+    }
+    .filter-btn.active, .filter-btn:hover {
+        background: #a64d79; color: #fff; border-color: #a64d79;
+    }
+    .search-input {
+        padding: 9px 16px; border: 1.5px solid #ede9fe;
+        border-radius: 10px; font-size: 0.88rem;
+        font-family: inherit; outline: none; width: 220px;
+    }
+    .search-input:focus { border-color: #a64d79; }
+
+    .complaint-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #ede9fe;
+        margin-bottom: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(166,77,121,0.04);
+    }
+    .complaint-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 22px;
+        border-bottom: 1px solid #f5f0ff;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .ticket-no {
+        font-family: monospace;
+        font-size: 0.82rem;
+        color: #7c3aed;
+        background: #ede9fe;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-weight: 700;
+    }
+    .complaint-body { padding: 18px 22px; }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+    .info-item label {
+        font-size: 0.7rem; color: #9ca3af;
+        font-weight: 700; text-transform: uppercase;
+    }
+    .info-item span {
+        display: block; font-size: 0.86rem;
+        color: #1e1033; font-weight: 500; margin-top: 2px;
+    }
+    .desc-box {
+        background: #f9f9f9;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 0.85rem;
+        color: #444;
+        line-height: 1.6;
+        margin-bottom: 14px;
+        border-left: 3px solid #a64d79;
+    }
+    .evidence-img {
+        width: 80px; height: 80px;
+        border-radius: 8px; object-fit: cover;
+        border: 1px solid #ede9fe;
+        cursor: pointer;
+        margin-bottom: 14px;
+    }
+    .seller-response-box {
+        background: #f0fdf4;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 0.85rem;
+        color: #166534;
+        line-height: 1.6;
+        margin-bottom: 14px;
+        border-left: 3px solid #16a34a;
+    }
+    .action-area {
+        display: flex; gap: 10px;
+        flex-wrap: wrap; align-items: center;
+        padding-top: 14px;
+        border-top: 1px solid #f5f0ff;
+    }
+    .notes-input {
+        flex: 1; min-width: 200px;
+        padding: 9px 14px;
+        border: 1.5px solid #ede9fe;
+        border-radius: 9px;
+        font-size: 0.85rem;
+        font-family: inherit;
+        outline: none;
+    }
+    .notes-input:focus { border-color: #a64d79; }
+    .btn-forward {
+        background: #fff3e0; color: #e65100;
+        border: 1.5px solid #ffcc80;
+        padding: 8px 18px; border-radius: 9px;
+        font-size: 0.82rem; font-weight: 600;
+        cursor: pointer; font-family: inherit;
+    }
+    .btn-resolve {
+        background: #d1fae5; color: #065f46;
+        border: 1.5px solid #6ee7b7;
+        padding: 8px 18px; border-radius: 9px;
+        font-size: 0.82rem; font-weight: 600;
+        cursor: pointer; font-family: inherit;
+    }
+    .btn-fake {
+        background: #fee2e2; color: #991b1b;
+        border: 1.5px solid #fca5a5;
+        padding: 8px 18px; border-radius: 9px;
+        font-size: 0.82rem; font-weight: 600;
+        cursor: pointer; font-family: inherit;
+    }
+    .badge {
+        padding: 4px 12px; border-radius: 20px;
+        font-size: 0.75rem; font-weight: 700;
+    }
+    .badge-open       { background: #e0f2fe; color: #0369a1; }
+    .badge-forwarded  { background: #fff3e0; color: #e65100; }
+    .badge-sellerresponded { background: #fef3c7; color: #d97706; }
+    .badge-escalated  { background: #fee2e2; color: #dc2626; }
+    .badge-resolved   { background: #d1fae5; color: #059669; }
+    .badge-fake       { background: #f3f4f6; color: #6b7280; }
+
+    .priority-dot {
+        width: 10px; height: 10px;
+        border-radius: 50%; display: inline-block;
+        margin-right: 5px;
+    }
+    .prio-low    { background: #22c55e; }
+    .prio-medium { background: #f59e0b; }
+    .prio-high   { background: #ef4444; }
+
+    .empty-state { text-align: center; padding: 60px; color: #9ca3af; }
+    .empty-state i { font-size: 3rem; margin-bottom: 16px; display: block; }
+
+    /* Result Modal */
+    .modal-overlay {
+        display: none; position: fixed; inset: 0;
+        background: rgba(0,0,0,0.45); z-index: 9999;
+        align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-box {
+        background: #fff; border-radius: 16px;
+        padding: 32px; max-width: 400px; width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .modal-box .modal-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .modal-box h3 { font-size: 1.1rem; font-weight: 700; color: #1e1033; margin-bottom: 8px; }
+    .modal-box p  { font-size: 0.85rem; color: #6b7280; margin-bottom: 20px; }
+    .modal-btn {
+        padding: 10px 28px; border-radius: 9px;
+        font-size: 0.88rem; font-weight: 600;
+        cursor: pointer; border: none; background: #a64d79; color: #fff;
+    }
+    @@media (max-width: 768px) {
+        .page-header {
+            padding: 20px 16px 0;
+        }
+
+        .content-area {
+            padding: 16px;
+        }
+
+        .stats-row {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-input {
+            width: 100%;
+        }
+
+        .complaint-header {
+            padding: 14px 16px;
+        }
+
+        .complaint-body {
+            padding: 16px;
+        }
+
+        .info-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .action-area {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .notes-input {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .btn-forward, .btn-resolve, .btn-fake {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <h1><i class="fas fa-flag" style="color:#a64d79; margin-right:8px;"></i>Complaints</h1>
+    <p>Manage customer complaints and take action</p>
+</div>
+
+<div class="content-area">
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <h3>@ViewBag.Total</h3>
+            <p>Total</p>
+        </div>
+        <div class="stat-card">
+            <h3 style="color:#0369a1;">@ViewBag.Open</h3>
+            <p>Open</p>
+        </div>
+        <div class="stat-card">
+            <h3 style="color:#e65100;">@ViewBag.Forwarded</h3>
+            <p>Forwarded</p>
+        </div>
+        <div class="stat-card">
+            <h3 style="color:#dc2626;">@ViewBag.Escalated</h3>
+            <p>Escalated</p>
+        </div>
+        <div class="stat-card">
+            <h3 style="color:#059669;">@ViewBag.Resolved</h3>
+            <p>Resolved</p>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="filter-btns">
+            <button class="filter-btn active" onclick="filterCards('all', this)">All</button>
+            <button class="filter-btn" onclick="filterCards('Open', this)">Open</button>
+            <button class="filter-btn" onclick="filterCards('Forwarded', this)">Forwarded</button>
+            <button class="filter-btn" onclick="filterCards('SellerResponded', this)">Seller Responded</button>
+            <button class="filter-btn" onclick="filterCards('Escalated', this)">Escalated</button>
+            <button class="filter-btn" onclick="filterCards('Resolved', this)">Resolved</button>
+            <button class="filter-btn" onclick="filterCards('Fake', this)">Fake</button>
+        </div>
+        <input type="text" class="search-input" placeholder="Search complaints..."
+               onkeyup="searchCards()" id="searchInput" />
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="fas fa-flag"></i>
+            <p>No complaints found.</p>
+        </div>
+    }
+    else
+    {
+        <div id="complaintsContainer">
+        @foreach (var c in Model)
+        {
+            var statusClass = c.Status switch {
+                "Open"             => "badge-open",
+                "Forwarded"        => "badge-forwarded",
+                "SellerResponded"  => "badge-sellerresponded",
+                "Escalated"        => "badge-escalated",
+                "Resolved"         => "badge-resolved",
+                "Fake"             => "badge-fake",
+                _                  => "badge-open"
+            };
+            var prioClass = c.Priority?.ToLower() switch {
+                "low"    => "prio-low",
+                "high"   => "prio-high",
+                _        => "prio-medium"
+            };
+
+            <div class="complaint-card" data-status="@c.Status" data-search="@c.CustomerName @c.SellerName @c.TicketNumber @c.ComplaintType">
+                <div class="complaint-header">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <span class="ticket-no">@c.TicketNumber</span>
+                        <span class="badge @statusClass">@c.Status</span>
+                        <span style="font-size:0.82rem; color:#6b7280;">
+                            <span class="priority-dot @prioClass"></span>@c.Priority Priority
+                        </span>
+                        @if (c.CustomerStrike > 0)
+                        {
+                            <span style="background:#fee2e2; color:#991b1b; padding:3px 10px; border-radius:20px; font-size:0.72rem; font-weight:700;">
+                                ⚠️ @c.CustomerStrike Strike(s)
+                            </span>
+                        }
+                    </div>
+                    <span style="font-size:0.78rem; color:#9ca3af;">
+                        @c.CreatedAt.ToString("dd MMM yyyy, hh:mm tt", System.Globalization.CultureInfo.InvariantCulture)
+                    </span>
+                </div>
+
+                <div class="complaint-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Customer</label>
+                            <span>@c.CustomerName</span>
+                            <span style="font-size:0.75rem; color:#6b7280;">@c.CustomerPhone</span>
+                            @if (!string.IsNullOrEmpty(c.CustomerEmail))
+                            {
+                                <span style="font-size:0.75rem; color:#6b7280;">@c.CustomerEmail</span>
+                            }
+                        </div>
+                        <div class="info-item">
+                            <label>Seller / Shop</label>
+                            <span>@c.SellerName</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Order ID</label>
+                            <span>@(c.OrderId ?? "—")</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Amount</label>
+                            <span>@(c.AmountPaid ?? "—")</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Type</label>
+                            <span>@c.ComplaintType</span>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="desc-box">
+                        <strong style="font-size:0.75rem; color:#a64d79; text-transform:uppercase;">Customer Description</strong><br/>
+                        @c.Description
+                    </div>
+
+                    <!-- Evidence Image -->
+                    @if (!string.IsNullOrEmpty(c.EvidenceImageUrl))
+                    {
+                        <div style="margin-bottom:14px;">
+                            <div style="font-size:0.72rem; color:#9ca3af; font-weight:700; text-transform:uppercase; margin-bottom:6px;">Evidence</div>
+                            <a href="@c.EvidenceImageUrl" target="_blank">
+                                <img src="@c.EvidenceImageUrl" class="evidence-img" alt="Evidence" />
+                            </a>
+                        </div>
+                    }
+
+                    <!-- Admin Notes -->
+                    @if (!string.IsNullOrEmpty(c.AdminNotes))
+                    {
+                        <div style="background:#f5f3ff; border-radius:8px; padding:10px 14px; font-size:0.83rem; color:#4c1d95; margin-bottom:14px; border-left:3px solid #7c3aed;">
+                            <strong>Admin Notes:</strong> @c.AdminNotes
+                        </div>
+                    }
+
+                    <!-- Seller Response -->
+                    @if (!string.IsNullOrEmpty(c.SellerResponse))
+                    {
+                        <div class="seller-response-box">
+                            <strong>Seller Response:</strong> @c.SellerResponse
+                            @if (!string.IsNullOrEmpty(c.SellerProofImageUrl))
+                            {
+                                <br/><a href="@c.SellerProofImageUrl" target="_blank" style="color:#16a34a; font-size:0.78rem;">
+                                    <i class="fas fa-image"></i> View Proof Image
+                                </a>
+                            }
+                        </div>
+                    }
+
+                    <!-- Customer Confirmation -->
+                    @if (c.IsResolvedByCustomer.HasValue)
+                    {
+                        <div style="background:#fef3c7; border-radius:8px; padding:10px 14px; font-size:0.83rem; color:#92400e; margin-bottom:14px; border-left:3px solid #f59e0b;">
+                            <strong>Customer Says:</strong>
+                            @(c.IsResolvedByCustomer.Value ? "✅ Issue is resolved" : "❌ Issue is NOT resolved")
+                        </div>
+                    }
+
+                    <!-- Action Area -->
+                    @if (c.Status != "Resolved" && c.Status != "Fake")
+                    {
+                        <div class="action-area">
+                            <input type="text" class="notes-input"
+                                   id="notes-@c.Id"
+                                   placeholder="Add notes / reason..." />
+
+                            @if (c.Status == "Open" || c.Status == "Escalated")
+                            {
+                                <button class="btn-forward"
+                                        onclick="forwardToSeller(@c.Id)">
+                                    <i class="fas fa-share"></i> Forward to Seller
+                                </button>
+                            }
+
+                            <button class="btn-resolve"
+                                    onclick="adminResolve(@c.Id)">
+                                <i class="fas fa-check"></i> Mark Resolved
+                            </button>
+
+                            <button class="btn-fake"
+                                    onclick="markFake(@c.Id)">
+                                <i class="fas fa-ban"></i> Mark Fake
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div style="font-size:0.83rem; color:#6b7280; padding-top:10px; border-top:1px solid #f5f0ff;">
+                            <i class="fas fa-info-circle"></i>
+                            Status: <strong>@c.Status</strong>
+                            @if (c.ResolvedAt.HasValue)
+                            {
+                                <span> — Resolved on @c.ResolvedAt.Value.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture)</span>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        </div>
+    }
+</div>
+
+<!-- Result Modal -->
+<div class="modal-overlay" id="resultModal">
+    <div class="modal-box">
+        <div class="modal-icon" id="modalIcon"></div>
+        <h3 id="modalTitle"></h3>
+        <p id="modalMsg"></p>
+        <button class="modal-btn" onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+<script>
+    let shouldReloadOnClose = false;
+
+    function showModal(icon, title, msg, reload = true) {
+        document.getElementById('modalIcon').textContent = icon;
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalMsg').textContent = msg;
+        document.getElementById('resultModal').classList.add('show');
+        shouldReloadOnClose = reload;
+    }
+    function closeModal() {
+        document.getElementById('resultModal').classList.remove('show');
+        if (shouldReloadOnClose) {
+            location.reload();
+        }
+    }
+
+function filterCards(status, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.complaint-card').forEach(card => {
+        card.style.display = (status === 'all' || card.dataset.status === status) ? '' : 'none';
+    });
+}
+
+function searchCards() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('.complaint-card').forEach(card => {
+        card.style.display = card.dataset.search.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+
+async function forwardToSeller(id) {
+    const notes = document.getElementById('notes-' + id).value.trim();
+       if (!notes) { showModal('⚠️', 'Notes Required', 'Please add notes before forwarding.', false); return; }
+
+    const res = await fetch('/Complaint/ForwardToSeller', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `complaintId=${id}&adminNotes=${encodeURIComponent(notes)}`
+    });
+    const data = await res.json();
+    if (data.success) showModal('📨', 'Forwarded!', 'Complaint has been forwarded to seller via email.');
+    else showModal('❌', 'Error', 'Something went wrong.');
+}
+
+async function adminResolve(id) {
+    const notes = document.getElementById('notes-' + id).value.trim();
+    const res = await fetch('/Complaint/AdminResolve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `complaintId=${id}&notes=${encodeURIComponent(notes)}`
+    });
+    const data = await res.json();
+    if (data.success) showModal('✅', 'Resolved!', 'Complaint marked as resolved. Customer notified.');
+    else showModal('❌', 'Error', 'Something went wrong.');
+}
+
+async function markFake(id) {
+    const res = await fetch('/Complaint/MarkFake', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `complaintId=${id}`
+    });
+    const data = await res.json();
+    if (data.success) showModal('🚫', 'Marked Fake!', 'Complaint marked as fake. Customer strike added.');
+    else showModal('❌', 'Error', 'Something went wrong.');
+}
+</script>

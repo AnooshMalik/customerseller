@@ -1,0 +1,383 @@
+﻿@model IEnumerable<customerseller.Models.Product>
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Banner Slider -->
+<div class="banner-slider">
+    <div class="slides">
+        <div class="slide"><img src="~/customer/images/banner1.jpeg" alt="Slide 1"></div>
+        <div class="slide"><img src="~/customer/images/banner2.jpeg" alt="Slide 2"></div>
+        <div class="slide"><img src="~/customer/images/banner3.jpg" alt="Slide 3"></div>
+    </div>
+    <span class="prev"></span>
+    <span class="next"></span>
+    <div class="dots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+    </div>
+</div>
+
+<!-- Categories Section - WITH SHOP NOW BUTTONS -->
+<!-- Category Carousel -->
+
+    <div class="cat-carousel-wrapper-auto">
+        <div class="cat-carousel-track">
+
+            <!-- Card 1: Fabric & Textile -->
+            <a asp-controller="Products" asp-action="FabricTextile" class="cat-card-slide">
+                <div class="cat-icon-circle">
+                    <i class="fa-solid fa-shirt"></i>
+                </div>
+                <div class="cat-card-name">Fabric &amp; Textile</div>
+                <div class="cat-card-sub">Kurtas, Dupattas, Totes</div>
+            </a>
+
+            <!-- Card 2: Wool & Yarn -->
+            <a asp-controller="Products" asp-action="WoolYarn" class="cat-card-slide">
+                <div class="cat-icon-circle">
+                    <i class="fa-solid fa-wind"></i>
+                </div>
+                <div class="cat-card-name">Wool &amp; Yarn</div>
+                <div class="cat-card-sub">Sweaters, Beanies, Baskets</div>
+            </a>
+
+            <!-- Card 3: Leather -->
+            <a asp-controller="Products" asp-action="Leather" class="cat-card-slide">
+                <div class="cat-icon-circle">
+                    <i class="fa-solid fa-briefcase"></i>
+                </div>
+                <div class="cat-card-name">Leather</div>
+                <div class="cat-card-sub">Bags, Wallets, Belts</div>
+            </a>
+
+            <!-- Card 4: Wood -->
+            <a asp-controller="Products" asp-action="Wood" class="cat-card-slide">
+                <div class="cat-icon-circle">
+                    <i class="fa-solid fa-tree"></i>
+                </div>
+                <div class="cat-card-name">Wood</div>
+                <div class="cat-card-sub">Frames, Trays, Toys</div>
+            </a>
+
+            <!-- Card 5: Clay & Pottery -->
+            <a asp-controller="Products" asp-action="ClayPottery" class="cat-card-slide">
+                <div class="cat-icon-circle">
+                    <i class="fa-solid fa-jar"></i>
+                </div>
+                <div class="cat-card-name">Clay &amp; Pottery</div>
+                <div class="cat-card-sub">Pots, Mugs, Vases</div>
+            </a>
+
+            <!-- Card 6: Jewels -->
+            <a asp-controller="Products" asp-action="Jewels" class="cat-card-slide">
+                <div class="cat-icon-circle">
+                    <i class="fa-solid fa-gem"></i>
+                </div>
+                <div class="cat-card-name">Jewels</div>
+                <div class="cat-card-sub">Rings, Earrings, Bangles</div>
+            </a>
+
+            <!-- Card 7: Paper & Cards -->
+            <a asp-controller="Products" asp-action="PaperCards" class="cat-card-slide">
+                <div class="cat-icon-circle">
+                    <i class="fa-solid fa-envelope-open-text"></i>
+                </div>
+                <div class="cat-card-name">Paper &amp; Cards</div>
+                <div class="cat-card-sub">Gift Boxes, Scrapbooks</div>
+            </a>
+
+            <!-- Card 8: Jute & Natural -->
+            <a asp-controller="Products" asp-action="JuteNatural" class="cat-card-slide">
+                <div class="cat-icon-circle">
+                    <i class="fa-solid fa-leaf"></i>
+                </div>
+                <div class="cat-card-name">Jute &amp; Natural</div>
+                <div class="cat-card-sub">Bags, Baskets, Bouquets</div>
+            </a>
+
+            <!-- Card 9: Resin & Epoxy -->
+            <a asp-controller="Products" asp-action="ResinEpoxy" class="cat-card-slide">
+                <div class="cat-icon-circle">
+                    <i class="fa-solid fa-droplet"></i>
+                </div>
+                <div class="cat-card-name">Resin &amp; Epoxy</div>
+                <div class="cat-card-sub">Coasters, Wall Art</div>
+            </a>
+
+            <!-- Card 10: Metal & Wire -->
+            <a asp-controller="Products" asp-action="MetalWire" class="cat-card-slide">
+                <div class="cat-icon-circle">
+                    <i class="fa-solid fa-wrench"></i>
+                </div>
+                <div class="cat-card-name">Metal &amp; Wire</div>
+                <div class="cat-card-sub">Earrings, Vases, Candles</div>
+            </a>
+
+            <!-- Duplicate for infinite loop -->
+            <a asp-controller="Products" asp-action="FabricTextile" class="cat-card-slide">
+                <div class="cat-icon-circle"><i class="fa-solid fa-shirt"></i></div>
+                <div class="cat-card-name">Fabric &amp; Textile</div>
+                <div class="cat-card-sub">Kurtas, Dupattas, Totes</div>
+            </a>
+            <a asp-controller="Products" asp-action="WoolYarn" class="cat-card-slide">
+                <div class="cat-icon-circle"><i class="fa-solid fa-wind"></i></div>
+                <div class="cat-card-name">Wool &amp; Yarn</div>
+                <div class="cat-card-sub">Sweaters, Beanies, Baskets</div>
+            </a>
+            <a asp-controller="Products" asp-action="Leather" class="cat-card-slide">
+                <div class="cat-icon-circle"><i class="fa-solid fa-briefcase"></i></div>
+                <div class="cat-card-name">Leather</div>
+                <div class="cat-card-sub">Bags, Wallets, Belts</div>
+            </a>
+            <a asp-controller="Products" asp-action="Wood" class="cat-card-slide">
+                <div class="cat-icon-circle"><i class="fa-solid fa-tree"></i></div>
+                <div class="cat-card-name">Wood</div>
+                <div class="cat-card-sub">Frames, Trays, Toys</div>
+            </a>
+            <a asp-controller="Products" asp-action="ClayPottery" class="cat-card-slide">
+                <div class="cat-icon-circle"><i class="fa-solid fa-jar"></i></div>
+                <div class="cat-card-name">Clay &amp; Pottery</div>
+                <div class="cat-card-sub">Pots, Mugs, Vases</div>
+            </a>
+            <a asp-controller="Products" asp-action="Jewels" class="cat-card-slide">
+                <div class="cat-icon-circle"><i class="fa-solid fa-gem"></i></div>
+                <div class="cat-card-name">Jewels</div>
+                <div class="cat-card-sub">Rings, Earrings, Bangles</div>
+            </a>
+            <a asp-controller="Products" asp-action="PaperCards" class="cat-card-slide">
+                <div class="cat-icon-circle"><i class="fa-solid fa-envelope-open-text"></i></div>
+                <div class="cat-card-name">Paper &amp; Cards</div>
+                <div class="cat-card-sub">Gift Boxes, Scrapbooks</div>
+            </a>
+            <a asp-controller="Products" asp-action="JuteNatural" class="cat-card-slide">
+                <div class="cat-icon-circle"><i class="fa-solid fa-leaf"></i></div>
+                <div class="cat-card-name">Jute &amp; Natural</div>
+                <div class="cat-card-sub">Bags, Baskets, Bouquets</div>
+            </a>
+            <a asp-controller="Products" asp-action="ResinEpoxy" class="cat-card-slide">
+                <div class="cat-icon-circle"><i class="fa-solid fa-droplet"></i></div>
+                <div class="cat-card-name">Resin &amp; Epoxy</div>
+                <div class="cat-card-sub">Coasters, Wall Art</div>
+            </a>
+            <a asp-controller="Products" asp-action="MetalWire" class="cat-card-slide">
+                <div class="cat-icon-circle"><i class="fa-solid fa-wrench"></i></div>
+                <div class="cat-card-name">Metal &amp; Wire</div>
+                <div class="cat-card-sub">Earrings, Vases, Candles</div>
+            </a>
+
+        </div>
+    </div>
+
+<!-- Story Section -->
+<section class="story-section-fixed">
+    <div class="story-content-wrapper">
+        <!-- IMAGE LEFT -->
+        <div class="story-visual">
+            <img src="~/customer/images/st.jpg" alt="Artisan crafting handmade products">
+        </div>
+
+        <!-- TEXT RIGHT -->
+        <div class="story-details">
+            <span class="story-subtitle">Our Story</span>
+            <h2 class="story-main-heading">Every Piece Tells a Story</h2>
+            <p class="story-info">
+                Each product is lovingly handcrafted by skilled artisans who pour their heart and soul into every detail. We celebrate traditional techniques passed down through generations.
+            </p>
+            <p class="story-info">
+                When you choose handmade, you're supporting artists, preserving craftsmanship, and bringing home something truly special.
+            </p>
+            <!-- CTA Button - LINK TO STORY PAGE -->
+            <a asp-controller="Home" asp-action="Story" class="story-cta-btn">Read Our Full Story</a>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Badges Section - WITH IMPROVED TEXT -->
+<div class="trust-badges">
+    <div class="trust-badge-item">
+        <i class="fa-solid fa-hand-holding-heart trust-badge-icon"></i>
+        <span class="trust-badge-text">100% Handmade</span>
+    </div>
+    <div class="trust-badge-item">
+        <i class="fa-solid fa-shield-halved trust-badge-icon"></i>
+        <span class="trust-badge-text">Quality Guaranteed</span>
+        <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">30-day return policy</p>
+    </div>
+    <div class="trust-badge-item">
+        <i class="fa-solid fa-truck-fast trust-badge-icon"></i>
+        <span class="trust-badge-text">Free Delivery</span>
+        <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">On all orders</p>
+    </div>
+    <div class="trust-badge-item">
+        <i class="fa-solid fa-lock trust-badge-icon"></i>
+        <span class="trust-badge-text">Secure Payment</span>
+    </div>
+</div>
+
+<!-- Best Seller Section -->
+<h2 class="best-seller-heading" id="best-sellers">Best Sellers</h2>
+
+<div class="product-row">
+    @{
+        var productIndex = 0;
+        // Different ratings for each product
+        var ratings = new[] {
+        "★★★★★|4.9",
+        "★★★★★|4.8",
+        "★★★★☆|4.5",
+        "★★★★★|5.0",
+        "★★★★☆|4.7",
+        "★★★★★|4.9",
+        "★★★★☆|4.6",
+        "★★★★★|4.8"
+        };
+    }
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var product in Model)
+        {
+            var imagePath = Url.Content(product.ImageUrl ?? "~/images/default.jpg");
+            var ratingData = ratings[productIndex % ratings.Length].Split('|');
+            var stars = ratingData[0];
+            var score = ratingData[1];
+            productIndex++;
+
+            
+           <div class="product-card" style="position:relative;">
+    <a href="/Products/Details/@product.Id" style="display:block; text-decoration:none; color:inherit;">
+        <div class="image-wrapper">
+            <img src="@imagePath" alt="@product.Title" />
+        </div>
+        <div class="product-info">
+            <h3>@product.Title</h3>
+            <p style="font-size:0.78rem; color:#888; margin:4px 0; line-height:1.4;">
+                @(product.Description != null && product.Description.Length > 40
+                    ? product.Description.Substring(0, 40) + "..."
+                    : product.Description)
+            </p>
+            <div class="price" style="color:#a64d79; font-weight:700; margin:6px 0;">
+                PKR @product.Price
+            </div>
+            <div class="rating" style="color:#f59e0b; font-size:0.85rem;">
+                <span>@stars</span>
+                <span style="color:#888; font-size:0.8rem;">(@score)</span>
+            </div>
+        </div>
+    </a>
+    <button class="plus-btn" onclick="event.preventDefault(); event.stopPropagation(); addToCart('@product.Id')">+</button>
+</div>        }
+        
+    }
+    else
+    {
+        <div style="text-align:center; padding: 50px; color: #999; font-style: italic; width: 100%;">
+            <p>No featured products available right now.</p>
+        </div>
+    }
+    </div>
+
+<a href="/Products/AllProducts" class="view-all-btn">VIEW ALL PRODUCTS</a>
+
+<section class="testimonials-section">
+    <h2 class="testimonials-heading">What Our Customers Say</h2>
+    <div class="testimonials-container">
+        <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-text">
+                "The quality is amazing! You can really feel the care and craftsmanship in every stitch. These handmade products are truly special."
+            </p>
+            <p class="testimonial-author">— Sarah Ahmed</p>
+        </div>
+
+        <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-text">
+                "I love supporting local artisans. The bag I ordered is beautiful and unique – I get compliments everywhere I go!"
+            </p>
+            <p class="testimonial-author">— Fatima Khan</p>
+        </div>
+
+        <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-text">
+                "Fast delivery and excellent customer service. The handmade shoes are comfortable and stylish. Highly recommend!"
+            </p>
+            <p class="testimonial-author">— Ali Hassan</p>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+       
+        let index = 0;
+        const slides = document.querySelector('.slides');
+        const dots = document.querySelectorAll('.dot');
+
+        function showSlide(i) {
+            index = (i + 3) % 3;
+            slides.style.transform = `translateX(-${index * 100}%)`;
+            dots.forEach(d => d.classList.remove("active"));
+            dots[index].classList.add("active");
+        }
+
+        document.querySelector('.next').onclick = () => showSlide(index + 1);
+        document.querySelector('.prev').onclick = () => showSlide(index - 1);
+
+        dots.forEach((dot, i) => {
+            dot.onclick = () => showSlide(i);
+        });
+
+        setInterval(() => showSlide(index + 1), 6000);
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+           
+            var shouldOpenLogin = '@TempData["OpenLoginSidebar"]';
+
+            if (shouldOpenLogin === "true") {
+               
+                openLoginSidebar();
+
+            }
+        });
+
+        
+        function openLoginSidebar() {
+            const sidebar = document.querySelector('.login-sidebar'); 
+            if(sidebar) {
+                sidebar.style.right = "0"; 
+            }
+        }
+
+                function addToCart(productId) {
+            
+            fetch('/Products/GetProductJson?id=' + productId)
+                .then(r => r.json())
+                .then(product => {
+                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+                    // Already hai to qty badhao
+                    let existing = cart.find(i => i.id === productId);
+                    if (existing) {
+                        existing.qty = (existing.qty || 1) + 1;
+                    } else {
+                        cart.push({
+                            id: product.id,
+                            title: product.title,
+                            price: product.price,
+                            img: product.imageUrl,
+                            qty: 1
+                        });
+                    }
+
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    openCart(); // Cart sidebar kholo
+                    updateCartCount();
+                });
+        }
+    </script>
+}

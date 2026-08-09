@@ -1,0 +1,259 @@
+﻿@model List<customerseller.Models.SellerShop>
+@{
+    Layout = "_AdminLayout";
+}
+
+<style>
+    .page-header { padding: 28px 35px 0; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; color: #1e1033; }
+    .page-header p { color: #6b7280; font-size: 0.9rem; margin-top: 4px; }
+    .content-area { padding: 24px 35px; }
+    .shop-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 24px;
+        margin-bottom: 20px;
+        border: 1px solid #ede9fe;
+        box-shadow: 0 2px 8px rgba(166,77,121,0.06);
+    }
+    .shop-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+    .shop-name { font-size: 1.1rem; font-weight: 700; color: #1e1033; }
+    .shop-meta { font-size: 0.82rem; color: #6b7280; margin-top: 3px; }
+    .badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    .badge-pending { background: #fef3c7; color: #d97706; }
+    .badge-approved { background: #d1fae5; color: #059669; }
+    .badge-rejected { background: #fee2e2; color: #dc2626; }
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .info-item label { font-size: 0.72rem; color: #9ca3af; font-weight: 600; text-transform: uppercase; }
+    .info-item span { display: block; font-size: 0.88rem; color: #1e1033; font-weight: 500; margin-top: 2px; }
+    .moderator-box {
+        background: #f5f3ff;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 16px;
+        border-left: 3px solid #a64d79;
+    }
+    .moderator-box h4 { font-size: 0.8rem; font-weight: 700; color: #a64d79; margin-bottom: 8px; text-transform: uppercase; }
+    .video-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #ede9fe;
+        color: #7c3aed;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 16px;
+    }
+    .action-area { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .btn-approve {
+        background: #a64d79;
+        color: #fff;
+        border: none;
+        padding: 9px 22px;
+        border-radius: 9px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .btn-reject {
+        background: #fff;
+        color: #dc2626;
+        border: 1.5px solid #dc2626;
+        padding: 9px 22px;
+        border-radius: 9px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .reason-input {
+        flex: 1;
+        min-width: 200px;
+        padding: 9px 14px;
+        border: 1.5px solid #ede9fe;
+        border-radius: 9px;
+        font-size: 0.85rem;
+        font-family: inherit;
+    }
+    .empty-state {
+        text-align: center;
+        padding: 60px;
+        color: #9ca3af;
+    }
+    .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 9999;
+    align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+    background: #fff; border-radius: 16px;
+    padding: 32px; max-width: 400px; width: 90%;
+    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.modal-box .modal-icon { font-size: 2.5rem; margin-bottom: 12px; }
+.modal-box h3 { font-size: 1.1rem; font-weight: 700; color: #1e1033; margin-bottom: 8px; }
+.modal-box p { font-size: 0.85rem; color: #6b7280; margin-bottom: 20px; }
+.modal-btn {
+    padding: 10px 28px; border-radius: 9px;
+    font-size: 0.88rem; font-weight: 600;
+    cursor: pointer; border: none;
+}
+.modal-btn.success { background: #a64d79; color: #fff; }
+.modal-btn.danger  { background: #fee2e2; color: #dc2626; }
+
+    @@media (max-width: 480px) {
+        .page-header {
+            padding: 20px 16px 0;
+        }
+
+        .content-area {
+            padding: 16px;
+        }
+
+        .shop-card {
+            padding: 18px;
+        }
+
+        .shop-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-area {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .reason-input {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .btn-approve, .btn-reject {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <h1>Shop Requests</h1>
+    <p>Review seller shop applications and moderator decisions</p>
+</div>
+
+<div class="content-area">
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="fas fa-store" style="font-size:3rem; margin-bottom:16px; display:block;"></i>
+            <p>No shop requests found.</p>
+        </div>
+    }
+    else
+    {
+        @foreach (var shop in Model)
+        {
+            <div class="shop-card" id="card-@shop.Id">
+                <div class="shop-card-header">
+                    <div>
+                        <a href="/Admin/ShopDetail/@shop.Id" class="shop-name"
+                           style="text-decoration:none; color:#a64d79; cursor:pointer;">
+                            <i class="fas fa-store" style="font-size:0.85rem;"></i> @shop.ShopName
+                        </a>
+                        <div class="shop-meta">Submitted by @shop.OwnerName · @shop.SellerEmail</div>
+                    </div>
+                    <span class="badge @(shop.AdminStatus == "Approved" ? "badge-approved" : shop.AdminStatus == "Rejected" ? "badge-rejected" : "badge-pending")">
+                        Admin: @(shop.AdminStatus ?? "Pending")
+                    </span>
+                </div>
+            </div>
+
+
+        }
+    }
+</div>
+
+<!-- Result Modal -->
+<div class="modal-overlay" id="resultModal">
+    <div class="modal-box">
+        <div class="modal-icon" id="modalIcon"></div>
+        <h3 id="modalTitle"></h3>
+        <p id="modalMsg"></p>
+        <button class="modal-btn success" onclick="closeModal()">OK</button>
+    </div>
+</div>
+
+<script>
+function showModal(icon, title, msg) {
+    document.getElementById('modalIcon').textContent = icon;
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalMsg').textContent = msg;
+    document.getElementById('resultModal').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('resultModal').classList.remove('show');
+    location.reload();
+}
+
+function approveShop(id) {
+    const reason = document.getElementById('reason-' + id).value;
+    fetch('/Admin/AdminApproveShop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, remarks: reason })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showModal('🎉', 'Shop Approved!', 'Seller has been notified via email.');
+        } else {
+            showModal('❌', 'Error', 'Something went wrong. Try again.');
+        }
+    });
+}
+
+function rejectShop(id) {
+    const reason = document.getElementById('reason-' + id).value;
+    if (!reason) {
+        showModal('⚠️', 'Reason Required', 'Please enter a rejection reason before rejecting.');
+        return;
+    }
+    fetch('/Admin/AdminRejectShop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, reason: reason })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showModal('❌', 'Shop Rejected', 'Seller has been notified via email.');
+        } else {
+            showModal('⚠️', 'Error', 'Something went wrong. Try again.');
+        }
+    });
+}
+</script>

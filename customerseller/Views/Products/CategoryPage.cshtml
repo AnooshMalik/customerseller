@@ -1,0 +1,318 @@
+﻿@model List<customerseller.Models.Product>
+
+@{
+    ViewData["Title"] = ViewData["Category"];
+}
+
+<style>
+    .category-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1100px;
+        margin: 38px auto 25px auto;
+        padding: 0 10px;
+    }
+
+    .category-title-main {
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin: 0;
+        text-align: left;
+    }
+
+    .filter-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #222;
+        text-decoration: none;
+        border: 1.5px solid #ccc;
+        border-radius: 6px;
+        padding: 8px 18px;
+        transition: border-color 0.2s, color 0.2s;
+        white-space: nowrap;
+    }
+
+        .filter-link:hover {
+            border-color: #a64d79;
+            color: #a64d79;
+        }
+
+    .product-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 28px;
+        max-width: 1100px;
+        margin: 0 auto 60px auto;
+        padding: 0 10px;
+    }
+
+    .pcard {
+        position: relative;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        padding: 20px 12px 15px 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        transition: box-shadow 0.2s, transform 0.2s;
+        cursor: pointer;
+    }
+
+        .pcard:hover {
+            box-shadow: 0 8px 24px rgba(166,77,121,0.18);
+            transform: translateY(-5px) scale(1.02);
+        }
+
+    .pcard-img-wrap {
+        width: 170px;
+        height: 170px;
+        background: #fff;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin: 0 auto 14px auto;
+        pointer-events: none;
+    }
+
+        .pcard-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+    .pcard-title {
+        font-size: 1rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+        pointer-events: none;
+    }
+
+    .pcard-desc {
+        font-size: 0.78rem;
+        color: #888;
+        margin: 4px 0;
+        line-height: 1.4;
+        pointer-events: none;
+    }
+
+    .pcard-price {
+        font-size: 1.06rem;
+        color: #a64d79;
+        font-weight: 500;
+        pointer-events: none;
+        margin: 6px 0;
+    }
+
+    .pcard-rating {
+        color: #f59e0b;
+        font-size: 0.85rem;
+        pointer-events: none;
+    }
+
+        .pcard-rating .score {
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+    .pcard-plus {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #a64d79;
+        color: #fff;
+        font-size: 22px;
+        font-weight: 300;
+        line-height: 34px;
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        z-index: 20;
+        opacity: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(166,77,121,0.4);
+        transition: opacity 0.3s ease, transform 0.2s ease;
+    }
+
+    .pcard:hover .pcard-plus {
+        opacity: 1;
+    }
+
+    .pcard-plus:hover {
+        background-color: #873b63;
+        transform: scale(1.1);
+    }
+
+    @@media (max-width: 900px) {
+        .product-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .category-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .product-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .no-products {
+        text-align: center;
+        padding: 60px 20px;
+        color: #666;
+        font-size: 1.2rem;
+    }
+</style>
+
+<div class="category-header">
+    <h1 class="category-title-main">@ViewBag.CategoryTitle</h1>
+    <a href="/Products/Filter" class="filter-link">
+        <i class="fa-solid fa-sliders"></i> Filter
+    </a>
+</div>
+
+@if (Model != null && Model.Any())
+{
+    var ratings = new[] {
+        "★★★★★|4.9",
+        "★★★★★|4.8",
+        "★★★★☆|4.5",
+        "★★★★★|5.0",
+        "★★★★☆|4.7",
+        "★★★★★|4.9",
+        "★★★★☆|4.6",
+        "★★★★★|4.8"
+    };
+    var productIndex = 0;
+
+    <div class="product-row">
+        @foreach (var product in Model)
+        {
+            var imagePath = product.ImageUrl;
+            var ratingData = ratings[productIndex % ratings.Length].Split('|');
+            var stars = ratingData[0];
+            var score = ratingData[1];
+            productIndex++;
+
+            <div class="pcard" data-href="/Products/Details/@product.Id">
+                <div class="pcard-img-wrap">
+                    <img src="@imagePath" alt="@product.Title">
+                </div>
+                <div class="pcard-title">@product.Title</div>
+                <div class="pcard-desc">
+                    @(product.Description != null && product.Description.Length > 40
+                        ? product.Description.Substring(0, 40) + "..."
+                        : product.Description)
+                </div>
+                <div class="pcard-price">Rs.@product.Price</div>
+                <div class="pcard-rating">
+                    <span>@stars</span>
+                    <span class="score">(@score)</span>
+                </div>
+
+                <button type="button" class="pcard-plus"
+                        data-id="@product.Id"
+                        data-title="@product.Title"
+                        data-price="@product.Price"
+                        data-img="@imagePath">
+                    +
+                </button>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="no-products">
+        @if (ViewData["NoResults"] != null && (bool)ViewData["NoResults"])
+        {
+            <i class="fa-solid fa-magnifying-glass" style="font-size: 3rem; color: #ddd; display: block; margin-bottom: 15px;"></i>
+            <p style="font-size: 1.5rem; color: #666; margin-bottom: 10px;">Result not found</p>
+            <p style="font-size: 1.1rem; color: #999; margin-bottom: 30px;">
+                No products found for "@ViewData["SearchQuery"]".<br>
+                Try searching with different keywords.
+            </p>
+        }
+        else
+        {
+            <p>No products found in this category.</p>
+        }
+        <a href="/" style="display:inline-block; padding:12px 30px; background:#a64d79; color:#fff;
+            text-decoration:none; border-radius:6px; font-weight:600; transition:background 0.3s;">
+            Return to Home
+        </a>
+    </div>
+}
+
+<script>
+   
+    document.querySelectorAll('.pcard').forEach(function (card) {
+        card.addEventListener('click', function (e) {
+            if (e.target.closest('.pcard-plus')) return;
+            var url = card.getAttribute('data-href');
+            if (url) window.location.href = url;
+        });
+    });
+
+   
+    document.querySelectorAll('.pcard-plus').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var id = btn.getAttribute('data-id');
+            var title = btn.getAttribute('data-title');
+            var price = Number(btn.getAttribute('data-price'));
+            var img = btn.getAttribute('data-img');
+
+            if (!id || !title || isNaN(price) || !img) return;
+
+           
+            var targetCart = (typeof window.cart !== 'undefined') ? window.cart : (JSON.parse(localStorage.getItem('cart')) || []);
+
+            var existing = targetCart.find(function (i) { return i.id === id; });
+            if (existing) {
+                existing.qty = (existing.qty || 1) + 1;
+            } else {
+                targetCart.push({ id: id, title: title, price: price, img: img, qty: 1 });
+            }
+
+            localStorage.setItem('cart', JSON.stringify(targetCart));
+
+           
+            var badge = document.getElementById('cartCount');
+            if (badge) {
+                var totalQty = targetCart.reduce(function (sum, i) { return sum + (i.qty || 1); }, 0);
+                badge.textContent = totalQty;
+                badge.style.display = totalQty > 0 ? 'block' : 'none';
+            }
+
+            
+            if (typeof window.renderCart === 'function') {
+                try { window.renderCart(); } catch (err) {}
+            }
+            if (typeof window.openCart === 'function') {
+                try { window.openCart(); } catch (err) {}
+            }
+        });
+    });
+</script>

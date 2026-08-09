@@ -1,0 +1,138 @@
+﻿<link href="~/style.css" rel="stylesheet" />
+@*
+
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+@{
+    <div class="hero-banner">
+        <div class="banner-content">
+            <h1>Start Your Creative Journey </h1>
+            <p>Empowering local artisans to sell handmade crafts with ease.</p>
+            <a asp-controller="Login" asp-action="Signup" class="btn-sell">Sell on Artisans</a>
+        </div>
+    </div>
+
+    <div class="local-features">
+        <div class="feature-box">
+            <i class="fas fa-house-user"></i>
+            <h3>Local Support</h3>
+            <p>A specialized platform tailored for home-based businesses.</p>
+        </div>
+        <div class="feature-box">
+            <i class="fas fa-truck-fast"></i>
+            <h3>Fast City Delivery</h3>
+            <p>Connect with buyers in your city for quicker and more reliable logistics.</p>
+        </div>
+        <div class="feature-box">
+            <i class="fas fa-tags"></i>
+            <h3>Fair Pricing</h3>
+            <p>No hidden international costs. Simple, local, and completely transparent.</p>
+        </div>
+    </div>
+
+    <section class="how-it-works">
+        <h2>Simple Steps to Start Selling</h2>
+        <div class="steps-container">
+            <div class="step-card">
+                <span class="step-number">1</span>
+                <h3>Register Your Shop</h3>
+                <p>Sign up as a seller and set up your unique shop profile.</p>
+            </div>
+            <div class="step-card">
+                <span class="step-number">2</span>
+                <h3>List Your Products</h3>
+                <p>Upload high-quality photos of your handmade crafts along with clear descriptions and pricing.</p>
+            </div>
+            <div class="step-card">
+                <span class="step-number">3</span>
+                <h3>Grow Your Brand</h3>
+                <p>Manage your orders efficiently and connect with local buyers who appreciate authentic handmade art.</p>
+            </div>
+        </div>
+    </section>
+    <section class="community-section">
+        <div class="community-images">
+            <img src="~/images/index1.png" />
+            <img src="~/images/index2.png" />
+            <img src="~/images/index3.png" />
+            <img src="~/images/index4.png" />
+
+        </div>
+
+        <div class="community-text">
+            <h2>Your Local Craft, <br> A Global Standard.</h2>
+            <p>Join over 500+ local artisans who have turned their passion into a professional business. We provide the tools; you provide the creativity.</p>
+
+            <ul class="perks-list">
+                <li><i class="fas fa-check"></i> 0% Commission on your first 10 sales</li>
+                <li><i class="fas fa-check"></i> Dedicated Seller Support for RWP Residents</li>
+                <li><i class="fas fa-check"></i> Simple & Secure Mobile-Wallet Payments</li>
+                <li><i class="fas fa-check"></i> Marketing help to reach more buyers</li>
+            </ul>
+            <a asp-controller="Home"  class="btn-sell" , style="margin-top: 20px;">Join the Community</a>
+        
+        </div>
+    </section>
+    <section class="seller-tools">
+        <div class="divider"></div>
+        <h2>Everything you need to succeed</h2>
+
+        <div class="tools-grid">
+            <div class="tool-item">
+                <i class="fas fa-chart-line"></i>
+                <h3>Powerful Analytics</h3>
+                <p>Track your shop's performance, see which products are trending, and grow your sales with real data.</p>
+            </div>
+
+            <div class="tool-item">
+                <i class="fas fa-mobile-screen-button"></i>
+                <h3>Manage on the go</h3>
+                <p>Our seller-friendly interface works perfectly on mobile, so you can manage orders and chat with buyers anywhere.</p>
+            </div>
+
+            <div class="tool-item">
+                <i class="fas fa-comments"></i>
+                <h3>Direct Messaging</h3>
+                <p>Build trust by talking directly to your customers. Answer questions about your handmade crafts in real-time.</p>
+            </div>
+
+            <div class="tool-item">
+                <i class="fas fa-lock"></i>
+                <h3>Secure Payments</h3>
+                <p>Get paid safely through local payment methods. We ensure your hard-earned money reaches you securely.</p>
+            </div>
+
+            <div class="tool-item">
+                <i class="fas fa-bullhorn"></i>
+                <h3>Free Marketing</h3>
+                <p>We feature top-rated local artisans on our main page and social media to give your shop the visibility it deserves.</p>
+            </div>
+
+            <div class="tool-item">
+                <i class="fas fa-graduation-cap"></i>
+                <h3>Seller Handbook</h3>
+                <p>Access exclusive guides on photography, pricing, and packaging to make your handmade brand stand out.</p>
+            </div>
+        </div>
+    </section>
+    <section class="impact-section">
+        <div class="impact-image-container">
+            <img src="~/images/index5.png" />
+            <div class="floating-badge">
+                100%<br> Handmade
+            </div>
+        </div>
+
+        <div class="impact-content">
+            <span>Why it matters</span>
+            <h2>Supporting a Dream in Every Purchase</h2>
+            <p>When you sell on Artisans, you aren't just listing a product; you are sharing a piece of your heritage. We've built this space specifically for the local hands to ensure that traditional crafts don't just survive—they thrive in the digital age.</p>
+            <a asp-controller="Home" class="btn-sell" >Start Your Shop Now</a>
+        
+        </div>
+    </section>
+   
+}

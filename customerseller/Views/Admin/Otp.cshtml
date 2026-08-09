@@ -1,0 +1,336 @@
+﻿@{
+    ViewData["Title"] = "OTP Verification";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>OTP Verification - Artisan Valley</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+        }
+        .left-panel {
+            width: 45%;
+            background: linear-gradient(135deg, #8e3a6e, #b05490, #7b2d6e);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            width: 300px; height: 300px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            top: -80px; left: -80px;
+        }
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            width: 200px; height: 200px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            bottom: -50px; right: -50px;
+        }
+        .left-panel h1 {
+            color: #fff;
+            font-size: 2.8rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-align: center;
+            z-index: 1;
+        }
+        .left-panel h1 span { font-weight: 700; }
+        .left-panel p {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-top: 8px;
+            z-index: 1;
+        }
+        .left-divider {
+            width: 50px; height: 2px;
+            background: rgba(255,255,255,0.4);
+            margin: 25px auto;
+            z-index: 1;
+        }
+        .left-quote {
+            color: rgba(255,255,255,0.8);
+            font-style: italic;
+            font-size: 1rem;
+            text-align: center;
+            z-index: 1;
+            max-width: 280px;
+            line-height: 1.6;
+        }
+        .right-panel {
+            width: 55%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            padding: 60px 40px;
+        }
+        .form-box { width: 100%; max-width: 420px; text-align: center; }
+        .otp-icon {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, #a64d79, #880e4f);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        .otp-icon i { color: #fff; font-size: 1.8rem; }
+        .form-box h2 {
+            font-size: 2rem;
+            color: #1a1a2e;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+        .form-box .sub {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 35px;
+            text-align: left;
+        }
+        .error-box {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+        .otp-inputs {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-start;
+            margin-bottom: 25px;
+        }
+        .otp-inputs input {
+            width: 52px; height: 58px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 10px;
+            outline: none;
+            transition: border 0.3s;
+            background: #fff;
+            color: #1a1a2e;
+        }
+        .otp-inputs input:focus { border-color: #a64d79; }
+        .verify-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #a64d79, #880e4f);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: opacity 0.3s;
+        }
+        .verify-btn:hover { opacity: 0.9; }
+        .timer {
+            margin-top: 15px;
+            color: #888;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+        .timer span { color: #a64d79; font-weight: 700; }
+        .back-link {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+        .back-link a { color: #a64d79; text-decoration: none; }
+        .footer-text {
+            text-align: center;
+            margin-top: 30px;
+            color: #bbb;
+            font-size: 0.8rem;
+        }
+
+            @@media (max-width: 768px) {
+                body {
+                    flex-direction: column;
+                    min-height: 100vh;
+                    height: auto;
+                }
+
+                .left-panel {
+                    width: 100%;
+                    padding: 30px 20px;
+                    min-height: 200px;
+                }
+
+                    .left-panel h1 {
+                        font-size: 1.8rem;
+                    }
+
+                    .left-panel::before,
+                    .left-panel::after {
+                        width: 150px;
+                        height: 150px;
+                    }
+
+                .right-panel {
+                    width: 100%;
+                    padding: 40px 20px;
+                }
+
+                .form-box {
+                    max-width: 100%;
+                }
+
+                .otp-inputs {
+                    justify-content: center;
+                    gap: 8px;
+                }
+
+                    .otp-inputs input {
+                        width: 42px;
+                        height: 50px;
+                        font-size: 1.2rem;
+                    }
+
+                .form-box h2 {
+                    text-align: center;
+                    font-size: 1.6rem;
+                }
+
+                .form-box .sub,
+                .timer,
+                .back-link {
+                    text-align: center;
+                }
+            }
+
+            @@media (max-width: 400px) {
+                .otp-inputs input {
+                    width: 36px;
+                    height: 44px;
+                    font-size: 1rem;
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <h1><span>Artisan</span> Valley</h1>
+        <p>Admin Portal</p>
+        <div class="left-divider"></div>
+        <div class="left-quote">"Crafted with care,<br>managed with precision."</div>
+    </div>
+
+    <div class="right-panel">
+        <div class="form-box">
+            <div class="otp-icon">
+                <i class="fa-solid fa-envelope-open-text"></i>
+            </div>
+            <h2>Check Your Email</h2>
+            <p class="sub">6-digit OTP bheja gaya hai admin email pe.<br>5 minutes mein expire ho jaye ga.</p>
+
+            @if (TempData["OtpError"] != null)
+            {
+                <div class="error-box">⚠️ @TempData["OtpError"]</div>
+            }
+
+            <form asp-controller="Admin" asp-action="Otp" method="post">
+                <div class="otp-inputs">
+                    <input type="text" maxlength="1" class="otp-digit" id="d1">
+                    <input type="text" maxlength="1" class="otp-digit" id="d2">
+                    <input type="text" maxlength="1" class="otp-digit" id="d3">
+                    <input type="text" maxlength="1" class="otp-digit" id="d4">
+                    <input type="text" maxlength="1" class="otp-digit" id="d5">
+                    <input type="text" maxlength="1" class="otp-digit" id="d6">
+                </div>
+                <input type="hidden" name="otp" id="otpHidden">
+                <button type="submit" class="verify-btn" onclick="combineOtp()">
+                    <i class="fa-solid fa-check"></i> Verify OTP
+                </button>
+            </form>
+
+            <div class="timer">OTP expires in: <span id="countdown">5:00</span></div>
+            <div class="back-link" style="margin-bottom:8px;">
+                <a href="javascript:void(0)" id="resendLink" onclick="resendOtp()">
+                    <i class="fa-solid fa-rotate-right"></i> Resend OTP
+                </a>
+                <div id="resendMsg" style="display:none; color:#2e7d32; font-size:0.8rem; margin-top:6px;"></div>
+            </div>
+            <div class="back-link">
+                <a href="/Admin/Login"><i class="fa-solid fa-arrow-left"></i> Back to Login</a>
+            </div>
+            <div class="footer-text">© 2025 Artisan Valley. All rights reserved.</div>
+        </div>
+    </div>
+
+    <script>
+        const digits = document.querySelectorAll('.otp-digit');
+        digits.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                if (input.value && index < digits.length - 1)
+                    digits[index + 1].focus();
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && index > 0)
+                    digits[index - 1].focus();
+            });
+        });
+
+        function combineOtp() {
+            let otp = '';
+            digits.forEach(d => otp += d.value);
+            document.getElementById('otpHidden').value = otp;
+        }
+
+        let seconds = 300;
+        const timer = setInterval(() => {
+            seconds--;
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('countdown').textContent = `${m}:${s}`;
+            if (seconds <= 0) {
+                clearInterval(timer);
+                document.getElementById('countdown').textContent = 'Expired!';
+            }
+        }, 1000);
+           async function resendOtp() {
+                const res = await fetch('/Admin/ResendOtp', { method: 'POST' });
+                const data = await res.json();
+                const msgBox = document.getElementById('resendMsg');
+                if (data.success) {
+                    seconds = 300;
+                    document.getElementById('countdown').textContent = '05:00';
+                    msgBox.style.color = '#2e7d32';
+                    msgBox.textContent = 'OTP sent successfully.';
+                    msgBox.style.display = 'block';
+                } else {
+                    msgBox.style.color = '#c62828';
+                    msgBox.textContent = data.message || 'Failed to resend OTP.';
+                    msgBox.style.display = 'block';
+                }
+                setTimeout(() => { msgBox.style.display = 'none'; }, 4000);
+            }
+        </script>
+</body>
+</html>

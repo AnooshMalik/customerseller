@@ -1,0 +1,558 @@
+﻿@model customerseller.Models.SellerShop
+@{
+    Layout = "_AdminLayout";
+    var subVideos = ViewBag.SubVideos as List<customerseller.Models.SubCategoryVideo>
+                 ?? new List<customerseller.Models.SubCategoryVideo>();
+    var allSubs = (Model.SubCategories ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList();
+}
+
+<style>
+    .detail-wrap {
+        padding: 30px 35px;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #a64d79;
+        font-weight: 600;
+        font-size: 0.88rem;
+        text-decoration: none;
+        margin-bottom: 20px;
+    }
+
+    .detail-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 28px;
+        border: 1px solid #ede9fe;
+        margin-bottom: 20px;
+    }
+
+        .detail-card h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e1033;
+            margin-bottom: 4px;
+        }
+
+        .detail-card .meta {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+    .section-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #a64d79;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+        letter-spacing: 0.5px;
+    }
+
+    .sub-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 14px;
+    }
+
+    .sub-card {
+        border-radius: 10px;
+        padding: 16px;
+        border: 1.5px solid #ede9fe;
+    }
+
+        .sub-card.approved {
+            border-color: #d1fae5;
+            background: #f0fdf4;
+        }
+
+        .sub-card.rejected {
+            border-color: #fee2e2;
+            background: #fff5f5;
+        }
+
+        .sub-card.pending {
+            border-color: #fef3c7;
+            background: #fffbeb;
+        }
+
+    .sub-name {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #1e1033;
+        margin-bottom: 8px;
+    }
+
+    .sub-status {
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        display: inline-block;
+    }
+
+    .s-approved {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .s-rejected {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .s-pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+
+    .reject-reason {
+        font-size: 0.82rem;
+        color: #dc2626;
+        margin-top: 8px;
+    }
+
+    .reject-input {
+        width: 100%;
+        margin-top: 10px;
+        padding: 7px 10px;
+        border-radius: 7px;
+        border: 1.5px solid #fca5a5;
+        font-size: 0.82rem;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+
+    .btn-sub-reject {
+        margin-top: 8px;
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 7px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-sub-approve {
+        margin-top: 8px;
+        background: #d1fae5;
+        color: #059669;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 7px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-right: 6px;
+    }
+
+    .info-row {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+    }
+
+    .info-item label {
+        font-size: 0.72rem;
+        color: #9ca3af;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .info-item span {
+        display: block;
+        font-size: 0.88rem;
+        color: #1e1033;
+        font-weight: 500;
+        margin-top: 2px;
+    }
+
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+    .modal-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 380px;
+        width: 90%;
+        text-align: center;
+    }
+
+        .modal-box .icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .modal-box h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e1033;
+            margin-bottom: 8px;
+        }
+
+        .modal-box p {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+    .modal-btn {
+        padding: 10px 28px;
+        border-radius: 9px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background: #a64d79;
+        color: #fff;
+    }
+
+    @@media (max-width: 480px) {
+        .detail-wrap {
+            padding: 16px;
+        }
+
+        .detail-card {
+            padding: 18px;
+        }
+
+        .info-row {
+            gap: 16px;
+        }
+
+        .sub-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="detail-wrap">
+    <a href="/Admin/ShopRequests" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Shop Requests
+    </a>
+
+    <!-- Shop Info -->
+    <div class="detail-card">
+        <h2><i class="fas fa-store" style="color:#a64d79;"></i> @Model.ShopName</h2>
+        <div class="meta">@Model.OwnerName · @Model.SellerEmail</div>
+
+        <div class="info-row">
+            <div class="info-item">
+                <label>CNIC</label>
+                <span>@Model.CNIC</span>
+            </div>
+            <div class="info-item">
+                <label>Admin Status</label>
+                <span>
+                    <span style="padding:3px 12px; border-radius:20px; font-size:0.78rem; font-weight:700;
+                        background:@(Model.AdminStatus == "Approved" ? "#d1fae5" : Model.AdminStatus == "Rejected" ? "#fee2e2" : "#fef3c7");
+                        color:@(Model.AdminStatus == "Approved" ? "#059669" : Model.AdminStatus == "Rejected" ? "#dc2626" : "#d97706");">
+                        @(Model.AdminStatus ?? "Pending")
+                    </span>
+                </span>
+            </div>
+            <div class="info-item">
+                <label>Moderator Status</label>
+                <span>
+                    <span style="padding:3px 12px; border-radius:20px; font-size:0.78rem; font-weight:700;
+                        background:@(Model.ModeratorStatus == "Approved" ? "#d1fae5" : Model.ModeratorStatus == "Rejected" ? "#fee2e2" : "#fef3c7");
+                        color:@(Model.ModeratorStatus == "Approved" ? "#059669" : Model.ModeratorStatus == "Rejected" ? "#dc2626" : "#d97706");">
+                        @(Model.ModeratorStatus ?? "Pending")
+                    </span>
+                </span>
+            </div>
+            <div class="info-item">
+                <label>Phone</label>
+                <span>@(Model.SellerPhone ?? "N/A")</span>
+            </div>
+          
+        </div>
+        @if (Model.AdminStatus != "Approved" && Model.AdminStatus != "Rejected")
+        {
+            @if (Model.ModeratorStatus == "Approved")
+            {
+                <div style="margin-top:16px; display:flex; gap:10px;">
+                    <button class="btn-sub-approve" onclick="confirmApproveShop('@Model.Id')">
+                        <i class="fas fa-check"></i> Approve Shop
+                    </button>
+                    <button class="btn-sub-reject" onclick="rejectShop('@Model.Id')">
+                        <i class="fas fa-times"></i> Reject Shop
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div style="margin-top:16px; background:#fffbeb; border:1.5px solid #fef3c7; padding:12px 16px; border-radius:8px; font-size:0.85rem; color:#92400e;">
+                    <i class="fas fa-clock"></i> Waiting for Moderator approval before Admin can approve this shop.
+                </div>
+            }
+        }
+        @if (!string.IsNullOrEmpty(Model.ModeratorComments))
+        {
+            <div style="background:#f5f3ff; border-left:3px solid #a64d79; padding:12px 16px; border-radius:8px; font-size:0.85rem; color:#1e1033;">
+                <strong style="color:#a64d79;">Moderator Comments:</strong> @Model.ModeratorComments
+            </div>
+        }
+    </div>
+
+    <!-- Subcategories -->
+    <div class="detail-card">
+        <div class="section-title"><i class="fas fa-tags"></i> Subcategory Status</div>
+        <div class="sub-grid">
+            @if (subVideos.Any())
+            {
+                @foreach (var video in subVideos)
+                {
+                    var status = video.VideoStatus ?? "Pending";
+                    var isRejected = status == "Rejected";
+                    var isPending = status == "Pending";
+                    var cardClass = isRejected ? "rejected" : isPending ? "pending" : "approved";
+                    var statusClass = isRejected ? "s-rejected" : isPending ? "s-pending" : "s-approved";
+                    var statusText = isRejected ? "Rejected by Moderator" : isPending ? "Pending Review" : "Approved by Moderator";
+
+              <div class="sub-card @cardClass">
+    <div class="sub-name">
+        <i class="fas fa-tag" style="font-size:0.8rem;"></i> @video.SubCategory
+    </div>
+    <span class="sub-status @statusClass">@statusText</span>
+
+  @if (isRejected && video.RejectionReason != null)
+{
+    <div class="reject-reason">
+        <i class="fas fa-exclamation-circle"></i> <strong>Reason:</strong> @video.RejectionReason
+    </div>
+}
+
+@if (isPending)
+{
+    <div>
+        <button class="btn-sub-approve" onclick="approveSub('@Model.Id', '@video.SubCategory')">
+            <i class="fas fa-check"></i> Approve
+        </button>
+        <button class="btn-sub-reject" onclick="rejectSub('@Model.Id', '@video.SubCategory')">
+            <i class="fas fa-times"></i> Reject
+        </button>
+    </div>
+}
+
+                        else if (!isRejected)
+                        {
+                            <div>
+                                <button class="btn-sub-reject" onclick="rejectSub('@Model.Id', '@video.SubCategory')">
+                                    <i class="fas fa-times"></i> Reject (Products Issue)
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <p style="color:#9ca3af; font-size:0.88rem;">No making videos submitted yet by this seller.</p>
+            }
+        </div>
+    </div>
+
+    <!-- Video -->
+    @if (!string.IsNullOrEmpty(Model.VideoPath))
+    {
+        <div class="detail-card">
+            <div class="section-title"><i class="fas fa-video"></i> Submitted Video</div>
+            <a href="@Model.VideoPath" target="_blank"
+               style="display:inline-flex; align-items:center; gap:8px; background:#ede9fe; color:#7c3aed; padding:10px 18px; border-radius:9px; text-decoration:none; font-weight:600;">
+                <i class="fas fa-play-circle"></i> Watch Video
+            </a>
+        </div>
+    }
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+    <div class="modal-box" style="position:relative;">
+        <button id="modalCloseX" onclick="closeModalNoUpdate()"
+                style="position:absolute; top:12px; right:14px; background:none; border:none;
+            font-size:1.3rem; color:#9ca3af; cursor:pointer; line-height:1; display:none;">
+            &times;
+        </button>
+        <div class="icon" id="mIcon"></div>
+        <h3 id="mTitle"></h3>
+        <p id="mMsg"></p>
+        <div id="modalInputWrap" style="display:none; margin-bottom:14px;">
+            <input type="text" id="modalReasonInput"
+                   style="width:100%; padding:8px 12px; border-radius:8px; border:1.5px solid #fca5a5; font-size:0.85rem; box-sizing:border-box;"
+                   placeholder="Enter rejection reason..." />
+        </div>
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button class="modal-btn" id="modalCancelBtn"
+                    style="background:#e5e7eb; color:#374151; display:none;"
+                    onclick="cancelModal()">
+                Cancel
+            </button>
+            <button class="modal-btn" id="modalOkBtn" onclick="closeModal()">OK</button>
+        </div>
+    </div>
+</div>
+<script>
+    var pendingShopId = null;
+    var pendingSubCategory = null;
+    var pendingMode = null;
+
+    function showModal(icon, title, msg, mode, shopId, subCat) {
+        document.getElementById('mIcon').textContent = icon;
+        document.getElementById('mTitle').textContent = title;
+        document.getElementById('mMsg').textContent = msg;
+        document.getElementById('modal').classList.add('show');
+
+        var inputWrap = document.getElementById('modalInputWrap');
+        var okBtn = document.getElementById('modalOkBtn');
+        var cancelBtn = document.getElementById('modalCancelBtn');
+        var closeX = document.getElementById('modalCloseX');
+
+        closeX.style.display = 'none'; // default hidden
+
+        if (mode === 'reject') {
+            inputWrap.style.display = 'block';
+            cancelBtn.style.display = 'none';
+            document.getElementById('modalReasonInput').value = '';
+            okBtn.textContent = 'Submit Rejection';
+            pendingShopId = shopId;
+            pendingSubCategory = subCat;
+            pendingMode = 'reject';
+        } else if (mode === 'confirm-approve') {
+            inputWrap.style.display = 'none';
+            cancelBtn.style.display = 'inline-block';
+            okBtn.textContent = 'Yes, Approve';
+            pendingShopId = shopId;
+            pendingSubCategory = null;
+            pendingMode = 'confirm-approve';
+        } else {
+            inputWrap.style.display = 'none';
+            cancelBtn.style.display = 'none';
+            okBtn.textContent = 'OK';
+            closeX.style.display = 'block'; // success popup pe X dikhao
+            pendingMode = 'done';
+        }
+    }
+
+    // X button click — modal band karo, reload MAT karo
+    function closeModalNoUpdate() {
+        document.getElementById('modal').classList.remove('show');
+        pendingMode = null;
+        pendingShopId = null;
+    }
+    function cancelModal() {
+        document.getElementById('modal').classList.remove('show');
+        pendingMode = null;
+        pendingShopId = null;
+    }
+
+    function closeModal() {
+        if (pendingMode === 'reject') {
+            var reason = document.getElementById('modalReasonInput').value.trim();
+            if (!reason) {
+                document.getElementById('modalReasonInput').style.border = '1.5px solid #dc2626';
+                return;
+            }
+            submitRejection(pendingShopId, pendingSubCategory, reason);
+            return;
+        }
+        if (pendingMode === 'confirm-approve') {
+            document.getElementById('modal').classList.remove('show');
+            doApproveShop(pendingShopId);
+            return;
+        }
+        document.getElementById('modal').classList.remove('show');
+        if (pendingMode === 'done') location.reload();
+    }
+
+    function rejectSub(shopId, subCategory) {
+        showModal('❌', 'Reject Subcategory', 'Enter reason for rejecting: ' + subCategory, 'reject', shopId, subCategory);
+    }
+
+    function approveSub(shopId, subCategory) {
+        fetch('/Admin/ApproveSubCategory', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ shopId: shopId, subCategory: subCategory })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showModal('✅', 'Approved!', subCategory + ' approved successfully.', 'done', null, null);
+                } else {
+                    showModal('❌', 'Error', data.error ?? 'Something went wrong.', 'done', null, null);
+                }
+            })
+            .catch(err => showModal('❌', 'Error', 'Request failed: ' + err.message, 'done', null, null));
+    }
+
+    // Step 1: Confirm popup dikhata hai — abhi database update nahi hota
+    function confirmApproveShop(shopId) {
+        showModal('⚠️', 'Approve Shop?', 'Are you sure you want to approve this shop?', 'confirm-approve', shopId, null);
+    }
+
+    // Step 2: Sirf "Yes, Approve" click karne pe ye call hota hai
+    function doApproveShop(shopId) {
+        fetch('/Admin/AdminApproveShop', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: shopId })
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    showModal('✅', 'Shop Approved!', 'Shop approved successfully.', 'done', null, null);
+                } else {
+                    showModal('❌', 'Error', data.error ?? 'Something went wrong.', 'done', null, null);
+                }
+            })
+            .catch(err => showModal('❌', 'Error', 'Request failed: ' + err.message, 'done', null, null));
+    }
+
+    function rejectShop(shopId) {
+        showModal('❌', 'Reject Shop', 'Enter reason for rejecting this shop:', 'reject', shopId, null);
+    }
+
+    function submitRejection(shopId, subCategory, reason) {
+        document.getElementById('modal').classList.remove('show');
+
+        var url = subCategory ? '/Admin/RejectSubCategory' : '/Admin/AdminRejectShop';
+        var payload = subCategory
+            ? { shopId: shopId, subCategory: subCategory, reason: reason }
+            : { id: shopId, reason: reason };
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    var msg = subCategory ? (subCategory + ' rejected. Seller notified via email.') : 'Shop rejected. Seller notified via email.';
+                    showModal('✅', 'Rejected!', msg, 'done', null, null);
+                } else {
+                    showModal('❌', 'Error', data.error ?? 'Something went wrong.', 'done', null, null);
+                }
+            })
+            .catch(err => showModal('❌', 'Error', 'Request failed: ' + err.message, 'done', null, null));
+    }
+</script>

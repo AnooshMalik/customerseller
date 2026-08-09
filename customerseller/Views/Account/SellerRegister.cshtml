@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Seller Registration";
+}
+<style>
+    .register-box {
+        max-width: 500px;
+        margin: 60px auto;
+        padding: 40px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+    }
+
+    @@media (max-width: 480px) {
+        .register-box {
+            margin: 30px 16px;
+            padding: 24px 20px;
+        }
+    }
+</style>
+<div class="register-box">
+    <h2 style="color:#a64d79; margin-bottom:5px;">🏪 Register as Seller</h2>
+    <p style="color:#888; margin-bottom:25px; font-size:0.9rem;">Create your seller account and start selling!</p>
+
+    @if (TempData["RegisterError"] != null)
+    {
+        <div style="background:#ffebee; color:#c62828; padding:10px 14px; border-radius:6px; margin-bottom:15px;">
+            @TempData["RegisterError"]
+        </div>
+    }
+
+    <form asp-controller="Account" asp-action="SellerRegister" method="post" autocomplete="off">
+        <input type="hidden" name="role" value="Seller" />
+        <input type="text" name="firstName" placeholder="First Name" required
+               style="width:100%; padding:10px; margin-bottom:12px; border:1px solid #ddd; border-radius:6px;">
+        <input type="text" name="lastName" placeholder="Last Name" required
+               style="width:100%; padding:10px; margin-bottom:12px; border:1px solid #ddd; border-radius:6px;">
+        <input type="email" name="email" placeholder="Email *" autocomplete="off" value="" required
+               style="width:100%; padding:10px; margin-bottom:12px; border:1px solid #ddd; border-radius:6px;">
+        <input type="password" name="password" placeholder="Password * (min 8 characters)" autocomplete="new-password" value="" required minlength="8"
+               style="width:100%; padding:10px; margin-bottom:20px; border:1px solid #ddd; border-radius:6px;">
+        <button type="submit"
+                style="width:100%; padding:12px; background:#a64d79; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:1rem; cursor:pointer;">
+            Create Seller Account
+        </button>
+    </form>
+    <p style="text-align:center; margin-top:15px; font-size:0.9rem;">
+        Already have an account?
+        <a href="/Account/Login" style="color:#a64d79;">Login here</a>
+    </p>
+</div>

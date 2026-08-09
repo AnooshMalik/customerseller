@@ -1,0 +1,450 @@
+﻿@{
+    Layout = "_DashboardLayout";
+    ViewData["Title"] = "Bulk Upload";
+    var groupedSubCategories = ViewBag.GroupedSubCategories as Dictionary<string, List<string>> ?? new Dictionary<string, List<string>>();
+}
+
+<style>
+    .bulk-container {
+        max-width: 750px;
+        margin: 30px auto;
+        background: #fff;
+        border-radius: 16px;
+        padding: 35px;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    }
+
+        .bulk-container h2 {
+            font-size: 1.5rem;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .bulk-container > p.subtitle {
+            color: #777;
+            font-size: 0.88rem;
+            margin-bottom: 25px;
+        }
+
+    .step-box {
+        border: 1.5px solid #e0e0e0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+        .step-box h4 {
+            font-size: 0.95rem;
+            color: #a64d79;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .step-box p {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+    select, input[type="file"] {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-family: inherit;
+        background: #fafafa;
+    }
+
+    .btn-primary {
+        padding: 12px 22px;
+        background: linear-gradient(135deg, #a64d79, #880e4f);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+    .note-box {
+        background: #fff3e0;
+        border: 1px solid #ffcc80;
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 0.8rem;
+        color: #e65100;
+        margin-bottom: 12px;
+    }
+
+    #resultBox {
+        margin-top: 20px;
+        display: none;
+    }
+
+    .result-success {
+        background: #e8f5e9;
+        border: 1px solid #a5d6a7;
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: #2e7d32;
+        font-size: 0.88rem;
+        margin-bottom: 12px;
+    }
+
+    .result-errors {
+        background: #ffebee;
+        border: 1px solid #ffcdd2;
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: #c62828;
+        font-size: 0.83rem;
+    }
+
+        .result-errors ul {
+            margin: 8px 0 0 18px;
+        }
+
+    #spinner {
+        display: none;
+        text-align: center;
+        padding: 15px;
+        color: #a64d79;
+        font-size: 0.9rem;
+    }
+
+    .upload-box {
+        border: 2px dashed #e0e0e0;
+        border-radius: 10px;
+        padding: 24px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: border 0.3s, background 0.3s;
+        background: #fafafa;
+    }
+
+        .upload-box:hover {
+            border-color: #a64d79;
+            background: #fdf5f9;
+        }
+
+        .upload-box.has-file {
+            border-color: #a5d6a7;
+            background: #f3faf4;
+        }
+
+        .upload-box i {
+            font-size: 1.8rem;
+            color: #bbb;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .upload-box.has-file i {
+            color: #2e7d32;
+        }
+
+        .upload-box .upload-main-text {
+            font-size: 0.88rem;
+            color: #a64d79;
+            font-weight: 600;
+        }
+
+        .upload-box .upload-sub-text {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 3px;
+        }
+
+        .upload-box.has-file .upload-main-text {
+            color: #2e7d32;
+        }
+
+        .upload-box input[type="file"] {
+            display: none;
+        }
+
+    @@media (max-width: 480px) {
+        .bulk-container {
+            margin: 15px 10px;
+            padding: 20px;
+        }
+
+        .step-box {
+            padding: 16px;
+        }
+    }
+
+    .custom-dropdown {
+        position: relative;
+        width: 100%;
+    }
+
+    .dropdown-selected {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        background: #fafafa;
+        cursor: pointer;
+        color: #333;
+    }
+
+        .dropdown-selected:hover {
+            border-color: #a64d79;
+        }
+
+    .dropdown-list {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        max-height: 260px;
+        overflow-y: auto;
+        background: #fff;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 10px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        z-index: 100;
+    }
+
+        .dropdown-list.open {
+            display: block;
+        }
+
+    .dropdown-group-label {
+        font-weight: 700;
+        font-size: 0.82rem;
+        color: #1a1a2e;
+        padding: 10px 14px 4px;
+        background: #f9f0f5;
+    }
+
+    .dropdown-option {
+        padding: 9px 22px;
+        font-size: 0.88rem;
+        color: #444;
+        cursor: pointer;
+    }
+
+        .dropdown-option:hover {
+            background: #a64d79;
+            color: #fff;
+        }
+</style>
+
+<div class="bulk-container">
+    <h2><i class="fa-solid fa-file-excel" style="color:#a64d79; margin-right:8px;"></i>Bulk Upload Products</h2>
+    <p class="subtitle">Upload hundreds of products at once via Excel — images and videos included.</p>
+
+    <div class="step-box">
+        <h4>Step 1 — Download the template</h4>
+        <p>Copy your Sub-Category name from the list below. Use this <strong>exact same name</strong> in the Excel file.</p>
+    <div class="custom-dropdown" id="customDropdown">
+            <div class="dropdown-selected" id="dropdownSelected" onclick="toggleDropdown()">
+                 Sub-Category 
+            </div>
+            <div class="dropdown-list" id="dropdownList">
+                @foreach (var group in groupedSubCategories)
+                {
+                    <div class="dropdown-group-label">@group.Key</div>
+                    foreach (var sub in group.Value)
+                    {
+                        <div class="dropdown-option" onclick="copySubCategory('@sub')">@sub <span style="float:right; font-size:0.75rem; color:#aaa;">click to copy</span></div>
+                    }
+                }
+            </div>
+        </div>
+
+        <br /><br />
+        <button type="button" class="btn-primary" onclick="downloadTemplate()">
+            <i class="fa-solid fa-download"></i> Download Template
+        </button>
+    </div>
+
+    <div class="step-box">
+        <h4>Step 2 — Upload the filled Excel and videos</h4>
+        <div class="note-box">
+            <i class="fa-solid fa-circle-info"></i>
+            <strong>Please remember:</strong>
+            <ul style="margin:8px 0 0 18px; padding:0;">
+                <li>Type the <strong>same Sub-Category name</strong> in the Excel "SubCategory" column.</li>
+                <li>If this is the <strong>first video</strong> for that Sub-Category, name the video file the <strong>same as the Sub-Category</strong> (Example: Sub-Category "Sweaters" → video file <code>Sweaters.mp4</code>).</li>
+                <li>Add each product's picture directly inside the "Image" column cell (Insert &gt; Pictures &gt; Place in Cell).</li>
+            </ul>
+        </div>
+        <label style="font-size:0.82rem; font-weight:700; color:#555; display:block; margin-bottom:6px;">FILLED EXCEL FILE</label>
+        <div class="upload-box" id="excelUploadBox" onclick="document.getElementById('excelFile').click()">
+            <i class="fa-solid fa-file-excel"></i>
+            <div class="upload-main-text" id="excelUploadText">Click to choose Excel file</div>
+            <div class="upload-sub-text">.xlsx only</div>
+            <input type="file" id="excelFile" accept=".xlsx" onchange="handleExcelSelect(this)" />
+        </div>
+
+        <br />
+        <label style="font-size:0.82rem; font-weight:700; color:#555; display:block; margin-bottom:6px;">VIDEO FILES (if required — you can select multiple)</label>
+        <div class="upload-box" id="videoUploadBox" onclick="document.getElementById('videoFiles').click()">
+            <i class="fa-solid fa-video"></i>
+            <div class="upload-main-text" id="videoUploadText">Click to choose video file(s)</div>
+            <div class="upload-sub-text">MP4, MOV — file name must match SubCategory code</div>
+            <input type="file" id="videoFiles" accept="video/*" multiple onchange="handleVideoSelect(this)" />
+        </div>
+
+        <br /><br />
+        <button type="button" class="btn-primary" onclick="submitBulkUpload()">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Upload Products
+        </button>
+    </div>
+
+    <div id="spinner"><i class="fa-solid fa-spinner fa-spin"></i> Processing, please wait...</div>
+
+    <div id="resultBox"></div>
+</div>
+
+<script>
+    function handleExcelSelect(input) {
+        const box = document.getElementById('excelUploadBox');
+        const text = document.getElementById('excelUploadText');
+        if (input.files && input.files[0]) {
+            box.classList.add('has-file');
+            text.textContent = input.files[0].name;
+        } else {
+            box.classList.remove('has-file');
+            text.textContent = 'Click to choose Excel file';
+        }
+    }
+
+    function handleVideoSelect(input) {
+        const box = document.getElementById('videoUploadBox');
+        const text = document.getElementById('videoUploadText');
+        if (input.files && input.files.length > 0) {
+            box.classList.add('has-file');
+            text.textContent = input.files.length === 1
+                ? input.files[0].name
+                : `${input.files.length} video files selected`;
+        } else {
+            box.classList.remove('has-file');
+            text.textContent = 'Click to choose video file(s)';
+        }
+    }
+        function downloadTemplate() {
+        window.location.href = '/Products/DownloadTemplate';
+    }
+
+    function copySubCategory(sub) {
+        document.getElementById('dropdownSelected').textContent = sub;
+        document.getElementById('dropdownList').classList.remove('open');
+
+        // Clipboard mein copy kar do taake seller seedha Excel/video naam mein paste kar sake
+        navigator.clipboard.writeText(sub).then(() => {
+            // Chota sa visual feedback
+            const el = document.getElementById('dropdownSelected');
+            const original = el.textContent;
+            el.textContent = `"${sub}" copied!`;
+            setTimeout(() => { el.textContent = original; }, 1200);
+        });
+    }
+
+    function toggleDropdown() {
+        document.getElementById('dropdownList').classList.toggle('open');
+    }
+
+    document.addEventListener('click', function (e) {
+        if (!document.getElementById('customDropdown').contains(e.target)) {
+            document.getElementById('dropdownList').classList.remove('open');
+        }
+    });
+    async function submitBulkUpload() {
+        const excelFile = document.getElementById('excelFile').files[0];
+        const videoFiles = document.getElementById('videoFiles').files;
+
+        if (!excelFile) {
+            alert('Please select an Excel file first.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('excelFile', excelFile);
+        for (let i = 0; i < videoFiles.length; i++) {
+            formData.append('videoFiles', videoFiles[i]);
+        }
+
+        document.getElementById('spinner').style.display = 'block';
+
+        try {
+            const res = await fetch('/Products/BulkUpload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            document.getElementById('spinner').style.display = 'none';
+
+            // Naya result card banayein (purane wale delete nahi honge)
+            const entry = document.createElement('div');
+            entry.style.marginBottom = '14px';
+
+            let html = `<div class="result-success"><i class="fa-solid fa-check"></i> ${data.inserted} products uploaded successfully.</div>`;
+
+            if (data.errorCount > 0) {
+                html += `<div class="result-errors"><i class="fa-solid fa-circle-exclamation"></i> ${data.errorCount} rows had errors:
+                    <ul>${data.errors.map(e => `<li>${e}</li>`).join('')}</ul>
+                </div>`;
+            }
+
+               entry.innerHTML = html;
+
+    const box = document.getElementById('resultBox');
+    box.style.display = 'block';
+    box.innerHTML = ""; // purane sab result hata do
+    box.appendChild(entry); // sirf naya result dikhao
+            resetUploadForm();
+
+        } catch (e) {
+            document.getElementById('spinner').style.display = 'none';
+            alert('An error occurred during upload. Please try again.');
+        }
+    }
+
+    function resetUploadForm() {
+        document.getElementById('dropdownSelected').textContent = 'View valid Sub-Category names';
+
+        // Excel file reset
+        const excelInput = document.getElementById('excelFile');
+        excelInput.value = "";
+        document.getElementById('excelUploadBox').classList.remove('has-file');
+        document.getElementById('excelUploadText').textContent = 'Click to choose Excel file';
+
+        // Video files reset
+        const videoInput = document.getElementById('videoFiles');
+        videoInput.value = "";
+        document.getElementById('videoUploadBox').classList.remove('has-file');
+        document.getElementById('videoUploadText').textContent = 'Click to choose video file(s)';
+    }        let selectedMainCategory = "";
+
+    function toggleDropdown() {
+        document.getElementById('dropdownList').classList.toggle('open');
+    }
+
+    function selectOption(mainCategory, subCategory) {
+        selectedMainCategory = mainCategory;
+        document.getElementById('dropdownSelected').textContent = subCategory;
+        document.getElementById('dropdownList').classList.remove('open');
+        document.getElementById('downloadBtn').disabled = false;
+    }
+
+    document.addEventListener('click', function (e) {
+        if (!document.getElementById('customDropdown').contains(e.target)) {
+            document.getElementById('dropdownList').classList.remove('open');
+        }
+    });
+</script>

@@ -1,0 +1,230 @@
+﻿@{
+    ViewData["Title"] = "Shopping Cart";
+}
+
+<style>
+    .cart-main {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .cart-item-row {
+        display: flex;
+        align-items: center;
+        padding: 20px 0;
+        border-bottom: 1px solid #eee;
+    }
+
+    .cart-item-img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-right: 20px;
+    }
+
+    .cart-item-info {
+        flex-grow: 1;
+    }
+
+        .cart-item-info h4 {
+            margin: 0 0 5px 0;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+    .cart-item-price {
+        color: #a64d79;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .cart-item-qty {
+        font-size: 0.9rem;
+        color: #666;
+    }
+
+    .remove-btn {
+        background: none;
+        border: none;
+        color: #ccc;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+        .remove-btn:hover {
+            color: #ff4d4d;
+        }
+
+    .cart-summary-box {
+        background: #f9f9f9;
+        padding: 25px;
+        border-radius: 12px;
+        margin-top: 30px;
+        text-align: right;
+    }
+
+    .total-amount {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #222;
+        margin-bottom: 20px;
+    }
+
+    .order-note-input {
+        width: 100%;
+        max-width: 400px;
+        height: 100px;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-family: inherit;
+    }
+
+    .checkout-btn {
+        background-color: #a64d79;
+        color: white;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: 0.3s;
+    }
+
+        .checkout-btn:hover {
+            background-color: #8e3d65;
+            transform: translateY(-2px);
+        }
+
+    @@media (max-width: 600px) {
+        .cart-main {
+            margin: 20px auto;
+            padding: 0 14px;
+        }
+
+        .cart-title {
+            font-size: 1.6rem;
+        }
+
+        .cart-item-row {
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 16px 0;
+        }
+
+        .cart-item-img {
+            width: 70px;
+            height: 70px;
+            margin-right: 12px;
+        }
+
+        .cart-summary-box,
+        div[style*="text-align:right"] {
+            text-align: center !important;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+        }
+
+        .order-note-input {
+            max-width: 100%;
+        }
+    }
+</style>
+
+<div class="cart-main">
+    <h1 class="cart-title" style="text-align:center;">Shopping Cart</h1>
+    <div id="cartContent"></div>
+</div>
+
+@section Scripts {
+    <script>
+        function renderCart() {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            let cartContent = document.getElementById('cartContent');
+
+            if (cart.length === 0) {
+                cartContent.innerHTML = `
+                    <div style="text-align:center; padding: 80px 20px;">
+                        <i class="fa-solid fa-cart-shopping" style="font-size: 3rem; color: #ddd; margin-bottom: 20px; display:block;"></i>
+                        <p style="font-size:1.2rem; color:#666;">Your cart is currently empty.</p>
+                        <a href="/" class="login-btn" style="text-decoration:none; display:inline-block; width:auto; padding:12px 25px; margin-top:15px; background:#a64d79; color:white; border-radius:5px;">Continue Shopping</a>
+                    </div>`;
+                return;
+            }
+
+            let total = 0;
+            let html = '<div class="cart-table-container" style="max-width:900px; margin: 0 auto;">';
+
+            // 1. Loop ke andar sirf product ki row honi chahiye
+            cart.forEach((item, index) => {
+                let itemPrice = parseFloat(item.price) || 0;
+                let itemQty = parseInt(item.qty) || 1;
+                total += (itemPrice * itemQty);
+
+                html += `
+                <div class="cart-item-row">
+                    <img src="${item.img}" class="cart-item-img">
+                    <div class="cart-item-info">
+                        <h4>${item.title}</h4>
+                        <p class="cart-item-price">Rs. ${itemPrice.toLocaleString()}</p>
+                        <span class="cart-item-qty">Quantity: ${itemQty}</span>
+                    </div>
+                    <button onclick="removeCartItem(${index})" class="remove-btn">&times;</button>
+                </div>`;
+            });
+
+            // 2. Total aur Checkout button loop se bahar hona chahiye
+            html += `
+                <div style="margin-top:40px; text-align:right; border-top: 2px solid #f9f9f9; padding-top:20px;">
+                    <h2 style="margin-bottom:25px; font-weight:800; color:#222;">Total: Rs. ${total.toLocaleString()}</h2>
+                    <button onclick="proceedToCheckout()" class="checkout-btn" style="box-shadow: 0 4px 15px rgba(166, 77, 121, 0.2);">
+                        Proceed to Checkout
+                    </button>
+                </div>
+            </div>`;
+
+            cartContent.innerHTML = html;
+        }
+
+        window.removeCartItem = function(index) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        };
+
+      
+      
+              window.proceedToCheckout = async function () {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+
+            // Role check karo
+            const res = await fetch('/Account/GetUserRole');
+            const data = await res.json();
+
+            if (data.role === 'Seller') {
+                alert('Sellers cannot place orders. Please login as a customer.');
+                return;
+            }
+
+            window.location.href = '/Cart/Checkout';
+        };
+
+        // Page load hotay hi function call karein
+        document.addEventListener('DOMContentLoaded', renderCart);
+    </script>
+}

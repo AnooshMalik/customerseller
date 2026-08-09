@@ -1,0 +1,661 @@
+﻿@model customerseller.Models.UserProfile
+@{
+    Layout = "_Dashboardlayout";
+    // Agar FullName null ho toh "User" dikhaye, warna pehla harf
+    var initial = !string.IsNullOrEmpty(Model?.FullName) ? Model.FullName.Substring(0, 1).ToUpper() : "U";
+}
+<link href="~/dashboard.css" rel="stylesheet" />
+<style>
+    .profile-body {
+        padding: 30px 40px;
+    }
+
+    .profile-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #ddd6fe;
+        overflow: hidden;
+    }
+
+    .banner {
+        height: 130px;
+        background: #a64d79;
+        position: relative;
+    }
+
+    .profile-pic-container {
+        position: absolute;
+        bottom: -40px;
+        left: 30px;
+    }
+
+    .profile-pic-box {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .initial-box {
+        width: 100%;
+        height: 100%;
+        background: #a64d79;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 700;
+        border-radius: 50%;
+    }
+
+    .content-wrapper {
+        padding: 55px 30px 30px;
+    }
+
+    .header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+
+    .store-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1e1033;
+        margin-bottom: 8px;
+    }
+
+    .meta-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .category-badge {
+        background: #ede9fe;
+        color: #7c3aed;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .location-text {
+        font-size: 0.82rem;
+        color: #6b7280;
+    }
+
+        .location-text i {
+            color: #a64d79;
+            margin-right: 4px;
+        }
+
+    .edit-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 18px;
+        background: #a64d79;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s;
+    }
+
+        .edit-btn:hover {
+            background: #880e4f;
+        }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 22px;
+        background: #f5f3ff;
+        border-radius: 12px;
+        padding: 18px;
+        border: 1px solid #ede9fe;
+    }
+
+    .stat-item label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #8b5cf6;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .stat-item p {
+        font-size: 0.88rem;
+        color: #1e1033;
+        font-weight: 500;
+    }
+
+    .contact-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: #f5f3ff;
+        border-radius: 12px;
+        padding: 16px 20px;
+        border: 1px solid #ede9fe;
+    }
+
+    .icon-box {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: #ede9fe;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #7c3aed;
+        font-size: 1.3rem;
+    }
+
+    .label-light {
+        font-size: 0.75rem;
+        color: #8b5cf6;
+        margin-bottom: 3px;
+    }
+
+    .phone-number {
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: #1e1033;
+        text-decoration: none;
+    }
+
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(30,16,80,0.5);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+    .modal-content {
+        background: #fff;
+        border-radius: 16px;
+        padding: 28px 30px;
+        width: 480px;
+        max-width: 95%;
+        border: 1px solid #ddd6fe;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+        .modal-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e1033;
+        }
+
+    .close-modal {
+        background: #f5f3ff;
+        border: 1px solid #ede9fe;
+        border-radius: 8px;
+        width: 30px;
+        height: 30px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .close-modal:hover {
+            background: #ede9fe;
+            color: #1e1033;
+        }
+
+    .form-group {
+        margin-bottom: 14px;
+    }
+
+        .form-group label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #8b5cf6;
+            margin-bottom: 6px;
+        }
+
+    .form-input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1.5px solid #ddd6fe;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        outline: none;
+        background: #f5f3ff;
+        font-family: inherit;
+        transition: border 0.2s;
+    }
+
+        .form-input:focus {
+            border-color: #a64d79;
+            background: #fff;
+        }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid #ede9fe;
+    }
+
+    .cancel-btn {
+        padding: 9px 18px;
+        border-radius: 10px;
+        border: 1px solid #ddd6fe;
+        background: #f5f3ff;
+        color: #6b7280;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    .save-btn {
+        padding: 9px 20px;
+        border-radius: 10px;
+        border: none;
+        background: #a64d79;
+        color: #fff;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.2s;
+    }
+
+        .save-btn:hover {
+            background: #880e4f;
+        }
+
+    @@media (max-width: 600px) {
+        .profile-body {
+            padding: 16px;
+        }
+
+        .content-wrapper {
+            padding: 55px 18px 20px;
+        }
+
+        .header-flex {
+            flex-direction: column;
+            gap: 14px;
+            align-items: stretch;
+        }
+
+        .edit-btn {
+            justify-content: center;
+        }
+
+        .meta-info {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .contact-info {
+            flex-wrap: wrap;
+        }
+
+        .modal-content {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            flex-direction: column-reverse;
+        }
+
+        .cancel-btn, .save-btn {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+<div class="profile-body">
+    <div class="profile-container">
+        <div class="banner berry-gradient">
+            <div class="profile-pic-container">
+                <div class="profile-pic-box">
+                    <div class="initial-box berry-gradient">@initial</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-wrapper">
+            <div class="header-flex">
+                <div>
+                    <h1 class="store-title">@(Model?.FullName ?? "New Seller")</h1>
+                    <div class="meta-info">
+                        <span class="category-badge">@(Model?.ShopName ?? "Artisan Shop")</span>
+                        <span class="location-text">
+                            <i class="fas fa-map-marker-alt"></i>
+                            @(string.IsNullOrEmpty(Model?.Area) ? "Rawalpindi, Pakistan" : Model.Area + ", Rawalpindi")
+                        </span>
+                    </div>
+                </div>
+                <button class="edit-btn" onclick="openModal()">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+            </div>
+
+            <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
+                <div class="stat-item">
+                    <label>Email Address</label>
+                    <p>@(Model?.Email ?? "not-set@example.com")</p>
+                </div>
+                <div class="stat-item">
+                    <label>Shop Name</label>
+                    <p>@(Model?.ShopName ?? "Unnamed Store")</p>
+                </div>
+                <div class="stat-item">
+                    <label>CNIC</label>
+                    <p>@(Model?.CNIC ?? "Not provided")</p>
+                </div>
+                <div class="stat-item">
+                    <label>Account Status</label>
+                    <p style="color: #10b981; font-weight: 600;">Active</p>
+                </div>
+            </div>
+
+            <!-- Categories alag section mein -->
+            <div style="background:#f5f3ff; border-radius:12px; padding:16px 20px; border:1px solid #ede9fe; margin-bottom:22px;">
+                <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#8b5cf6; margin-bottom:10px;">
+                    Categories
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                    @foreach (var cat in (Model?.Categories ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        <span style="background:#ede9fe; color:#4c1d95; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600;">
+                            @cat.Trim()
+                        </span>
+                    }
+                </div>
+            </div>
+            <div class="contact-info">
+                <div class="icon-box">
+                    <i class="fab fa-whatsapp"></i>
+                </div>
+                <div>
+                    <div class="label-light">Message on WhatsApp</div>
+                    @if (!string.IsNullOrEmpty(Model?.Phone))
+                    {
+                        <a href="https://wa.me/92@(Model.Phone.TrimStart('0'))" target="_blank" class="phone-number">
+                            @Model.Phone
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="phone-number">No phone added</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Edit Modal Section *@
+<div id="editModal" class="modal-overlay">
+    <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
+        <div class="modal-header">
+            <div>
+                <h3>Edit Profile</h3>
+                <p style="font-size: 0.8rem; color: #6b7280; margin: 0;">Update your personal and shop information</p>
+            </div>
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+        </div>
+
+        <form asp-action="UpdateProfile" asp-controller="Profile" method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Full Name</label>
+                <input type="text" asp-for="FullName" class="form-input" placeholder="Your Full Name">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-store"></i> Shop Name</label>
+                <input type="text" asp-for="ShopName" class="form-input" placeholder="Shop Name">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email Address</label>
+                <input type="email" asp-for="Email" class="form-input" placeholder="Email">
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-phone"></i> Phone Number</label>
+                <input type="text" asp-for="Phone" class="form-input" placeholder="e.g. 923001234567">
+            </div>
+
+            <!-- ===== Categories & Subcategories Section ===== -->
+            <div class="form-group">
+                <label><i class="fas fa-tags"></i> Categories &amp; Subcategories</label>
+                <p style="font-size:0.75rem; color:#6b7280; margin:-4px 0 10px;">
+                    Select the main categories, then check the subcategories you sell.
+                </p>
+
+                <div id="mainCategoryTabs" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;"></div>
+
+                <div id="subCategoryPicker" style="background:#f5f3ff; border:1px solid #ede9fe; border-radius:10px; padding:12px; min-height:60px;">
+                    <p style="font-size:0.82rem; color:#9ca3af; margin:0;">Select a category above to see subcategories.</p>
+                </div>
+
+                <div id="selectedCategoriesPreview" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;"></div>
+
+                <input type="hidden" asp-for="Categories" id="categoriesInput" />
+            </div>
+            <!-- ===== End Categories Section ===== -->
+
+            <div class="modal-footer">
+                <button type="button" class="cancel-btn" onclick="closeModal()">Discard</button>
+                <button type="submit" class="save-btn">Update Profile</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Same map as AddProduct page — keep in sync if you add new categories there
+    const subCategoryMap = {
+        'FabricTextile': { label: '🧵 Fabric & Textile', subs: [
+            { val: 'CushionCovers', label: 'Cushion Covers' },
+            { val: 'PrintedKurtas', label: 'Printed Kurtas' },
+            { val: 'TieDyeDupattas', label: 'Tie-Dye Dupattas' },
+            { val: 'FabricToteBags', label: 'Tote Bags' },
+            { val: 'FabricTextile', label: 'General Fabric' }
+        ]},
+        'WoolYarn': { label: '🧶 Wool & Yarn', subs: [
+            { val: 'Sweaters', label: 'Sweaters' },
+            { val: 'CrochetBags', label: 'Crochet Bags' },
+            { val: 'StorageBaskets', label: 'Storage Baskets' },
+            { val: 'Beanies', label: 'Beanies' },
+            { val: 'WoolYarn', label: 'General Wool' }
+        ]},
+        'Leather': { label: '👜 Leather', subs: [
+            { val: 'LeatherHandbags', label: 'Handbags' },
+            { val: 'Wallets', label: 'Wallets' },
+            { val: 'Belts', label: 'Belts' },
+            { val: 'LeatherKeychains', label: 'Keychains' },
+            { val: 'Journals', label: 'Journals' },
+            { val: 'Leather', label: 'General Leather' }
+        ]},
+        'Wood': { label: '🪵 Wood', subs: [
+            { val: 'PhotoFrames', label: 'Photo Frames' },
+            { val: 'WoodNecklaces', label: 'Necklaces' },
+            { val: 'WoodToys', label: 'Toys' },
+            { val: 'ServingTrays', label: 'Serving Trays' },
+            { val: 'WoodShowpieces', label: 'Showpieces' },
+            { val: 'WoodKeychains', label: 'Keychains' },
+            { val: 'Wood', label: 'General Wood' }
+        ]},
+        'ClayPottery': { label: '🏺 Clay & Pottery', subs: [
+            { val: 'FlowerPots', label: 'Flower Pots' },
+            { val: 'CoffeeMugs', label: 'Coffee Mugs' },
+            { val: 'ClayVases', label: 'Vases' },
+            { val: 'ClayEarrings', label: 'Earrings' },
+            { val: 'ClayFigurines', label: 'Figurines' },
+            { val: 'ClayPottery', label: 'General Clay' }
+        ]},
+        'Jewels': { label: '💎 Jewels', subs: [
+            { val: 'Necklaces', label: 'Necklaces' },
+            { val: 'Bracelets', label: 'Bracelets' },
+            { val: 'Rings', label: 'Rings' },
+            { val: 'Bangles', label: 'Bangles' },
+            { val: 'JewelEarrings', label: 'Earrings' },
+            { val: 'Jewels', label: 'General Jewels' }
+        ]},
+        'PaperCards': { label: '📄 Paper & Cards', subs: [
+            { val: 'GreetingCards', label: 'Greeting Cards' },
+            { val: 'GiftBoxes', label: 'Gift Boxes' },
+            { val: 'PaperFlowers', label: 'Paper Flowers' },
+            { val: 'PaperShowpieces', label: 'Showpieces' },
+            { val: 'Scrapbooks', label: 'Scrapbooks' },
+            { val: 'PaperCards', label: 'General Paper' }
+        ]},
+        'JuteNatural': { label: '🌿 Jute & Natural', subs: [
+            { val: 'JuteBags', label: 'Bags' },
+            { val: 'Baskets', label: 'Baskets' },
+            { val: 'Trays', label: 'Trays' },
+            { val: 'DriedBouquets', label: 'Dried Bouquets' },
+            { val: 'Paintings', label: 'Paintings' },
+            { val: 'JuteNatural', label: 'General Jute' }
+        ]},
+        'ResinEpoxy': { label: '🔮 Resin & Epoxy', subs: [
+            { val: 'Coasters', label: 'Coasters' },
+            { val: 'ResinEarrings', label: 'Earrings' },
+            { val: 'ResinKeychains', label: 'Keychains' },
+            { val: 'WallArt', label: 'Wall Art' },
+            { val: 'ResinServingTrays', label: 'Serving Trays' },
+            { val: 'ResinEpoxy', label: 'General Resin' }
+        ]},
+        'MetalWire': { label: '⚙️ Metal & Wire', subs: [
+            { val: 'MetalEarrings', label: 'Earrings' },
+            { val: 'MetalVases', label: 'Vases' },
+            { val: 'MetalFigurines', label: 'Figurines' },
+            { val: 'MetalWallArt', label: 'Wall Art' },
+            { val: 'CandleHolders', label: 'Candle Holders' },
+            { val: 'MetalWire', label: 'General Metal' }
+        ]}
+    };
+
+    // Seller ki already selected subcategories (Model.Categories se aayi hui)
+    let selectedSubs = new Set(
+        "@Html.Raw(Model?.Categories ?? "")".split(',').map(s => s.trim()).filter(s => s.length > 0)
+    );
+
+    let activeMainCat = null;
+
+    function findMainCatFor(subVal) {
+        for (const key in subCategoryMap) {
+            if (subCategoryMap[key].subs.some(s => s.val === subVal)) return key;
+        }
+        return null;
+    }
+
+    function renderMainTabs() {
+        const container = document.getElementById('mainCategoryTabs');
+        container.innerHTML = '';
+        Object.keys(subCategoryMap).forEach(key => {
+            const hasSelected = subCategoryMap[key].subs.some(s => selectedSubs.has(s.val));
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = subCategoryMap[key].label;
+            btn.style.cssText = `padding:6px 12px; border-radius:20px; font-size:0.78rem; font-weight:600; cursor:pointer; border:1.5px solid ${hasSelected ? '#a64d79' : '#ddd6fe'}; background:${hasSelected ? '#a64d79' : '#fff'}; color:${hasSelected ? '#fff' : '#4c1d95'};`;
+            btn.onclick = () => { activeMainCat = key; renderMainTabs(); renderSubPicker(); };
+            container.appendChild(btn);
+        });
+    }
+
+    function renderSubPicker() {
+        const picker = document.getElementById('subCategoryPicker');
+        if (!activeMainCat) {
+            picker.innerHTML = '<p style="font-size:0.82rem; color:#9ca3af; margin:0;">Select a category above to see subcategories.</p>';
+            return;
+        }
+        picker.innerHTML = '';
+        const wrap = document.createElement('div');
+        wrap.style.cssText = 'display:flex; flex-wrap:wrap; gap:8px;';
+        subCategoryMap[activeMainCat].subs.forEach(sub => {
+            const isChecked = selectedSubs.has(sub.val);
+            const label = document.createElement('label');
+            label.style.cssText = `display:flex; align-items:center; gap:6px; background:#fff; border:1px solid #ddd6fe; border-radius:8px; padding:6px 10px; font-size:0.82rem; cursor:pointer; color:#1e1033;`;
+            label.innerHTML = `<input type="checkbox" ${isChecked ? 'checked' : ''} style="cursor:pointer;" /> ${sub.label}`;
+            label.querySelector('input').addEventListener('change', function () {
+                if (this.checked) selectedSubs.add(sub.val);
+                else selectedSubs.delete(sub.val);
+                syncHiddenInput();
+                renderPreview();
+                renderMainTabs();
+            });
+            wrap.appendChild(label);
+        });
+        picker.appendChild(wrap);
+    }
+
+    function renderPreview() {
+        const preview = document.getElementById('selectedCategoriesPreview');
+        preview.innerHTML = '';
+        selectedSubs.forEach(val => {
+            const mainKey = findMainCatFor(val);
+            const subInfo = mainKey ? subCategoryMap[mainKey].subs.find(s => s.val === val) : null;
+            const chip = document.createElement('span');
+            chip.style.cssText = 'background:#ede9fe; color:#4c1d95; padding:4px 10px 4px 12px; border-radius:20px; font-size:0.78rem; font-weight:600; display:flex; align-items:center; gap:6px;';
+            chip.innerHTML = `${subInfo ? subInfo.label : val} <span style="cursor:pointer; font-weight:700;">&times;</span>`;
+            chip.querySelector('span').onclick = () => {
+                selectedSubs.delete(val);
+                syncHiddenInput();
+                renderPreview();
+                renderMainTabs();
+                renderSubPicker();
+            };
+            preview.appendChild(chip);
+        });
+    }
+
+    function syncHiddenInput() {
+        document.getElementById('categoriesInput').value = Array.from(selectedSubs).join(',');
+    }
+
+    // Initial render
+    syncHiddenInput();
+    renderMainTabs();
+    renderPreview();
+</script>

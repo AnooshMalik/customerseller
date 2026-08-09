@@ -1,0 +1,766 @@
+﻿@model IEnumerable<customerseller.Models.Order>
+@{
+    Layout = "_DashboardLayout";
+    var couriers = ViewBag.Couriers as List<customerseller.Models.CourierCompany> ?? new List<customerseller.Models.CourierCompany>();
+}
+
+<style>
+    .orders-page {
+        padding: 30px;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+        .page-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .page-header p {
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 3px;
+        }
+
+    .orders-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-box {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px 22px;
+        border-top: 3px solid #ad2882;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+        .stat-box .label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .stat-box .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+    .orders-table-card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        overflow: hidden;
+        border: 1px solid rgba(0,0,0,0.06);
+        margin-bottom: 24px;
+    }
+
+    .table-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+        .table-top h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .table-top span {
+            font-size: 0.78rem;
+            color: #888;
+        }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead tr {
+        background: #fafafa;
+    }
+
+    th {
+        padding: 12px 18px;
+        text-align: left;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #888;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    td {
+        padding: 14px 18px;
+        font-size: 0.88rem;
+        color: #333;
+        border-bottom: 1px solid #f7f7f7;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover td {
+        background: #fdf5f9;
+    }
+
+    .order-id {
+        font-family: monospace;
+        font-size: 0.8rem;
+        color: #666;
+        background: #f5f5f5;
+        padding: 3px 8px;
+        border-radius: 6px;
+    }
+
+    .btn-track {
+        background: #fce4f3;
+        color: #ad2882;
+        border: 1.5px solid #ad2882;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+        .btn-track:hover {
+            background: #ad2882;
+            color: #fff;
+        }
+
+    .btn-assign {
+        background: #a64d79;
+        color: #fff;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-left: 6px;
+    }
+
+    .badge-assigned {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 6px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 50px;
+        color: #888;
+    }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+    .tracking-section {
+        background: #fff;
+        border-radius: 14px;
+        padding: 28px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.06);
+        margin-top: 10px;
+    }
+
+    .tracking-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 25px;
+    }
+
+        .tracking-title span {
+            color: #ad2882;
+        }
+
+    .stepper-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        position: relative;
+        padding: 10px 0;
+    }
+
+        .stepper-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 22px;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #f0f0f0;
+            z-index: 0;
+        }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        flex: 1;
+        z-index: 1;
+    }
+
+    .step-dot {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #f0f0f0;
+        border: 3px solid #e0e0e0;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s;
+    }
+
+        .step-dot i {
+            font-size: 0.85rem;
+            color: #bbb;
+        }
+
+    .step-item.active .step-dot {
+        background: #ad2882;
+        border-color: #ad2882;
+    }
+
+        .step-item.active .step-dot i {
+            color: #fff;
+        }
+
+    .step-item h4 {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 4px;
+    }
+
+    .step-item p {
+        font-size: 0.75rem;
+        color: #888;
+    }
+
+    .step-item.active h4 {
+        color: #ad2882;
+    }
+
+    /* Assign Courier Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+    .modal-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 30px;
+        max-width: 420px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+        .modal-box h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-box label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .modal-box select, .modal-box input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            margin-bottom: 14px;
+            font-family: inherit;
+            outline: none;
+        }
+
+            .modal-box select:focus, .modal-box input:focus {
+                border-color: #a64d79;
+            }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 4px;
+    }
+
+    .btn-cancel-modal {
+        flex: 1;
+        padding: 11px;
+        background: #f1f5f9;
+        color: #555;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-confirm-modal {
+        flex: 1;
+        padding: 11px;
+        background: #a64d79;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    /* WhatsApp Result Modal */
+    .wa-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 28px;
+        max-width: 440px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+        .wa-box .wa-icon {
+            font-size: 2.4rem;
+            color: #25D366;
+            margin-bottom: 10px;
+        }
+
+        .wa-box h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 14px;
+        }
+
+    .wa-preview {
+        background: #f0fdf4;
+        border: 1.5px solid #c8e6c9;
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-size: 0.82rem;
+        color: #333;
+        text-align: left;
+        white-space: pre-wrap;
+        margin-bottom: 18px;
+        max-height: 220px;
+        overflow-y: auto;
+    }
+
+    .btn-wa-send {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #25D366;
+        color: #fff;
+        border: none;
+        padding: 11px 24px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        margin-bottom: 10px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-wa-close {
+        background: none;
+        border: none;
+        color: #888;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+
+    @@media (max-width: 768px) {
+        .orders-page {
+            padding: 16px;
+        }
+
+        .orders-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .orders-table-card {
+            overflow-x: auto;
+        }
+
+        table {
+            min-width: 650px;
+        }
+
+        .table-top {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .stepper-wrapper {
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+            .stepper-wrapper::before {
+                display: none;
+            }
+
+        .step-item {
+            flex: 0 0 45%;
+        }
+
+        .modal-box, .wa-box {
+            padding: 20px;
+        }
+
+        .modal-actions {
+            flex-direction: column;
+        }
+
+        .btn-assign {
+            margin-left: 0;
+            margin-top: 6px;
+            display: inline-block;
+        }
+    }
+</style>
+
+
+<div class="orders-page">
+    <div class="page-header">
+        <div>
+            <h1>Orders</h1>
+            <p>Track and manage your artisan sales.</p>
+        </div>
+    </div>
+
+    <div class="orders-stats">
+        <div class="stat-box">
+            <div class="label">Total Orders</div>
+            <div class="value">@(Model?.Count() ?? 0)</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">Pending</div>
+            <div class="value">@(Model?.Count(o => o.Status == "Placed") ?? 0)</div>
+        </div>
+        <div class="stat-box">
+            <div class="label">Delivered</div>
+            <div class="value">@(Model?.Count(o => o.Status == "Delivered") ?? 0)</div>
+        </div>
+    </div>
+
+    <div class="orders-table-card">
+        <div class="table-top">
+            <h3>All Orders</h3>
+            <span>@(Model?.Count() ?? 0) orders</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Customer</th>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Courier</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td><span class="order-id">@order.OrderId</span></td>
+                            <td>@order.CustomerName</td>
+                            <td>
+                                @order.ProductName
+                                <small style="color:#999; display:block;">
+                                    Qty: @(order.Items?.FirstOrDefault(i => i.ProductId != null)?.Quantity ?? 1)
+                                </small>
+                            </td>
+                            <td style="font-weight:700; color:#ad2882;">PKR @order.Price</td>
+                            <td>
+                                <span style="background:#fce4f3; color:#ad2882; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">
+                                    @(order.Status ?? "Placed")
+                                </span>
+                            </td>
+                            <td>
+                                @if (order.CourierCompanyId == null)
+                                {
+                                    <span style="color:#aaa; font-size:0.8rem;">Not assigned</span>
+                                }
+                                else if (order.CourierStatus == "PickedUp")
+                                {
+                                    <span style="background:#e3f2fd; color:#1565c0; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">🚴 Picked Up</span>
+                                }
+                                else if (order.CourierStatus == "Delivered")
+                                {
+                                    <span style="background:#d1fae5; color:#065f46; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">✅ Delivered</span>
+                                }
+                                else
+                                {
+                                    <span style="background:#fce4f3; color:#ad2882; padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:600;">📦 Assigned</span>
+                                }
+                            </td>
+
+                            <td>
+                                <button class="btn-track" onclick="trackMyOrder('@order.OrderId')">
+                                    <i class="fas fa-location-dot"></i> Track
+                                </button>
+                                @if (order.CourierCompanyId == null)
+                                {
+                                    <button class="btn-assign"
+                                            onclick="openAssignModal('@order.OrderId', '@order.CustomerPhone', '@order.CustomerAddress')">
+                                        <i class="fas fa-truck"></i> Assign to Delivery
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="fas fa-shopping-bag"></i>
+                                <p>No orders found yet.</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div id="trackingArea" class="tracking-section" style="display:none;">
+        <div class="tracking-title">
+            Order Status: <span id="trackId"></span>
+        </div>
+        <div class="stepper-wrapper">
+            <div class="step-item" id="step-placed">
+                <div class="step-dot"><i class="fas fa-check"></i></div>
+                <h4>Order Placed</h4>
+                <p>Confirmed</p>
+            </div>
+            <div class="step-item" id="step-shipped">
+                <div class="step-dot"><i class="fas fa-truck"></i></div>
+                <h4>Shipped</h4>
+                <p>In Transit</p>
+            </div>
+            <div class="step-item" id="step-delivered">
+                <div class="step-dot"><i class="fas fa-house"></i></div>
+                <h4>Delivered</h4>
+                <p>Completed</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Courier Modal -->
+<div class="modal-overlay" id="assignModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-truck" style="color:#a64d79;"></i> Assign to Delivery</h3>
+        <input type="hidden" id="assignOrderId">
+
+        <label>Select Courier</label>
+        <select id="courierSelect">
+            @foreach (var c in couriers)
+            {
+                <option value="@c.Id">@c.CompanyName</option>
+            }
+        </select>
+
+        <label>Customer Phone Number</label>
+        <input type="text" id="customerPhoneInput" placeholder="03XX-XXXXXXX" />
+
+        <label>Customer Delivery Address</label>
+        <input type="text" id="customerAddressInput" placeholder="Full address" />
+
+        <div class="modal-actions">
+            <button class="btn-cancel-modal" onclick="closeAssignModal()">Cancel</button>
+            <button class="btn-confirm-modal" onclick="confirmAssign()">Assign</button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box" style="text-align:center;">
+        <div style="font-size:2rem; margin-bottom:12px;">🚚</div>
+        <h3>Assign to Courier?</h3>
+        <p style="color:#888; font-size:0.9rem; margin:10px 0 20px;">
+            Are you sure you want to assign this order to courier?<br>
+            Courier will pickup first, then WhatsApp message will be sent to customer.
+        </p>
+        <div class="modal-actions">
+            <button class="btn-cancel-modal" onclick="closeConfirmModal()">Cancel</button>
+            <button class="btn-confirm-modal" onclick="proceedToAssign()">Yes, Assign</button>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Courier Modal -->
+<div class="modal-overlay" id="assignModal">
+    <div class="modal-box">
+        <h3><i class="fas fa-truck" style="color:#a64d79;"></i> Assign to Delivery</h3>
+        <input type="hidden" id="assignOrderId">
+        <label>Select Courier</label>
+        <select id="courierSelect">
+            @foreach (var c in couriers)
+            {
+                <option value="@c.Id">@c.CompanyName</option>
+            }
+        </select>
+        <label>Customer Phone Number</label>
+        <input type="text" id="customerPhoneInput" placeholder="03XX-XXXXXXX" />
+        <label>Customer Delivery Address</label>
+        <input type="text" id="customerAddressInput" placeholder="Full address" />
+        <div class="modal-actions">
+            <button class="btn-cancel-modal" onclick="closeAssignModal()">Cancel</button>
+            <button class="btn-confirm-modal" onclick="confirmAssign()">Assign</button>
+        </div>
+    </div>
+</div>
+
+<!-- WhatsApp Message Modal -->
+<div class="modal-overlay" id="waModal">
+    <div class="wa-box">
+        <div class="wa-icon"><i class="fab fa-whatsapp"></i></div>
+        <h3>Order Assigned! Send WhatsApp to Customer</h3>
+        <div class="wa-preview" id="waPreview"></div>
+        <a class="btn-wa-send" id="waSendLink" href="#" target="_blank">
+            <i class="fab fa-whatsapp"></i> Send via WhatsApp
+        </a>
+        <br />
+        <button class="btn-wa-close" onclick="closeWaModal()">Close</button>
+    </div>
+</div>
+
+<script>
+    function openAssignModal(orderId, customerPhone, customerAddress) {
+        document.getElementById('assignOrderId').value = orderId;
+        document.getElementById('customerPhoneInput').value = customerPhone || '';
+        document.getElementById('customerAddressInput').value = customerAddress || '';
+
+        const courierSelect = document.getElementById('courierSelect');
+        const options = courierSelect.querySelectorAll('option');
+        if (options.length === 1) {
+            courierSelect.value = options[0].value;
+        }
+
+        document.getElementById('confirmModal').classList.add('show');
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').classList.remove('show');
+    }
+
+    function proceedToAssign() {
+        document.getElementById('confirmModal').classList.remove('show');
+        document.getElementById('assignModal').classList.add('show');
+    }
+
+    function closeAssignModal() {
+        document.getElementById('assignModal').classList.remove('show');
+    }
+
+    async function confirmAssign() {
+        const orderId = document.getElementById('assignOrderId').value;
+        const courierId = document.getElementById('courierSelect').value;
+        const customerPhone = document.getElementById('customerPhoneInput').value.trim();
+        const customerAddress = document.getElementById('customerAddressInput').value.trim();
+
+        if (!courierId) { alert('Please select a courier.'); return; }
+        if (!customerPhone) { alert('Please enter customer phone number.'); return; }
+        if (!customerAddress) { alert('Please enter customer address.'); return; }
+
+        const res = await fetch('/Orders/AssignToDelivery', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `orderId=${encodeURIComponent(orderId)}&courierId=${courierId}&customerPhone=${encodeURIComponent(customerPhone)}&customerAddress=${encodeURIComponent(customerAddress)}`
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            closeAssignModal();
+            showWaModal(data.whatsappMessage, data.customerPhone);
+        } else {
+            alert('Error: ' + (data.error || 'Something went wrong'));
+        }
+    }
+
+    function showWaModal(message, phone) {
+        document.getElementById('waPreview').textContent = message;
+        const cleanPhone = phone.replace(/\D/g, '');
+        const waPhone = cleanPhone.startsWith('0') ? '92' + cleanPhone.substring(1) : cleanPhone;
+        const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
+        document.getElementById('waSendLink').href = waUrl;
+        document.getElementById('waModal').classList.add('show');
+    }
+
+    function closeWaModal() {
+        document.getElementById('waModal').classList.remove('show');
+        location.reload();
+    }
+
+    function trackMyOrder(orderId) {
+        document.getElementById('trackId').textContent = '#' + orderId;
+        document.getElementById('trackingArea').style.display = 'block';
+        document.getElementById('trackingArea').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+<script src="~/seller/js/dashboard.js"></script>

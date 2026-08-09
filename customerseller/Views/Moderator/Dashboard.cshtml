@@ -1,0 +1,430 @@
+﻿@{
+    ViewData["Title"] = "Moderator Dashboard";
+    Layout = null;
+    var pendingVideos = ViewBag.PendingVideos as List<dynamic>;
+    int pendingCount = ViewBag.PendingCount ?? 0;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderator Dashboard - Artisan Valley</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f3ff; display: flex; }
+        .sidebar { width: 260px; background: #a64d79; height: 100vh; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; }
+        .sidebar-logo { padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: center; }
+        .sidebar-logo img { height: 55px; }
+        .sidebar-logo p { color: rgba(255,255,255,0.5); font-size: 0.7rem; font-weight: 700; margin-top: 8px; letter-spacing: 3px; text-transform: uppercase; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.88rem; transition: all 0.2s; cursor: pointer; border-left: 3px solid transparent; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.08); color: #fff; border-left-color: #fff; }
+        .nav-item i { width: 18px; }
+        .sidebar-bottom { margin-top: auto; padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.08); }
+        .logout-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: #ff6b6b; text-decoration: none; font-size: 0.88rem; }
+        .main { 
+    margin-left: 260px; 
+    padding: 30px 40px; 
+    min-height: 100vh; 
+    max-width: 1100px;
+    width: calc(100% - 260px);
+}
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+        .topbar h1 { font-size: 1.5rem; color: #1a1a2e; font-weight: 700; }
+        .topbar p { color: #888; font-size: 0.85rem; margin-top: 3px; }
+        .mod-badge { background: #a64d79; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+        .stat-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 4px solid #a64d79; }
+        .stat-card.pending { border-left-color: #f59e0b; }
+        .stat-card.approved { border-left-color: #10b981; }
+        .stat-card.rejected { border-left-color: #ef4444; }
+        .stat-number { font-size: 1.8rem; font-weight: 700; color: #1a1a2e; }
+        .stat-label { color: #888; font-size: 0.78rem; margin-top: 4px; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .video-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
+    gap: 24px; 
+}
+        .video-card { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .video-wrapper { width: 100%; height: 180px; background: #000; display: flex; align-items: center; justify-content: center; }
+        .video-wrapper video { width: 100%; height: 180px; object-fit: cover; }
+        .video-body { padding: 16px; }
+        .product-name { font-size: 1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
+        .info-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+        .info-badge { background: #f1f5f9; color: #475569; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .seller-info { font-size: 0.82rem; color: #888; margin-bottom: 14px; padding: 10px; background: #f8fafc; border-radius: 8px; }
+        .seller-info span { display: block; margin-bottom: 3px; }
+        .seller-info strong { color: #1a1a2e; }
+
+        .action-area { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-approve { flex: 1; padding: 10px; background: #10b981; color: #fff; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        .btn-reject { flex: 1; padding: 10px; background: #ef4444; color: #fff; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        .history-card { 
+    background: #fff; 
+    border-radius: 12px; 
+    padding: 18px 24px; 
+    margin-bottom: 12px; 
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06); 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border-left: 4px solid #10b981;
+    transition: transform 0.2s;
+}
+.history-card:hover { transform: translateX(4px); }
+        .history-card.rejected-card { border-left-color: #ef4444; }
+        .history-info h4 { font-size: 0.95rem; font-weight: 700; color: #1a1a2e; }
+        .history-info p { font-size: 0.8rem; color: #888; margin-top: 3px; }
+        .history-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .history-badge.app { background: #d1fae5; color: #065f46; }
+        .history-badge.rej { background: #fee2e2; color: #991b1b; }
+        .empty-state { text-align: center; padding: 50px; color: #888; }
+        .empty-state i { font-size: 3rem; color: #ddd; margin-bottom: 15px; display: block; }
+        .reject-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+        .reject-modal.show { display: flex; }
+        .reject-box { background: #fff; border-radius: 16px; padding: 30px; width: 450px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        .reject-box h3 { font-size: 1.1rem; color: #1a1a2e; margin-bottom: 20px; }
+        .reject-box select, .reject-box textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 0.9rem; outline: none; margin-bottom: 15px; font-family: inherit; }
+        .reject-box textarea { height: 80px; resize: none; }
+        .reject-btns { display: flex; gap: 10px; }
+        .btn-confirm-reject { flex: 1; padding: 12px; background: #ef4444; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+            .btn-cancel-reject {
+                flex: 1;
+                padding: 12px;
+                background: #f1f5f9;
+                color: #555;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            @@media (max-width: 768px) {
+                .sidebar {
+                    width: 100%;
+                    height: auto;
+                    position: relative;
+                }
+
+                .main {
+                    margin-left: 0;
+                    width: 100%;
+                    max-width: 100%;
+                    padding: 20px 15px;
+                }
+
+                .stats-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .video-grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .reject-box {
+                    width: 90%;
+                    padding: 20px;
+                }
+
+                .history-card {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 8px;
+                }
+
+                .action-area {
+                    flex-direction: column;
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="/customer/images/logoo.png" alt="Artisan Valley">
+            <p>Moderator Panel</p>
+        </div>
+        <a class="nav-item active" onclick="showSection('pending', this)">
+            <i class="fa-solid fa-clock"></i> Pending Queue
+            <span style="margin-left:auto; background:#f59e0b; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.72rem;">@pendingCount</span>
+        </a>
+        <a class="nav-item" onclick="showSection('approved', this)">
+            <i class="fa-solid fa-circle-check"></i> Approved
+        </a>
+        <a class="nav-item" onclick="showSection('rejected', this)">
+            <i class="fa-solid fa-circle-xmark"></i> Rejected
+        </a>
+
+        <a class="nav-item" href="/Chat/Messages" style="position:relative;">
+            <i class="fa-solid fa-comment-dots"></i> Messages
+            <span id="chatUnreadBadge" style="display:none; margin-left:auto; background:#dc2626; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.72rem;">0</span>
+        </a>
+        <div class="sidebar-bottom">
+            <a href="/Moderator/Logout" class="logout-item">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="topbar">
+            <div>
+                <h1>Moderator Dashboard</h1>
+                <p>Review making videos per sub-category</p>
+            </div>
+            <div class="mod-badge"><i class="fa-solid fa-video"></i> Moderator</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card pending">
+                <div class="stat-number" id="statPending">@pendingCount</div>
+                <div class="stat-label">Pending Videos</div>
+            </div>
+            <div class="stat-card approved">
+                <div class="stat-number" id="statApproved">-</div>
+                <div class="stat-label">Approved Videos</div>
+            </div>
+            <div class="stat-card rejected">
+                <div class="stat-number" id="statRejected">-</div>
+                <div class="stat-label">Rejected Videos</div>
+            </div>
+        </div>
+
+        <!-- Pending -->
+        <div class="section active" id="sec-pending">
+            @if (pendingVideos != null && pendingVideos.Count > 0)
+            {
+                <div class="video-grid">
+                    @foreach (var v in pendingVideos)
+                    {
+                        <div class="video-card">
+                            <div class="video-wrapper">
+                                @if (!string.IsNullOrEmpty(v.VideoUrl?.ToString()))
+                                {
+                                    <video controls>
+                                        <source src="@v.VideoUrl" type="video/mp4">
+                                    </video>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-video" style="color:#fff; font-size:2rem;"></i>
+                                }
+                            </div>
+                            <div class="video-body">
+                                <div class="product-name">@v.SubCategory</div>
+                                <div class="info-row">
+                                    <span class="info-badge">Making Video</span>
+                                    <span class="info-badge" style="background:#fff3e0; color:#e65100;">Pending</span>
+                                </div>
+                                <div class="seller-info">
+                                    <span><strong>Seller:</strong> @v.SellerEmail</span>
+                                    <span><strong>Uploaded:</strong> @v.UploadedAt</span>
+                                </div>
+
+                                <div class="seller-info" style="margin-top:8px;">
+    <span>
+        <strong>Products in this sub-category:</strong> 
+        @v.ProductCount
+    </span>
+    @if (!string.IsNullOrEmpty(v.ProductTitles?.ToString()))
+    {
+        <span style="margin-top:4px; color:#555;">
+            @v.ProductTitles
+        </span>
+    }
+</div>
+                                <div class="action-area">
+                                    <button class="btn-approve" onclick="approveVideo(@v.Id)">
+                                        <i class="fa-solid fa-check"></i> Approve
+                                    </button>
+                                    <button class="btn-reject" onclick="openRejectModal(@v.Id)">
+                                        <i class="fa-solid fa-times"></i> Reject
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <p>No pending videos! All caught up.</p>
+                </div>
+            }
+        </div>
+
+        <!-- Approved -->
+        <div class="section" id="sec-approved">
+            <div id="approvedList">
+                <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading...</p></div>
+            </div>
+        </div>
+
+        <!-- Rejected -->
+        <div class="section" id="sec-rejected">
+            <div id="rejectedList">
+                <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading...</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div class="reject-modal" id="rejectModal">
+        <div class="reject-box">
+            <h3><i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i> Reject Video</h3>
+            <input type="hidden" id="rejectVideoId">
+            <select id="rejectReason">
+                <option value="">-- Select Reason --</option>
+                <option value="Video quality is poor">Video quality is poor</option>
+                <option value="Product not handmade">Product not handmade</option>
+                <option value="Inappropriate content">Inappropriate content</option>
+                <option value="Does not match sub-category">Does not match sub-category</option>
+                <option value="Other">Other</option>
+            </select>
+            <textarea id="rejectCustomReason" placeholder="Additional details (optional)..."></textarea>
+            <div class="reject-btns">
+                <button class="btn-cancel-reject" onclick="closeRejectModal()">Cancel</button>
+                <button class="btn-confirm-reject" onclick="confirmReject()">Confirm Reject</button>
+            </div>
+        </div>
+    </div>
+        <!-- Confirm Modal -->
+        <div class="reject-modal" id="confirmModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999; align-items:center; justify-content:center;">
+            <div class="reject-box" style="text-align:center;">
+                <div style="font-size:2.5rem; margin-bottom:12px;" id="confirmModalIcon"></div>
+                <h3 id="confirmModalTitle" style="margin-bottom:8px;"></h3>
+                <p id="confirmModalMsg" style="font-size:0.85rem; color:#6b7280; margin-bottom:20px;"></p>
+                <div style="display:flex; gap:10px; justify-content:center;">
+                    <button class="btn-cancel-reject" onclick="closeConfirmModal()">Cancel</button>
+                    <button class="btn-confirm-reject" id="confirmModalBtn" style="background:#10b981;">Confirm</button>
+                </div>
+            </div>
+        </div>
+    
+
+    <script>
+       fetch('/Moderator/GetStats')
+    .then(r => r.json())
+    .then(d => {
+        document.getElementById('statPending').textContent = d.pending;
+        document.getElementById('statApproved').textContent = d.approved;
+        document.getElementById('statRejected').textContent = d.rejected;
+    });
+                fetch('/Chat/GetUnreadCount')
+                .then(r => r.json())
+                .then(d => {
+                    const badge = document.getElementById('chatUnreadBadge');
+                    if (d.count > 0) {
+                        badge.textContent = d.count;
+                        badge.style.display = 'inline-block';
+                    }
+                });
+// Page load pe approved/rejected preload karo
+loadHistory('Approved', 'approvedList');
+loadHistory('Rejected', 'rejectedList');
+
+        function showSection(name, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('sec-' + name).classList.add('active');
+            el.classList.add('active');
+            if (name === 'approved') loadHistory('Approved', 'approvedList');
+            if (name === 'rejected') loadHistory('Rejected', 'rejectedList');
+        }
+
+        async function loadHistory(status, containerId) {
+            const res = await fetch('/Moderator/GetVideoHistory?status=' + status);
+            const videos = await res.json();
+            const container = document.getElementById(containerId);
+            if (videos.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-circle-check"></i><p>No ${status.toLowerCase()} videos yet.</p></div>`;
+                return;
+            }
+                        container.innerHTML = videos.map(v => `
+                <div class="history-card ${status === 'Rejected' ? 'rejected-card' : ''}">
+                    <div class="history-info">
+                        <h4>${v.subCategory}</h4>
+                        <p>${v.sellerEmail} • ${new Date(v.uploadedAt).toLocaleDateString()}</p>
+                        ${status === 'Rejected' && v.rejectionReason ? `<p style="color:#dc2626; margin-top:4px;"><strong>Reason:</strong> ${v.rejectionReason}</p>` : ''}
+                    </div>
+                    <span class="history-badge ${status === 'Approved' ? 'app' : 'rej'}">${status}</span>
+                </div>`).join('');
+        }
+
+                    function showConfirmModal(icon, title, msg, onConfirm) {
+                document.getElementById('confirmModalIcon').textContent = icon;
+                document.getElementById('confirmModalTitle').textContent = title;
+                document.getElementById('confirmModalMsg').textContent = msg;
+                document.getElementById('confirmModalBtn').onclick = () => {
+                    closeConfirmModal();
+                    onConfirm();
+                };
+                document.getElementById('confirmModal').style.display = 'flex';
+            }
+
+            function closeConfirmModal() {
+                document.getElementById('confirmModal').style.display = 'none';
+            }
+
+            async function approveVideo(videoId) {
+                showConfirmModal('✅', 'Approve Video?',
+                    'Are you sure you want to approve this making video? Seller will be notified via email.',
+                    async () => {
+                        const res = await fetch('/Moderator/Approve', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `videoId=${videoId}`
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            location.reload();
+                        }
+                    }
+                );
+            }
+        function openRejectModal(videoId) {
+            document.getElementById('rejectVideoId').value = videoId;
+            document.getElementById('rejectModal').classList.add('show');
+        }
+
+        function closeRejectModal() {
+            document.getElementById('rejectModal').classList.remove('show');
+        }
+        async function confirmReject() {
+    const videoId = document.getElementById('rejectVideoId').value;
+    const reason = document.getElementById('rejectReason').value;
+    const custom = document.getElementById('rejectCustomReason').value;
+    
+    if (!reason && !custom) {
+        showConfirmModal('⚠️', 'Required', 'Please provide a rejection reason.', () => {});
+        return;
+    }
+    
+    
+    const finalReason = (custom && custom.trim()) ? custom.trim() : reason;
+    
+    console.log('Sending reason:', finalReason); // Debug
+    
+    const res = await fetch('/Moderator/Reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `videoId=${videoId}&reason=${encodeURIComponent(finalReason)}`
+    });
+    
+    const data = await res.json();
+    if (data.success) {
+        closeRejectModal();
+        location.reload();
+    }
+}
+           
+        
+    </script>
+</body>
+</html>

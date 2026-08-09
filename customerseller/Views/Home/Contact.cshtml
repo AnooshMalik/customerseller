@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Contact";
+}
+
+<main class="contact-container">
+    <h1>Contact Us</h1>
+
+    <section>
+        <p>
+            If you have any questions, suggestions, or need support regarding our handmade products,
+            please reach out to us. We’d love to hear from you!
+        </p>
+    </section>
+
+    <section>
+        <h2>Send Us a Message</h2>
+
+        <form asp-controller="Home" asp-action="Contact" method="post">
+            <label>Full Name</label>
+            <input type="text" name="Name" placeholder="Your full name" required>
+
+            <label>Email Address</label>
+            <input type="email" name="Email" placeholder="Your email" required>
+
+            <label>Phone Number</label>
+            <input type="tel" name="Phone" placeholder="Your phone number" required>
+
+            <label>Subject</label>
+            <input type="text" name="Subject" placeholder="Subject" required>
+
+            <label>Message</label>
+            <textarea name="Message" rows="6" placeholder="Write your message here..." required></textarea>
+
+            <button type="submit">Send Message</button>
+        </form>
+    </section>
+
+    <footer class="contact-note">
+        Thank you for supporting our handmade small business ❤️
+    </footer>
+</main>

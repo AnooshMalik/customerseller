@@ -1,0 +1,401 @@
+﻿@{
+    ViewData["Title"] = "File a Complaint";
+    var orderId = ViewBag.OrderId as string ?? "";
+    var amount = ViewBag.Amount as string ?? "";
+}
+
+<style>
+    .complaint-page {
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 0 20px 60px;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .complaint-header {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+        .complaint-header .icon {
+            width: 70px;
+            height: 70px;
+            background: #fff0f3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 2rem;
+        }
+
+        .complaint-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+        }
+
+        .complaint-header p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+    .complaint-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 32px;
+        box-shadow: 0 4px 24px rgba(166, 77, 121, 0.08);
+        border: 1px solid #f5e6ed;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+        .form-field.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-field label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+            .form-field label span {
+                color: #e74c3c;
+                margin-left: 2px;
+            }
+
+        .form-field input,
+        .form-field select,
+        .form-field textarea {
+            width: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.92rem;
+            padding: 11px 14px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fafafa;
+            color: #1a1a1a;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.15s;
+        }
+
+            .form-field input:focus,
+            .form-field select:focus,
+            .form-field textarea:focus {
+                border-color: #a64d79;
+                background: #fff;
+            }
+
+            .form-field input[readonly] {
+                color: #888;
+                background: #f3f3f3;
+                cursor: not-allowed;
+            }
+
+        .form-field textarea {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+
+    .priority-row {
+        display: flex;
+        gap: 10px;
+    }
+
+    .p-btn {
+        flex: 1;
+        padding: 10px 6px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        background: #fafafa;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: #888;
+        text-align: center;
+        font-family: 'Segoe UI', sans-serif;
+        transition: all 0.15s;
+    }
+
+        .p-btn.low.active {
+            border-color: #27ae60;
+            background: #eafaf1;
+            color: #1e8449;
+        }
+
+        .p-btn.medium.active {
+            border-color: #f39c12;
+            background: #fef9e7;
+            color: #b7770d;
+        }
+
+        .p-btn.high.active {
+            border-color: #e74c3c;
+            background: #fdedec;
+            color: #c0392b;
+        }
+
+    .submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: #a64d79;
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 24px;
+        transition: background 0.2s;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+        .submit-btn:hover {
+            background: #873b63;
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+    .success-box {
+        display: none;
+        text-align: center;
+        padding: 50px 30px;
+    }
+
+        .success-box .s-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .success-box h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+
+        .success-box p {
+            color: #888;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+    .ticket-badge {
+        display: inline-block;
+        margin-top: 16px;
+        font-size: 0.9rem;
+        background: #f3f4f6;
+        border-radius: 8px;
+        padding: 8px 20px;
+        color: #555;
+        font-family: monospace;
+        font-weight: 700;
+    }
+
+    .back-btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 11px 28px;
+        background: #a64d79;
+        color: #fff;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    @@media (max-width: 600px) {
+        .complaint-page {
+            margin: 20px auto;
+            padding: 0 12px 40px;
+        }
+
+        .complaint-card {
+            padding: 20px;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-field.full {
+            grid-column: 1;
+        }
+
+        .priority-row {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="complaint-page">
+    <div class="complaint-header">
+        <div class="icon">🚩</div>
+        <h1>File a Complaint</h1>
+        <p>Your complaint will be reviewed within 24 hours</p>
+    </div>
+
+    <div class="complaint-card">
+        <div id="formSection">
+            <div class="form-grid">
+                <div class="form-field">
+                    <label>Your Name <span>*</span></label>
+                    <input type="text" id="cf-name" placeholder="e.g. Ali Hassan">
+                </div>
+                <div class="form-field">
+                    <label>Phone Number <span>*</span></label>
+                    <input type="tel" id="cf-phone" placeholder="03XX-XXXXXXX">
+                </div>
+                <div class="form-field full">
+                    <label>Email Address</label>
+                    <input type="email" id="cf-email" placeholder="your@email.com">
+                </div>
+                <div class="form-field">
+                    <label>Order ID <span>*</span></label>
+                    <input type="text" id="cf-orderid" placeholder="e.g. AV-001" value="@orderId">
+                </div>
+                <div class="form-field">
+                    <label>Amount Paid (Rs.)</label>
+                    <input type="text" id="cf-amount" placeholder="e.g. 1500" value="@amount">
+                </div>
+                <div class="form-field">
+                    <label>Seller / Shop Name <span>*</span></label>
+                    <input type="text" id="cf-seller" placeholder="e.g. Khan Crafts">
+                </div>
+                <div class="form-field">
+                    <label>Purchase Date</label>
+                    <input type="date" id="cf-date">
+                </div>
+                
+                <div class="form-field full">
+                    <label>Priority Level <span>*</span></label>
+                    <div class="priority-row">
+                        <button type="button" class="p-btn low" onclick="setPrio(this)">🟢 Low</button>
+                        <button type="button" class="p-btn medium active" onclick="setPrio(this)">🟡 Medium</button>
+                        <button type="button" class="p-btn high" onclick="setPrio(this)">🔴 High</button>
+                    </div>
+                </div>
+                <div class="form-field full">
+                    <label>Describe Your Complaint <span>*</span></label>
+                    <textarea id="cf-desc" placeholder="What happened, when it happened, and what the seller said..."></textarea>
+                </div>
+                <div class="form-field full">
+                    <label>Attach Evidence (photos / screenshots) <span>*</span></label>
+                    <input type="file" id="cf-files" accept="image/*,.pdf" multiple style="display:none;">
+                    <label for="cf-files" style="color:#a64d79; text-decoration:underline; cursor:pointer; font-weight:600; font-size:0.9rem; width:fit-content;">
+                        📎 Choose files to attach
+                    </label>
+                    <span id="fileNameDisplay" style="color:#888; font-size:0.82rem;"></span>
+                </div>
+            </div>
+            <button class="submit-btn" id="submitBtn" onclick="submitComplaint()">
+                Submit Complaint →
+            </button>
+        </div>
+
+        <div class="success-box" id="successBox">
+            <div class="s-icon">✅</div>
+            <h2>Complaint Submitted!</h2>
+            <p>We will review your complaint within 24 hours<br>and contact you via phone or email.</p>
+            <div class="ticket-badge" id="ticketNum">Ticket #CMP-0000</div>
+            <br>
+            <a href="/" class="back-btn">Back to Home</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setPrio(btn) {
+        document.querySelectorAll('.p-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    async function submitComplaint() {
+        const name   = document.getElementById('cf-name').value.trim();
+        const phone  = document.getElementById('cf-phone').value.trim();
+        const seller = document.getElementById('cf-seller').value.trim();
+       
+        const desc   = document.getElementById('cf-desc').value.trim();
+        const email  = document.getElementById('cf-email').value.trim();
+        const orderId  = document.getElementById('cf-orderid').value.trim();
+        const amount   = document.getElementById('cf-amount').value.trim();
+        const fileInput = document.getElementById('cf-files');
+
+           if (!name || !phone || !seller || !desc) {
+        alert('Please fill in all required fields (*).');
+        return;
+    }
+
+    if (fileInput.files.length === 0) {
+        alert('Please attach at least one photo/screenshot as evidence.');
+        return;
+    }
+
+        const activePrio = document.querySelector('.p-btn.active');
+        const priority = activePrio ? activePrio.textContent.trim().replace(/[^a-zA-Z]/g, '') : 'Medium';
+
+        const formData = new FormData();
+        formData.append('customerName',  name);
+        formData.append('customerPhone', phone);
+        formData.append('customerEmail', email);
+        formData.append('orderId',       orderId);
+        formData.append('amountPaid',    amount);
+        formData.append('sellerName',    seller);
+        
+        formData.append('priority',      priority);
+        formData.append('description',   desc);
+
+        if (fileInput.files.length > 0) {
+            formData.append('evidenceFile', fileInput.files[0]);
+        }
+
+        const btn = document.getElementById('submitBtn');
+        btn.textContent = 'Submitting...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/Complaint/Submit', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                document.getElementById('ticketNum').textContent = 'Ticket #' + data.ticket;
+                document.getElementById('formSection').style.display = 'none';
+                document.getElementById('successBox').style.display = 'block';
+            } else {
+                alert('Something went wrong. Please try again.');
+                btn.textContent = 'Submit Complaint →';
+                btn.disabled = false;
+            }
+        } catch (e) {
+            alert('Network error. Please try again.');
+            btn.textContent = 'Submit Complaint →';
+            btn.disabled = false;
+        }
+    }
+        document.getElementById('cf-files').addEventListener('change', function() {
+        const names = Array.from(this.files).map(f => f.name).join(', ');
+        document.getElementById('fileNameDisplay').textContent = names || '';
+    });
+</script>

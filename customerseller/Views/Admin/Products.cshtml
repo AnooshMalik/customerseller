@@ -1,0 +1,652 @@
+﻿@model List<customerseller.Models.Product>
+@{
+    Layout = "_AdminLayout";
+}
+
+<style>
+    .page-header { padding: 28px 35px 0; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; color: #1e1033; }
+    .page-header p { color: #6b7280; font-size: 0.9rem; margin-top: 4px; }
+    .content-area { padding: 24px 35px; }
+
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 18px 22px;
+        border: 1px solid #ede9fe;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .stat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .stat-card h3 { font-size: 1.4rem; font-weight: 700; color: #1e1033; }
+    .stat-card p { font-size: 0.78rem; color: #6b7280; margin-top: 2px; }
+
+    .filter-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .filter-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .filter-btn {
+        padding: 7px 18px;
+        border-radius: 20px;
+        border: 1.5px solid #ede9fe;
+        background: #fff;
+        color: #6b7280;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+        background: #a64d79;
+        color: #fff;
+        border-color: #a64d79;
+    }
+
+    .search-input {
+        padding: 9px 16px;
+        border: 1.5px solid #ede9fe;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        font-family: inherit;
+        outline: none;
+        width: 240px;
+        max-width: 100%;
+        flex: 1;
+    }
+
+    .search-input:focus { border-color: #a64d79; }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid #ede9fe;
+    }
+
+    thead { background: #f5f3ff; }
+
+    th {
+        padding: 13px 18px;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+
+    td {
+        padding: 14px 18px;
+        font-size: 0.87rem;
+        color: #1e1033;
+        border-top: 1px solid #f3f4f6;
+        vertical-align: middle;
+    }
+
+    tr:hover td { background: #fdf9ff; }
+
+    .product-cell { display: flex; align-items: center; gap: 12px; }
+
+    .product-thumb {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        object-fit: cover;
+        background: #f5f3ff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #a64d79;
+        font-size: 1rem;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+    .product-title {
+        font-weight: 600;
+        color: #1e1033;
+        font-size: 0.88rem;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .product-cat {
+        font-size: 0.78rem;
+        color: #6b7280;
+        margin-top: 2px;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    .badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .badge-pending { background: #fef3c7; color: #d97706; }
+    .badge-approved { background: #d1fae5; color: #059669; }
+    .badge-rejected { background: #fee2e2; color: #dc2626; }
+
+   
+
+    .video-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: #7c3aed;
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px;
+        color: #9ca3af;
+    }
+
+    .btn-approve {
+        background: #059669;
+        color: #fff;
+        border: none;
+        padding: 5px 8px;
+        border-radius: 7px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 4px;
+        text-align: center;
+    }
+        .btn-approve:hover {
+            background: #047857;
+        }
+
+    .btn-remove {
+        background: #dc2626;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 7px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        display: block;
+        width: 100px;
+    }
+
+        .btn-remove:hover {
+            background: #b91c1c;
+        }
+
+    .btn-reject {
+        background: #f59e0b;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 7px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        display: block;
+        width: 100%;
+    }
+
+        .btn-reject:hover {
+            background: #d97706;
+        }
+
+        .btn-reject:hover {
+            background: #d97706;
+        }
+
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+    .modal-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 360px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+
+        .modal-box .micon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .modal-box h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e1033;
+            margin-bottom: 8px;
+        }
+
+        .modal-box p {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+        .modal-actions button {
+            padding: 10px 24px;
+            border-radius: 9px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+    .btn-modal-confirm {
+        background: #a64d79;
+        color: #fff;
+    }
+
+    .btn-modal-cancel {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .reject-input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1.5px solid #ede9fe;
+        border-radius: 9px;
+        font-size: 0.85rem;
+        font-family: inherit;
+        margin-bottom: 16px;
+        box-sizing: border-box;
+        outline: none;
+        display: none;
+    }
+
+        .reject-input:focus {
+            border-color: #a64d79;
+        }
+    @@media (max-width: 700px) {
+        .stats-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .search-input {
+        padding: 9px 16px;
+        border: 1.5px solid #ede9fe;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        font-family: inherit;
+        outline: none;
+        width: 240px;
+        max-width: 100%;
+        flex: 1;
+    }
+    @@media (max-width: 420px) {
+        .stats-row {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header, .content-area {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+    }
+
+    @@media (max-width: 420px) {
+        .stats-row {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header, .content-area {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-input {
+            width: 100%;
+        }
+    }
+    .content-area div[style*="overflow-x"]::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .content-area div[style*="overflow-x"]::-webkit-scrollbar-thumb {
+        background: #d1c4e9;
+        border-radius: 10px;
+    }
+
+    .content-area div[style*="overflow-x"]::-webkit-scrollbar-track {
+        background: #f5f3ff;
+    }
+</style>
+
+<div class="page-header">
+    <h1>Products</h1>
+    <p>All products listed on ArtisanValley</p>
+</div>
+
+<div class="content-area">
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#ede9fe;">
+                <i class="fas fa-box" style="color:#7c3aed;"></i>
+            </div>
+            <div>
+                <h3>@ViewBag.Total</h3>
+                <p>Total Products</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#d1fae5;">
+                <i class="fas fa-check-circle" style="color:#059669;"></i>
+            </div>
+            <div>
+                <h3>@ViewBag.Approved</h3>
+                <p>Approved</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fef3c7;">
+                <i class="fas fa-clock" style="color:#d97706;"></i>
+            </div>
+            <div>
+                <h3>@ViewBag.Pending</h3>
+                <p>Pending</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fee2e2;">
+                <i class="fas fa-times-circle" style="color:#dc2626;"></i>
+            </div>
+            <div>
+                <h3>@ViewBag.Rejected</h3>
+                <p>Rejected</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-bar">
+        <div class="filter-btns">
+            <button class="filter-btn active" onclick="filterTable('all', this)">All</button>
+            <button class="filter-btn" onclick="filterTable('Pending', this)">Pending</button>
+            <button class="filter-btn" onclick="filterTable('Approved', this)">Approved</button>
+            <button class="filter-btn" onclick="filterTable('Rejected', this)">Rejected</button>
+        </div>
+        <input type="text" class="search-input" placeholder="Search products..."
+               onkeyup="searchTable()" id="searchInput" />
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <i class="fas fa-box-open" style="font-size:3rem; margin-bottom:16px; display:block;"></i>
+            <p>No products found.</p>
+        </div>
+    }
+    else
+    {
+        <div style="overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch;">
+        <table id="productsTable">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Seller</th>
+                    <th>Price</th>
+                    <th>Video</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+
+                    <table id="productsTable">
+                       
+                        <thead>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr data-status="@(p.IsAdminApproved ? "Approved" : (p.AdminRejectionReason != null ? "Rejected" : "Pending"))">
+                        <td>
+                            <div class="product-cell">
+                                <div class="product-thumb">
+                                    @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                    {
+                                        <img src="@p.ImageUrl" alt="@p.Title" />
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-box"></i>
+                                    }
+                                </div>
+                                <div>
+                                    <div class="product-title">@p.Title</div>
+                                    <div class="product-cat">@p.Category</div>
+                                </div>
+                            </div>
+                        </td>
+                            <td>
+                                <div style="font-weight:600; word-break:break-word;">@p.SellerName</div>
+                                <div style="font-size:0.78rem; color:#6b7280; word-break:break-word;">@p.SellerEmail</div>
+                            </td>
+                        <td>Rs. @p.Price</td>
+                       @{
+    var videoMap = ViewBag.VideoMap as Dictionary<string, string> ?? new Dictionary<string, string>();
+    var videoKey = p.SellerEmail + "|" + p.Category;
+    var subVideoUrl = videoMap.ContainsKey(videoKey) ? videoMap[videoKey] : p.VideoUrl;
+}
+<td>
+    @if (!string.IsNullOrEmpty(subVideoUrl))
+    {
+        <a href="@subVideoUrl" target="_blank" class="video-link">
+            <i class="fas fa-play-circle"></i> Watch
+        </a>
+    }
+    else
+    {
+        <span style="color:#9ca3af; font-size:0.78rem;">No video</span>
+    }
+</td>
+                       
+                        <td>
+                            <span class="badge @(p.IsAdminApproved ? "badge-approved" : p.AdminRejectionReason != null ? "badge-rejected" : "badge-pending")">
+                                @(p.IsAdminApproved ? "Approved" : p.AdminRejectionReason != null ? "Rejected" : "Pending")
+                            </span>
+                        </td>
+                                    <td style="width:100px;">
+                                        @if (!p.IsAdminApproved && p.AdminRejectionReason == null)
+                                        {
+                                            <button class="btn-approve" onclick="showApprove('@p.Id', this)">
+                                                <i class="fas fa-check"></i> Approve
+                                            </button>
+                                            <button class="btn-reject" onclick="showReject('@p.Id', this)">
+                                                <i class="fas fa-times"></i> Reject
+                                            </button>
+                                        }
+                                        else if (p.IsAdminApproved)
+                                        {
+                                            <button class="btn-remove" onclick="showRemove('@p.Id', this)">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                        }
+                                    </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+       </div>
+    }
+</div>
+<!-- Modal -->
+<div class="modal-overlay" id="actionModal">
+    <div class="modal-box">
+        <div class="micon" id="mIcon"></div>
+        <h3 id="mTitle"></h3>
+        <p id="mMsg"></p>
+        <input type="text" class="reject-input" id="rejectReason" placeholder="Enter rejection reason..." />
+        <div class="modal-actions">
+            <button class="btn-modal-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-modal-confirm" id="mConfirmBtn">Confirm</button>
+        </div>
+    </div>
+</div>
+<script>
+    let currentId = null;
+    let currentBtn = null;
+    let currentAction = null;
+
+    function showApprove(id, btn) {
+        currentId = id; currentBtn = btn; currentAction = 'approve';
+        document.getElementById('mIcon').textContent = '✅';
+        document.getElementById('mTitle').textContent = 'Approve Product';
+        document.getElementById('mMsg').textContent = 'Are you sure you want to approve this product?';
+        document.getElementById('rejectReason').style.display = 'none';
+        document.getElementById('mConfirmBtn').style.background = '#059669';
+        document.getElementById('actionModal').classList.add('show');
+    }
+
+    function showReject(id, btn) {
+        currentId = id; currentBtn = btn; currentAction = 'reject';
+        document.getElementById('mIcon').textContent = '⚠️';
+        document.getElementById('mTitle').textContent = 'Reject Product';
+        document.getElementById('mMsg').textContent = 'Please provide a reason for rejection:';
+        document.getElementById('rejectReason').style.display = 'block';
+        document.getElementById('rejectReason').value = '';
+        document.getElementById('mConfirmBtn').style.background = '#f59e0b';
+        document.getElementById('actionModal').classList.add('show');
+    }
+
+    function showRemove(id, btn) {
+        currentId = id; currentBtn = btn; currentAction = 'remove';
+        document.getElementById('mIcon').textContent = '🗑️';
+        document.getElementById('mTitle').textContent = 'Remove Product';
+        document.getElementById('mMsg').textContent = 'This will permanently delete the product.';
+        document.getElementById('rejectReason').style.display = 'none';
+        document.getElementById('mConfirmBtn').style.background = '#dc2626';
+        document.getElementById('actionModal').classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('actionModal').classList.remove('show');
+        currentId = null; currentBtn = null; currentAction = null;
+    }
+
+    document.getElementById('mConfirmBtn').addEventListener('click', function() {
+        if (currentAction === 'approve') {
+            fetch('/Admin/ApproveProduct?id=' + currentId, { method: 'POST' })
+            .then(r => r.json()).then(data => {
+                if (data.success) {
+                    const row = currentBtn.closest('tr');
+                    row.dataset.status = 'Approved';
+                    row.querySelector('.badge').className = 'badge badge-approved';
+                    row.querySelector('.badge').textContent = 'Approved';
+                    row.querySelector('td:last-child').innerHTML = '<button class="btn-remove" onclick="showRemove(\'' + currentId + '\', this)"><i class="fas fa-trash"></i> Remove</button>';
+                    closeModal();
+                }
+            });
+        } else if (currentAction === 'reject') {
+            const reason = document.getElementById('rejectReason').value.trim();
+            if (!reason) { document.getElementById('rejectReason').focus(); return; }
+            fetch('/Admin/RejectProduct?id=' + currentId + '&reason=' + encodeURIComponent(reason), { method: 'POST' })
+            .then(r => r.json()).then(data => {
+                if (data.success) {
+                    const row = currentBtn.closest('tr');
+                    row.dataset.status = 'Rejected';
+                    row.querySelector('.badge').className = 'badge badge-rejected';
+                    row.querySelector('.badge').textContent = 'Rejected';
+                    row.querySelector('td:last-child').innerHTML = '<button class="btn-remove" onclick="showRemove(\'' + currentId + '\', this)"><i class="fas fa-trash"></i> Remove</button>';
+                    closeModal();
+                }
+            });
+        } else if (currentAction === 'remove') {
+            fetch('/Admin/RemoveProduct', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: currentId })
+            })
+            .then(r => r.json()).then(data => {
+                if (data.success) {
+                    currentBtn.closest('tr').remove();
+                    closeModal();
+                }
+            });
+        }
+    });
+
+    function filterTable(status, btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('#productsTable tbody tr').forEach(row => {
+            row.style.display = (status === 'all' || row.dataset.status === status) ? '' : 'none';
+        });
+    }
+
+    function searchTable() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('#productsTable tbody tr').forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(input) ? '' : 'none';
+        });
+    }
+</script>

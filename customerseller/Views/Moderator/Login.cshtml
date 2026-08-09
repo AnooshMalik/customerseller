@@ -1,0 +1,310 @@
+﻿@{
+    ViewData["Title"] = "Moderator Login";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moderator Login - Artisan Valley</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; min-height: 100vh; display: flex; }
+        .left-panel {
+            width: 45%;
+          background: #a64d79;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            width: 300px; height: 300px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50%;
+            top: -80px; left: -80px;
+        }
+        .left-panel::after {
+            content: '';
+            position: absolute;
+            width: 200px; height: 200px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 50%;
+            bottom: -50px; right: -50px;
+        }
+        .left-panel h1 {
+            color: #fff;
+            font-size: 2.8rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-align: center;
+            z-index: 1;
+        }
+        .left-panel h1 span { font-weight: 700; }
+        .left-panel p {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-top: 8px;
+            z-index: 1;
+        }
+        .left-divider {
+            width: 50px; height: 2px;
+            background: rgba(255,255,255,0.2);
+            margin: 25px auto;
+            z-index: 1;
+        }
+        .left-quote {
+            color: rgba(255,255,255,0.6);
+            font-style: italic;
+            font-size: 1rem;
+            text-align: center;
+            z-index: 1;
+            max-width: 280px;
+            line-height: 1.6;
+        }
+        .right-panel {
+            width: 55%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            padding: 60px 40px;
+        }
+        .form-box { width: 100%; max-width: 420px; }
+        .icon-box {
+            width: 65px; height: 65px;
+            background: #a64d79;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .icon-box i { color: #fff; font-size: 1.6rem; }
+        h2 { font-size: 2rem; color: #a64d79; font-weight: 600; margin-bottom: 8px; }
+        .sub { color: #888; font-size: 0.9rem; margin-bottom: 40px; }
+        .error-box {
+            background: #ffebee; color: #c62828;
+            padding: 10px 14px; border-radius: 8px;
+            margin-bottom: 20px; font-size: 0.9rem;
+        }
+        .field-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #999;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            outline: none;
+            background: #fff;
+            transition: border 0.3s;
+        }
+        input:focus { border-color: #a64d79; }
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: #a64d79;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .login-btn:hover { opacity: 0.9; }
+        .back-link { text-align: center; margin-top: 20px; font-size: 0.85rem; }
+        .back-link a { color: #a64d79; text-decoration: none; }
+        .footer-text { text-align: center; margin-top: 30px; color: #bbb; font-size: 0.8rem; }
+
+            @@media (max-width: 768px) {
+                body {
+                    flex-direction: column;
+                }
+
+                .left-panel, .right-panel {
+                    width: 100%;
+                }
+
+                .left-panel {
+                    padding: 40px 20px;
+                }
+
+                    .left-panel h1 {
+                        font-size: 2rem;
+                    }
+
+                .right-panel {
+                    padding: 40px 20px;
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="left-panel">
+        <h1><span>Artisan</span> Valley</h1>
+        <p>Moderator Portal</p>
+        <div class="left-divider"></div>
+        <div class="left-quote">"Review with care,<br>approve with precision."</div>
+    </div>
+    <div class="right-panel">
+        <div class="form-box">
+            <div class="icon-box">
+                <i class="fa-solid fa-video"></i>
+            </div>
+            <h2>Moderator Portal</h2>
+            <p class="sub">Sign in to review product videos.</p>
+
+            @if (TempData["ModError"] != null)
+            {
+                <div class="error-box">⚠️ @TempData["ModError"]</div>
+            }
+
+            <form asp-controller="Moderator" asp-action="Login" method="post">
+    <label class="field-label">Email Address</label>
+    <input type="email" name="email" 
+        placeholder="" 
+        autocomplete="off" 
+        required>
+           <label class="field-label">Password</label>
+                <input type="password" name="password"
+                       placeholder="........."
+                       autocomplete="new-password"
+                       required>
+
+                <div style="text-align:right; margin-top:-16px; margin-bottom:20px;">
+                    <a href="javascript:void(0)" onclick="openForgotModal()" style="color:#a64d79; font-size:0.82rem; text-decoration:none;">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    Continue →
+                </button>
+            </form>
+            <div class="back-link">
+                <a href="/">← Back to Website</a>
+            </div>
+            <div class="footer-text">© 2025 Artisan Valley. All rights reserved.</div>
+        </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-lock-open" style="color:#a64d79;"></i> Forgot Password</h3>
+                <span class="modal-close" onclick="closeForgotModal()">&times;</span>
+            </div>
+            <div style="padding:20px;">
+                <p style="font-size:0.85rem; color:#888; margin-bottom:18px;">Enter your moderator email address. We'll send you a link to reset your password.</p>
+                <input type="email" id="forgotEmail" placeholder="Email Address" style="margin-bottom:16px;">
+                <div id="forgotMsg" style="display:none; font-size:0.85rem; margin-bottom:14px;"></div>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="closeForgotModal()" style="flex:1; padding:12px; background:#f1f5f9; color:#555; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Cancel</button>
+                    <button onclick="submitForgotPassword()" style="flex:1; padding:12px; background:#a64d79; color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Send Reset Link</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(30,16,50,0.5);
+                z-index: 9999;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .modal-overlay.show {
+                    display: flex;
+                }
+
+            .modal-box {
+                background: #fff;
+                border-radius: 14px;
+                width: 380px;
+                max-width: 90%;
+                overflow: hidden;
+            }
+
+            .modal-header {
+                padding: 18px 20px;
+                border-bottom: 1px solid #f0f0f0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+                .modal-header h3 {
+                    font-size: 1rem;
+                    color: #1a1a2e;
+                }
+
+            .modal-close {
+                cursor: pointer;
+                color: #999;
+                font-size: 1.3rem;
+                line-height: 1;
+            }
+    </style>
+
+    <script>
+            function openForgotModal() {
+                document.getElementById('forgotEmail').value = '';
+                document.getElementById('forgotMsg').style.display = 'none';
+                document.getElementById('forgotModal').classList.add('show');
+            }
+
+            function closeForgotModal() {
+                document.getElementById('forgotModal').classList.remove('show');
+            }
+
+            async function submitForgotPassword() {
+                const email = document.getElementById('forgotEmail').value.trim();
+                const msgBox = document.getElementById('forgotMsg');
+
+                if (!email) {
+                    msgBox.style.color = '#c62828';
+                    msgBox.textContent = 'Please enter your email address.';
+                    msgBox.style.display = 'block';
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('email', email);
+
+                const res = await fetch('/Moderator/ForgotPasswordAjax', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.success) {
+                    msgBox.style.color = '#2e7d32';
+                    msgBox.textContent = data.message || 'Reset link sent to your email.';
+                } else {
+                    msgBox.style.color = '#c62828';
+                    msgBox.textContent = data.message || 'Something went wrong.';
+                }
+                msgBox.style.display = 'block';
+            }
+    </script>
+</body>
+</html>

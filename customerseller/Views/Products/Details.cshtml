@@ -1,0 +1,747 @@
+﻿@model customerseller.Models.Product
+@{
+    ViewData["Title"] = Model.Title + " - Artisan Valley";
+    var imagePath = Model.ImageUrl;
+}
+
+<style>
+    .pd-wrap {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .pd-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 50px;
+        align-items: start;
+    }
+
+    .pd-img-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 80px;
+    }
+
+        .pd-img-box img {
+            width: 100%;
+            height: 380px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+    .pd-badge {
+        display: inline-block;
+        background: #fdf0f5;
+        color: #a64d79;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 4px 14px;
+        border-radius: 20px;
+        border: 1px solid #f0c4d8;
+        margin-bottom: 12px;
+    }
+
+    .pd-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #222;
+        margin: 0 0 10px;
+        line-height: 1.3;
+    }
+
+    .pd-rating {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+        font-size: 0.9rem;
+        color: #888;
+    }
+
+    .pd-stars {
+        color: #ffc107;
+        font-size: 1.1rem;
+    }
+
+    .pd-price {
+        font-size: 2rem;
+        color: #a64d79;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    .pd-divider {
+        height: 1px;
+        background: #f0f0f0;
+        margin: 20px 0;
+    }
+
+    .pd-label {
+        font-size: 0.9rem;
+        color: #666;
+        margin: 0 0 10px;
+        font-weight: 500;
+    }
+
+    .pd-colors {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .pd-color {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.2s;
+        box-sizing: border-box;
+    }
+
+        .pd-color.on {
+            border: 3px solid #a64d79;
+            transform: scale(1.1);
+        }
+
+    .pd-sizes {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .pd-size {
+        padding: 7px 16px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        background: #fff;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #333;
+    }
+
+        .pd-size.on {
+            background: #a64d79;
+            color: #fff;
+            border-color: #a64d79;
+        }
+
+    .pd-qty {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        width: fit-content;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+        .pd-qty button {
+            width: 40px;
+            height: 40px;
+            background: #f5f5f5;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #a64d79;
+            font-weight: bold;
+        }
+
+            .pd-qty button:hover {
+                background: #a64d79;
+                color: #fff;
+            }
+
+        .pd-qty span {
+            min-width: 50px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+    .pd-btn-cart {
+        width: 100%;
+        padding: 14px;
+        background: #a64d79;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-bottom: 12px;
+    }
+
+    .pd-btn-buy {
+        width: 100%;
+        padding: 14px;
+        background: #222;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-bottom: 12px;
+    }
+
+    .pd-btn-cont {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        background: #fff;
+        color: #a64d79;
+        border: 2px solid #a64d79;
+        border-radius: 8px;
+        font-size: 1.05rem;
+        font-weight: 700;
+        text-align: center;
+        text-decoration: none;
+        box-sizing: border-box;
+    }
+
+    @@media (max-width: 768px) {
+        .pd-grid {
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .pd-img-box {
+            position: static;
+            padding: 20px;
+        }
+
+            .pd-img-box img {
+                height: 280px;
+            }
+
+        .pd-title {
+            font-size: 1.5rem;
+        }
+
+        .pd-price {
+            font-size: 1.5rem;
+        }
+
+        .review-form .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .pd-wrap {
+            margin: 20px auto;
+            padding: 0 14px;
+        }
+
+        button[title="Message Seller"] {
+            width: 48px;
+            height: 48px;
+            font-size: 1.2rem;
+            bottom: 20px;
+            right: 20px;
+        }
+    }
+
+    .pd-img-box {
+            position: static;
+        }
+    }
+
+    .reviews-section {
+        max-width: 1100px;
+        margin: 50px auto 40px;
+        padding: 0 20px;
+    }
+
+        .reviews-section h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+        }
+
+    .avg-rating {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 24px;
+        font-size: 0.9rem;
+        color: #777;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .avg-stars {
+        color: #ffc107;
+        font-size: 1.2rem;
+    }
+
+    .review-form {
+        background: #fdf0f5;
+        border: none;
+        border-radius: 16px;
+        padding: 24px;
+        margin-top: 30px;
+    }
+
+        .review-form h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #a64d79;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .review-form .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .review-form .form-group {
+            margin-bottom: 12px;
+        }
+
+        .review-form label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #a64d79;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .review-form input,
+        .review-form select,
+        .review-form textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid #e8d5e0;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #333;
+            box-sizing: border-box;
+            background: #fff;
+            transition: border-color 0.2s;
+        }
+
+        .review-form textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+            .review-form input:focus,
+            .review-form select:focus,
+            .review-form textarea:focus {
+                border-color: #a64d79;
+                outline: none;
+            }
+
+        .review-form button[type=submit] {
+            background: #a64d79;
+            color: #fff;
+            border: none;
+            padding: 9px 24px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+            .review-form button[type=submit]:hover {
+                background: #873b63;
+            }
+
+    .desc-accordion {
+        margin-bottom: 20px;
+    }
+
+    .desc-toggle {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #a64d79;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .desc-toggle:hover {
+            background: #873b63;
+        }
+
+    .desc-arrow {
+        transition: transform 0.3s ease;
+        font-size: 0.85rem;
+    }
+
+    .desc-accordion:hover .desc-arrow {
+        transform: rotate(180deg);
+    }
+
+    .desc-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+        background: #fdf0f5;
+        border-radius: 0 0 10px 10px;
+        padding: 0 18px;
+    }
+
+    .desc-accordion:hover .desc-content {
+        max-height: 300px;
+        padding: 16px 18px;
+        border: 1.5px solid #a64d79;
+        border-top: none;
+        margin-top: -2px;
+    }
+
+    .desc-content p {
+        font-size: 0.92rem;
+        color: #555;
+        line-height: 1.7;
+        margin: 0;
+        text-align: center;
+    }
+</style>
+
+<div class="pd-wrap">
+    <div class="pd-grid">
+        <div class="pd-img-box">
+            <img src="@imagePath" alt="@Model.Title" onerror="this.src='/images/placeholder.jpg'" />
+        </div>
+
+        <div>
+            <span class="pd-badge">Handmade</span>
+            <div style="margin:12px 0;">
+                <a href="#" style="display:inline-flex; align-items:center; gap:6px; font-size:0.85rem; color:#666; text-decoration:none;">
+                    <i class="fa-solid fa-store" style="color:#a64d79;"></i>
+                    Sold by <strong style="color:#a64d79;">@ViewBag.ShopName</strong>
+                </a>
+            </div>
+
+           
+            <span style="font-size:0.8rem; color:#a64d79; font-weight:600; margin-left:8px;">@Model.DisplayId</span>
+            <h1 class="pd-title">@Model.Title</h1>
+
+            <div class="pd-rating">
+                <span class="pd-stars">★★★★★</span>
+                <span style="color:@(Model.Stock != "0" ? "#10b981" : "#dc2626"); font-weight:600;">
+                    @(Model.Stock != "0" ? $"{Model.Stock} in stock" : "Out of stock")
+                </span>
+            </div>
+
+            <div class="pd-price">Rs.@Model.Price</div>
+            <div class="pd-divider"></div>
+            @{
+
+                bool isFootwear = Model.Title != null &&
+                                (Model.Title.Contains("Shoes") ||
+                                Model.Title.Contains("Boots") ||
+                                Model.Title.Contains("Men") ||
+                                Model.Title.Contains("Sandals") ||
+                                Model.Title.Contains("Khussa") ||
+                                Model.Title.Contains("Sneakers") ||
+                                Model.Title.Contains("Slides") ||
+                                Model.Title.Contains("Loafers") ||
+                                Model.Title.Contains("slippers") ||
+                                Model.Title.Contains("Slides") ||
+                                Model.Title.Contains("Flats") ||
+                                Model.Title.Contains("Heels") ||
+                                Model.Title.Contains("Women"));
+            }
+
+            @if (isFootwear)
+            {
+                <p class="pd-label">Color: <strong id="pd-color-name" style="color:#333;">Brown</strong></p>
+                <div class="pd-colors">
+                    <div class="pd-color on" style="background:#8B4513;" onclick="pdColor(this,'Brown')"></div>
+                    <div class="pd-color" style="background:#1a1a1a;" onclick="pdColor(this,'Black')"></div>
+                    <div class="pd-color" style="background:#D2691E;" onclick="pdColor(this,'Tan')"></div>
+                    <div class="pd-color" style="background:#800020;" onclick="pdColor(this,'Burgundy')"></div>
+                </div>
+
+                <p class="pd-label">Size: <strong id="pd-size-name" style="color:#333;">Select size</strong></p>
+                <div class="pd-sizes">
+                    <button type="button" class="pd-size" onclick="pdSize(this,'36')">36</button>
+                    <button type="button" class="pd-size" onclick="pdSize(this,'37')">37</button>
+                    <button type="button" class="pd-size" onclick="pdSize(this,'38')">38</button>
+                    <button type="button" class="pd-size" onclick="pdSize(this,'39')">39</button>
+                    <button type="button" class="pd-size" onclick="pdSize(this,'40')">40</button>
+                </div>
+                <div class="pd-divider"></div>
+            }
+
+            <div class="pd-divider"></div>
+
+            <p class="pd-label">Quantity</p>
+            <div class="pd-qty">
+                <button type="button" onclick="pdQty(-1)">-</button>
+                <span id="pd-qty-val">1</span>
+                <button type="button" onclick="pdQty(1)" @(Model.Stock == "0" ? "disabled" : "")>+</button>
+            </div>
+            <p id="pd-qty-msg" style="display:none; color:#dc2626; font-size:0.85rem; margin-top:-12px; margin-bottom:16px;">
+                Only @Model.Stock left in stock.
+            </p>
+
+            @if (Model.Stock != "0")
+            {
+                <button type="button" id="btnAddToCart" class="pd-btn-cart" onclick="pdAddToCart()">
+                    <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+                </button>
+
+                <button type="button" id="btnBuyNow" class="pd-btn-buy" onclick="pdBuyNow()">
+                    <i class="fa-solid fa-bolt"></i> Buy it Now
+                </button>
+            }
+            else
+            {
+                <button type="button" class="pd-btn-cart" disabled style="background:#ccc; cursor:not-allowed;">
+                    Out of Stock
+                </button>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <div class="desc-accordion" style="margin-top:20px;">
+                    <button type="button" class="desc-toggle">
+                        <span><i class="fa-solid fa-circle-info" style="margin-right:8px;"></i>Description</span>
+                        <i class="fa-solid fa-chevron-down desc-arrow"></i>
+                    </button>
+                    <div class="desc-content">
+                        <p>@Model.Description</p>
+                    </div>
+                </div>
+            }
+            <button onclick="startSellerChat()" title="Message Seller"
+                    style="position:fixed; bottom:30px; right:30px; width:58px; height:58px; border-radius:50%;
+                background:#a64d79; color:#fff; border:none; box-shadow:0 4px 16px rgba(0,0,0,0.25);
+                font-size:1.4rem; cursor:pointer; z-index:9998; display:flex; align-items:center; justify-content:center;">
+                <i class="fa-solid fa-comment-dots"></i>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="reviews-section">
+        <h3>Customer Reviews</h3>
+
+        @{
+            var reviews = ViewBag.Reviews as List<customerseller.Models.Review>;
+            if (reviews == null) reviews = new List<customerseller.Models.Review>();
+            double avgRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
+            int fullStars = (int)Math.Round(avgRating);
+        }
+
+        <div class="avg-rating">
+            <span class="avg-stars">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <span>@(i <= fullStars ? "★" : "☆")</span>
+                }
+            </span>
+            <span><strong>@avgRating.ToString("0.0")</strong> / 5 &nbsp;·&nbsp; @reviews.Count review(s)</span>
+        </div>
+
+        @if (reviews.Any())
+        {
+            foreach (var r in reviews)
+            {
+                <div class="review-card">
+                    <div class="r-top">
+                        <span class="r-name">@r.UserName</span>
+                        <span class="r-stars">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <span>@(i <= r.Rating ? "★" : "☆")</span>
+                            }
+                        </span>
+                    </div>
+                    <p class="r-comment">@r.Comment</p>
+                    <span class="r-date">@r.CreatedAt.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture)</span>
+                </div>
+            }
+        }
+
+        <div class="review-form">
+            <h4> Write a Review</h4>
+            @using (Html.BeginForm("Submit", "Review", FormMethod.Post))
+            {
+                <input type="hidden" name="ProductId" value="@Model.Id" />
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Your Name</label>
+                        <input type="text" name="UserName" placeholder="e.g. Sara Ahmed" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Rating</label>
+                        <select name="Rating">
+                            <option value="5">★★★★★ Excellent</option>
+                            <option value="4">★★★★☆ Good</option>
+                            <option value="3">★★★☆☆ Average</option>
+                            <option value="2">★★☆☆☆ Poor</option>
+                            <option value="1">★☆☆☆☆ Terrible</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Comment</label>
+                    <textarea name="Comment" rows="2" placeholder="Share your experience..."></textarea>
+                </div>
+
+                <button type="submit">Submit Review</button>
+            }
+        </div>
+    </div>
+</div>
+
+    
+@section Scripts {
+    <script>
+        var isUserLoggedIn = @(Context.Session.GetString("UserEmail") != null ? "true" : "false");
+
+                    function pdQty(delta) {
+            var el = document.getElementById('pd-qty-val');
+            var msgEl = document.getElementById('pd-qty-msg');
+            var current = parseInt(el.innerText) || 1;
+            var maxStock = parseInt("@Model.Stock") || 0;
+            var newVal = current + delta;
+
+            if (newVal > maxStock) {
+                newVal = maxStock;
+                if (msgEl) msgEl.style.display = 'block';
+            } else {
+                if (msgEl) msgEl.style.display = 'none';
+            }
+            if (newVal < 1) newVal = 1;
+
+            el.innerText = newVal;
+        }
+        function pdColor(el, name) {
+            document.querySelectorAll('.pd-color').forEach(c => c.classList.remove('on'));
+            el.classList.add('on');
+            document.getElementById('pd-color-name').innerText = name;
+        }
+
+        function pdSize(el, size) {
+            document.querySelectorAll('.pd-size').forEach(s => s.classList.remove('on'));
+            el.classList.add('on');
+            document.getElementById('pd-size-name').innerText = size;
+        }
+
+        function pdAddToCart() {
+            try {
+                var currentQty = parseInt(document.getElementById('pd-qty-val').innerText) || 1;
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+                let item = {
+                    id: "@Model.Id",
+                    title: "@Model.Title",
+                    price: parseFloat("@Model.Price") || 0,
+                    img: "@imagePath",
+                    qty: currentQty
+                };
+
+                let existing = cart.find(i => i.id.toString() === item.id.toString());
+                if (existing) {
+                    existing.qty += currentQty;
+                } else {
+                    cart.push(item);
+                }
+
+                localStorage.setItem('cart', JSON.stringify(cart));
+                localStorage.removeItem('buyNowItem');
+
+                if (typeof renderCart === 'function') renderCart();
+                if (typeof openCart === 'function') openCart();
+            } catch (e) { console.error("Cart Error:", e); }
+        }
+
+        function pdBuyNow() {
+            try {
+                var currentQty = parseInt(document.getElementById('pd-qty-val').innerText) || 1;
+
+                let buyNowData = {
+                    id: "@Model.Id",
+                    title: "@Model.Title",
+                    price: parseFloat("@Model.Price") || 0,
+                    img: "@imagePath",
+                    qty: currentQty
+                };
+
+                localStorage.setItem('buyNowItem', JSON.stringify(buyNowData));
+
+                if (isUserLoggedIn) {
+                    window.location.href = '/Cart/Checkout';
+                } else {
+                    const inp = document.getElementById('loginReturnUrl');
+                    if (inp) inp.value = '/Cart/Checkout';
+
+                    const loginPopup = document.getElementById('loginPopup');
+                    const loginOverlay = document.getElementById('loginOverlay');
+                    if (loginPopup && loginOverlay) {
+                        loginPopup.classList.add('active');
+                        loginOverlay.classList.add('active');
+                    }
+                }
+            } catch (e) { console.error("Buy Now Error:", e); }
+        }
+
+                function toggleDescription(btn) {
+            btn.classList.toggle('active');
+            var content = btn.nextElementSibling;
+            content.classList.toggle('open');
+        }
+                async function startSellerChat() {
+            if (!isUserLoggedIn) {
+                const loginPopup = document.getElementById('loginPopup');
+                const loginOverlay = document.getElementById('loginOverlay');
+                if (loginPopup && loginOverlay) {
+                    loginPopup.classList.add('active');
+                    loginOverlay.classList.add('active');
+                }
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('otherEmail', '@Model.SellerEmail');
+            formData.append('otherRole', 'Seller');
+            formData.append('productId', '@Model.Id');
+
+            const res = await fetch('/Chat/StartConversation', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                window.location.href = '/Chat/Messages?open=' + data.conversationId;
+            } else {
+                alert(data.message || 'Could not start chat.');
+            }
+        }
+    </script>
+}
+

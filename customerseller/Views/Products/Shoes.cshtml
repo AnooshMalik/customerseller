@@ -1,0 +1,29 @@
+﻿@model List<customerseller.Models.Product>
+@{
+    ViewData["Title"] = "Shoes - Artisan Valley";
+}
+
+<div class="category-title-main">Shoes</div>
+
+<div class="product-row">
+    @foreach (var product in Model)
+    {
+        var imagePath = Url.Content($"~/images/{product.ImageUrl}");
+        <div class="product-card">
+            <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">
+                <div class="image-wrapper">
+                    <img src="@imagePath" alt="@product.Title" />
+                </div>
+                <div class="product-title">@product.Title</div>
+                <div class="product-price">Rs.@product.Price</div>
+            </a>
+            <button class="plus-btn"
+            data-id="@product.Id"
+            data-title="@product.Title"
+            data-price="@product.Price"
+            data-img="@imagePath">
+                +
+            </button>
+        </div>
+    }
+</div>

@@ -1,0 +1,107 @@
+﻿<link href="~/style.css" rel="stylesheet" />
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_Layout";
+}
+
+
+    <section class="help-center">
+        <div class="container">
+            <!-- Header / Hero -->
+            <div class="hc-header">
+                <h1>Welcome to Our Help Center</h1>
+                <p>Find quick answers, browse categories, or explore featured articles.</p>
+                <input type="text" placeholder="Search help articles..." class="hc-search">
+            </div>
+
+            <!-- Categories -->
+            <div class="hc-categories">
+                <h2>Browse Categories</h2>
+                <div class="categories-grid">
+                    <div class="category">
+                        <div class="cat-icon">💳</div>
+                        <p>Billing</p>
+                    </div>
+                    <div class="category">
+                        <div class="cat-icon">🛒</div>
+                        <p>Orders</p>
+                    </div>
+                    <div class="category">
+                        <div class="cat-icon">⚙️</div>
+                        <p>Account</p>
+                    </div>
+                    <div class="category">
+                        <div class="cat-icon">📦</div>
+                        <p>Shipping</p>
+                    </div>
+                    <div class="category">
+                        <div class="cat-icon">🔄</div>
+                        <p>Returns</p>
+                    </div>
+                    <div class="category">
+                        <div class="cat-icon">💡</div>
+                        <p>Guides</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Articles -->
+            <div class="hc-featured">
+                <h2>Featured Articles</h2>
+                <div class="featured-grid">
+                    <div class="article-card">
+                        <h3>How to Track Your Order</h3>
+                        <p>Get real-time updates and track your shipment easily.</p>
+                    </div>
+                    <div class="article-card">
+                        <h3>Reset Your Password</h3>
+                        <p>Step-by-step guide to securely reset your account password.</p>
+                    </div>
+                    <div class="article-card">
+                        <h3>Contact Support</h3>
+                        <p>Reach out via live chat or email for fast assistance.</p>
+                    </div>
+                    <div class="article-card">
+                        <h3>Shipping & Delivery</h3>
+                        <p>Learn about shipping times, delivery options, and tracking.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Accordion -->
+            <div class="hc-faq">
+                <h2>Frequently Asked Questions</h2>
+
+                <div class="faq-item">
+                    <button class="faq-question">How can I reset my password?</button>
+                    <div class="faq-answer">
+                        <p>Click 'Forgot Password' on the login page and follow the instructions sent to your email.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">How do I contact support?</button>
+                    <div class="faq-answer">
+                        <p>Email us at support@example.com.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">Where can I find my order history?</button>
+                    <div class="faq-answer">
+                        <p>Your order history is in your account dashboard under 'My Orders'.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">How do returns work?</button>
+                    <div class="faq-answer">
+                        <p>Returns can be initiated within 7 days of delivery via your account dashboard.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+

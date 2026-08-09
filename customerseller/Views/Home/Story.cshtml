@@ -1,0 +1,356 @@
+﻿@{
+    ViewData["Title"] = "Our Story";
+}
+
+<style>
+    /* ===== HERO ===== */
+    .story-hero-section {
+        position: relative;
+        height: 480px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .story-hero-section img {
+        position: absolute;
+        width: 100%; height: 100%;
+        object-fit: cover;
+        filter: brightness(0.45);
+    }
+
+    .story-hero-text {
+        position: relative;
+        text-align: center;
+        color: #fff;
+        z-index: 2;
+        padding: 0 20px;
+    }
+
+    .story-hero-text span {
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: #f0c4d8;
+        margin-bottom: 14px;
+    }
+
+    .story-hero-text h1 {
+        font-size: 3.2rem;
+        font-weight: 900;
+        font-family: 'Georgia', serif;
+        margin: 0 0 16px;
+        line-height: 1.15;
+    }
+
+    .story-hero-text p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        max-width: 560px;
+        margin: 0 auto;
+        line-height: 1.7;
+    }
+
+    /* ===== INTRO ===== */
+    .story-intro {
+        max-width: 780px;
+        margin: 70px auto;
+        padding: 0 24px;
+        text-align: center;
+    }
+
+    .story-intro h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #222;
+        margin-bottom: 20px;
+        font-family: 'Georgia', serif;
+    }
+
+    .story-intro p {
+        font-size: 1.05rem;
+        color: #555;
+        line-height: 1.9;
+        margin-bottom: 18px;
+    }
+
+    .story-divider {
+        width: 60px;
+        height: 3px;
+        background: #1e2d40;;
+        margin: 30px auto;
+        border-radius: 2px;
+    }
+
+    /* ===== QUOTE ===== */
+    .story-quote {
+        background: #fdf6f9;
+        border-left: 4px solid #a64d79;
+        max-width: 780px;
+        margin: 0 auto 70px;
+        padding: 28px 36px;
+        border-radius: 0 8px 8px 0;
+    }
+
+    .story-quote p {
+        font-size: 1.15rem;
+        font-style: italic;
+        color: #5a3d4e;
+        margin: 0;
+        line-height: 1.8;
+    }
+
+    /* ===== TWO COLUMN ===== */
+    .story-two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        max-width: 1100px;
+        margin: 0 auto 80px;
+        padding: 0 24px;
+        align-items: center;
+    }
+
+    .story-two-col.reverse { direction: rtl; }
+    .story-two-col.reverse > * { direction: ltr; }
+
+    .story-two-col img {
+        width: 100%;
+        height: 380px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+
+    .story-two-col-text h2 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #222;
+        margin-bottom: 18px;
+        font-family: 'Georgia', serif;
+    }
+
+    .story-two-col-text p {
+        font-size: 1rem;
+        color: #555;
+        line-height: 1.9;
+        margin-bottom: 14px;
+    }
+
+    /* ===== VALUES ===== */
+    .story-values {
+        background: #fafafa;
+        padding: 70px 24px;
+        margin-bottom: 0;
+    }
+
+    .story-values h2 {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #222;
+        margin-bottom: 10px;
+        font-family: 'Georgia', serif;
+    }
+
+    .story-values-sub {
+        text-align: center;
+        color: #888;
+        font-size: 1rem;
+        margin-bottom: 50px;
+    }
+
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .value-card {
+        background: #fff;
+        padding: 32px 24px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border-top: 3px solid #a64d79;
+        transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .value-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 8px 24px rgba(166,77,121,0.15);
+    }
+
+    .value-icon {
+        width: 52px; height: 52px;
+        border-radius: 50%;
+        background: #f9eef4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 1.4rem;
+        color: #a64d79;
+    }
+
+    .value-card h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #222;
+        margin-bottom: 8px;
+    }
+
+    .value-card p {
+        font-size: 0.88rem;
+        color: #666;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .story-cta {
+    background: #ffffff;
+    padding: 80px 24px;
+    text-align: center;
+    color: #222;
+    border-top: 1px solid #f0f0f0;
+}
+
+.story-cta h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 16px;
+    font-family: 'Georgia', serif;
+    color: #222;
+}
+
+.story-cta p {
+    font-size: 1.05rem;
+    color: #555;
+    max-width: 520px;
+    margin: 0 auto 32px;
+    line-height: 1.7;
+}
+
+.story-cta a {
+    display: inline-block;
+    background: #a64d79;
+    color: #fff;
+    padding: 14px 40px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.25s;
+    box-shadow: 0 4px 16px rgba(166,77,121,0.3);
+}
+
+.story-cta a:hover {
+    background: #873b63;
+    transform: translateY(-2px);
+}
+    @@media (max-width: 768px) {
+        .story-hero-text h1 { font-size: 2.2rem; }
+        .story-two-col { grid-template-columns: 1fr; gap: 30px; }
+        .story-two-col.reverse { direction: ltr; }
+        .values-grid { grid-template-columns: 1fr 1fr; }
+        .story-hero-section { height: 360px; }
+    }
+
+    @@media (max-width: 480px) {
+        .values-grid { grid-template-columns: 1fr; }
+        .story-cta h2 { font-size: 1.6rem; }
+    }
+</style>
+
+<!-- HERO -->
+<div class="story-hero-section">
+    <img src="~/customer/images/st.jpg" alt="Artisan at work">
+    <div class="story-hero-text">
+        <span>Est. with Love</span>
+        <h1>Our Story</h1>
+        <p>A journey of passion, tradition, and craftsmanship — where every piece tells a human story.</p>
+    </div>
+</div>
+
+<!-- INTRO -->
+<div class="story-intro">
+    <h2>Where It All Began</h2>
+    <p>In a world dominated by mass production and fleeting trends, we believe in something deeper — something timeless. Our journey began with a simple dream: to celebrate the beauty of handmade craftsmanship and preserve art passed down through generations.</p>
+    <p>Every product you see here carries a story. It's the story of skilled artisans who wake up each day with passion in their hearts and dedication in their hands.</p>
+    <div class="story-divider"></div>
+</div>
+
+<!-- QUOTE -->
+<div class="story-quote">
+    <p>"When you choose handmade, you're not just buying a product — you're investing in someone's dream, supporting their family, and keeping age-old traditions alive."</p>
+</div>
+
+<!-- TWO COL: Heart Behind -->
+<div class="story-two-col" style="margin-top:80px;">
+    <img src="~/customer/images/st.jpg" alt="Artisan crafting">
+    <div class="story-two-col-text">
+        <h2>The Heart Behind Every Piece</h2>
+        <p>Our artisans pour their soul into every stitch, every brushstroke, every carefully placed detail. They don't work on assembly lines — they work in small workshops, homes, and studios where each creation is given the time and attention it deserves.</p>
+        <p>We've witnessed the joy in an artisan's eyes when their creation is appreciated. We've seen families supported by the income from their craft. We've watched dying art forms be revived.</p>
+    </div>
+</div>
+
+<!-- TWO COL: Why Handmade (reversed) -->
+<div class="story-two-col reverse">
+    <img src="~/customer/images/banner2.jpeg" alt="Handmade products">
+    <div class="story-two-col-text">
+        <h2>Why Handmade Matters</h2>
+        <p>In an era where everything is instant and disposable, handmade products remind us to slow down and appreciate the beauty of craftsmanship. They tell us that some things are worth waiting for, worth treasuring for years to come.</p>
+        <p>When you hold a handmade item, you can feel the difference. There's warmth in it, character in its imperfections — a connection to the maker, their culture, and a tradition that spans centuries.</p>
+    </div>
+</div>
+
+<!-- VALUES -->
+<div class="story-values">
+    <h2>What We Stand For</h2>
+    <p class="story-values-sub">The principles that guide everything we do</p>
+    <div class="values-grid">
+        <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-hands"></i></div>
+            <h3>Authenticity</h3>
+            <p>Every piece is 100% handmade with genuine materials and traditional techniques.</p>
+        </div>
+        <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-leaf"></i></div>
+            <h3>Sustainability</h3>
+            <p>Eco-friendly practices that respect our planet and future generations.</p>
+        </div>
+        <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-star"></i></div>
+            <h3>Quality</h3>
+            <p>No shortcuts, no compromises. Only the finest craftsmanship in every product.</p>
+        </div>
+        <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-handshake"></i></div>
+            <h3>Fair Trade</h3>
+            <p>We ensure artisans receive fair compensation for their incredible work.</p>
+        </div>
+        <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-gem"></i></div>
+            <h3>Uniqueness</h3>
+            <p>Each piece is one-of-a-kind, carrying its own character and charm.</p>
+        </div>
+        <div class="value-card">
+            <div class="value-icon"><i class="fa-solid fa-heart"></i></div>
+            <h3>Community</h3>
+            <p>Building a community that values art, tradition, and human connection.</p>
+        </div>
+    </div>
+</div>
+
+<!-- CTA -->
+<div class="story-cta">
+    <h2>Ready to Experience the Magic?</h2>
+    <p>Discover our curated collection of handmade treasures, each with its own unique story to tell.</p>
+    <a asp-controller="Home" asp-action="Index">Browse Our Collection</a>
+</div>

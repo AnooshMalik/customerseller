@@ -1,0 +1,73 @@
+﻿@model IEnumerable<customerseller.Models.Review>
+@{
+    Layout = "_DashboardLayout";
+    // Average rating ko dynamic calculate karne ke liye
+    var avgRating = Model != null && Model.Any() ? Model.Average(r => r.Rating).ToString("0.0") : "0.0";
+}
+<link href="~/Dashboard.css" rel="stylesheet" />
+
+<main class="reviews-container">
+    <header class="reviews-header">
+        <div class="title-group">
+            <h1 class="page-title">Customer Reviews</h1>
+            <p class="sub-title">Manage your store reputation and feedback.</p>
+        </div>
+        <div class="rating-summary">
+            <p class="summary-label">Average Rating</p>
+            @* Hardcoded 4.8 ki jagah ab dynamic value ayegi *@
+            <h2 class="summary-score">@avgRating <span class="star-icon">★</span></h2>
+        </div>
+    </header>
+
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var review in Model)
+        {
+            <div class="review-card">
+                <div class="card-header">
+                    <div class="customer-info">
+                        <div class="avatar">@review.CustomerInitials</div>
+                        <div class="customer-details">
+                            <h4 class="customer-name">@review.CustomerName</h4>
+                            <p class="post-date">@review.DateLabel</p>
+                        </div>
+                    </div>
+                    <div class="star-rating">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="@(i <= review.Rating ? "fas" : "far") fa-star"></i>
+                        }
+                    </div>
+                </div>
+
+                <div class="tag-container">
+                    <span class="product-tag">@review.ProductName</span>
+                </div>
+
+                <p class="review-text">"@review.Comment"</p>
+
+                <div class="action-area">
+                    <span class="btn-reply" onclick="toggleReply('@review.Id')">
+                        <i class="fas fa-reply"></i> Respond to this review
+                    </span>
+                </div>
+
+                <div id="reply-@review.Id" class="reply-box" style="display:none;">
+                    <textarea class="reply-input" placeholder="Write your thank you note..."></textarea>
+                    <div class="reply-actions">
+                        <button class="btn-send" onclick="sendResponse('@review.Id')">Send Response</button>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div style="text-align:center; padding: 50px; color: #999;">
+            <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+            <p>No reviews yet. Feedback from customers will appear here.</p>
+        </div>
+    }
+</main>
+
+<script src="~/js/Dashboard.js"></script>

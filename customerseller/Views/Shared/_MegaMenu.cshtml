@@ -1,0 +1,362 @@
+﻿<nav style="display:flex; align-items:center; font-family:inherit; position:relative;">
+  <ul style="list-style:none; margin:0; padding:0; display:flex; gap:28px; align-items:center;">
+ 
+    <li style="position:static;" class="mega-item">
+      <a href="javascript:void(0)" class="mega-nav-link" style="font-size:1rem; font-weight:600; color:#222; text-decoration:none; display:inline-flex; align-items:center; gap:5px; cursor:pointer; outline:none !important; -webkit-tap-highlight-color:transparent; border:none;">
+        Shop <i class="fa-solid fa-chevron-down" style="font-size:0.65rem; pointer-events:none;"></i>
+      </a>
+ 
+      <div class="mega-panel">
+        <div class="mega-grid">
+ 
+          <!-- 1. Fabric & Textile -->
+          <div class="mega-col">
+            <h4 class="mega-heading">Fabric &amp; Textile</h4>
+            <ul>
+              <li><a asp-controller="Products" asp-action="FabricCushionCovers" class="mega-link">Cushion Covers</a></li>
+              <li><a asp-controller="Products" asp-action="FabricKurtas"        class="mega-link">Printed Kurtas</a></li>
+              <li><a asp-controller="Products" asp-action="FabricDupattas"      class="mega-link">Tie-Dye Dupattas</a></li>
+              <li><a asp-controller="Products" asp-action="FabricToteBags"      class="mega-link">Tote Bags</a></li>
+            </ul>
+          </div>
+ 
+          <!-- 2. Wool & Yarn -->
+          <div class="mega-col">
+            <h4 class="mega-heading">Wool &amp; Yarn</h4>
+            <ul>
+              <li><a asp-controller="Products" asp-action="WoolSweaters"    class="mega-link">Sweaters</a></li>
+              <li><a asp-controller="Products" asp-action="WoolCrochetBags" class="mega-link">Crochet Bags</a></li>
+              <li><a asp-controller="Products" asp-action="WoolStorageBaskets"     class="mega-link">Storage Baskets</a></li>
+              <li><a asp-controller="Products" asp-action="WoolBeanies"     class="mega-link">Beanies</a></li>
+            </ul>
+          </div>
+ 
+          <!-- 3. Leather -->
+          <div class="mega-col">
+            <h4 class="mega-heading">Leather</h4>
+            <ul>
+              <li><a asp-controller="Products" asp-action="LeatherHandbags"      class="mega-link">Handbags</a></li>
+              <li><a asp-controller="Products" asp-action="LeatherWallets"   class="mega-link">Wallets</a></li>
+              <li><a asp-controller="Products" asp-action="LeatherBelts"     class="mega-link">Belts</a></li>
+              <li><a asp-controller="Products" asp-action="LeatherKeychains" class="mega-link">Keychains</a></li>
+              <li><a asp-controller="Products" asp-action="LeatherJournals"  class="mega-link">Journals</a></li>
+            </ul>
+          </div>
+ 
+          <!-- 4. Wood -->
+          <div class="mega-col">
+            <h4 class="mega-heading">Wood</h4>
+            <ul>
+              <li><a asp-controller="Products" asp-action="WoodPhotoFrames"     class="mega-link">Photo Frames</a></li>
+              <li><a asp-controller="Products" asp-action="WoodNecklaces"  class="mega-link">Necklaces</a></li>
+              <li><a asp-controller="Products" asp-action="WoodToys"       class="mega-link">Toys</a></li>
+              <li><a asp-controller="Products" asp-action="WoodServingTrays"      class="mega-link">Serving Trays</a></li>
+              <li><a asp-controller="Products" asp-action="WoodShowpieces" class="mega-link">Showpieces</a></li>
+              <li><a asp-controller="Products" asp-action="WoodKeychains"  class="mega-link">Keychains</a></li>
+            </ul>
+          </div>
+ 
+          <!-- 5. Clay & Pottery -->
+          <div class="mega-col">
+            <h4 class="mega-heading">Clay &amp; Pottery</h4>
+            <ul>
+              <li><a asp-controller="Products" asp-action="ClayFlowerPots"      class="mega-link">Flower Pots</a></li>
+              <li><a asp-controller="Products" asp-action="ClayCoffeeMugs"      class="mega-link">Coffee Mugs</a></li>
+              <li><a asp-controller="Products" asp-action="ClayVases"     class="mega-link">Vases</a></li>
+              <li><a asp-controller="Products" asp-action="ClayEarrings"  class="mega-link">Earrings</a></li>
+              <li><a asp-controller="Products" asp-action="ClayFigurines" class="mega-link">Figurines</a></li>
+            </ul>
+          </div>
+ 
+          <!-- 6. Beads & Jewels -->
+          <div class="mega-col">
+            <h4 class="mega-heading"> Jewels</h4>
+            <ul>
+              <li><a asp-controller="Products" asp-action="JewelsNecklaces"  class="mega-link">Necklaces</a></li>
+              <li><a asp-controller="Products" asp-action="JewelsBracelets"  class="mega-link">Bracelets</a></li>
+              <li><a asp-controller="Products" asp-action="JewelsRings"      class="mega-link">Rings</a></li>
+              <li><a asp-controller="Products" asp-action="JewelsBangles"    class="mega-link">Bangles</a></li>
+              <li><a asp-controller="Products" asp-action="JewelsEarrings"   class="mega-link">Earrings</a></li>
+            </ul>
+          </div>
+ 
+          <!-- 7. Paper & Cards -->
+          <div class="mega-col">
+            <h4 class="mega-heading">Paper &amp; Cards</h4>
+            <ul>
+              <li><a asp-controller="Products" asp-action="PaperGreetingCards" class="mega-link">Greeting Cards</a></li>
+              <li><a asp-controller="Products" asp-action="PaperGiftBoxes"     class="mega-link">Gift Boxes</a></li>
+              <li><a asp-controller="Products" asp-action="PaperFlowers"       class="mega-link">Paper Flowers</a></li>
+              <li><a asp-controller="Products" asp-action="PaperShowpieces"    class="mega-link">Showpieces</a></li>
+              <li><a asp-controller="Products" asp-action="PaperScrapbooks"    class="mega-link">Scrapbooks</a></li>
+            </ul>
+          </div>
+ 
+          <!-- 8. Jute & Natural -->
+          <div class="mega-col">
+            <h4 class="mega-heading">Jute &amp; Natural</h4>
+            <ul>
+              <li><a asp-controller="Products" asp-action="JuteBags"      class="mega-link">Bags</a></li>
+              <li><a asp-controller="Products" asp-action="JuteBaskets"   class="mega-link">Baskets</a></li>
+              <li><a asp-controller="Products" asp-action="JuteTrays"     class="mega-link">Trays</a></li>
+              <li><a asp-controller="Products" asp-action="JuteDriedBouquets"  class="mega-link">Dried Bouquets</a></li>
+              <li><a asp-controller="Products" asp-action="JutePaintings" class="mega-link">Paintings</a></li>
+            </ul>
+          </div>
+ 
+          <!-- 9. Resin & Epoxy -->
+          <div class="mega-col">
+            <h4 class="mega-heading">Resin &amp; Epoxy</h4>
+            <ul>
+              <li><a asp-controller="Products" asp-action="ResinCoasters"  class="mega-link">Coasters</a></li>
+              <li><a asp-controller="Products" asp-action="ResinEarrings"  class="mega-link">Earrings</a></li>
+              <li><a asp-controller="Products" asp-action="ResinKeychains" class="mega-link">Keychains</a></li>
+              <li><a asp-controller="Products" asp-action="ResinWallArt"   class="mega-link">Wall Art</a></li>
+              <li><a asp-controller="Products" asp-action="ResinServingTrays"     class="mega-link">Serving Trays</a></li>
+            </ul>
+          </div>
+ 
+          <!-- 10. Metal & Wire -->
+          <div class="mega-col" style="border-right:none;">
+            <h4 class="mega-heading">Metal &amp; Wire</h4>
+            <ul>
+              <li><a asp-controller="Products" asp-action="MetalEarrings"       class="mega-link">Earrings</a></li>
+              <li><a asp-controller="Products" asp-action="MetalVases"          class="mega-link">Vases</a></li>
+              <li><a asp-controller="Products" asp-action="MetalFigurines"      class="mega-link">Figurines</a></li>
+              <li><a asp-controller="Products" asp-action="MetalWallArt"        class="mega-link">Wall Art</a></li>
+              <li><a asp-controller="Products" asp-action="MetalCandleHolders"  class="mega-link">Candle Holders</a></li>
+            </ul>
+          </div>
+ 
+        </div>
+      </div>
+    </li>
+ 
+    <li>
+      <a asp-controller="Home" asp-action="About" style="font-size:1rem; font-weight:600; color:#222; text-decoration:none; outline:none !important;">About</a>
+    </li>
+ 
+  </ul>
+</nav>
+ 
+<style>
+  .mega-panel {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: #fff;
+    z-index: 9999;
+    border-top: 1px solid #eee;
+    border-bottom: 2px solid #a64d79;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+ 
+    /* ✅ HEIGHT FIX — sirf content jitni height, puri screen nahi */
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+ 
+  .mega-panel.active { display: block; }
+ 
+.mega-grid {
+  display: grid;
+  /* ✅ FIX 2: Last column clip nahi hoga */
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  padding: 10px 20px 14px;
+  gap: 0;
+  width: 100%;
+  box-sizing: border-box;  /* ✅ padding andar rahegi */
+  height: auto;
+  align-items: start;
+  overflow: visible;       /* ✅ koi clip nahi */
+}
+
+ 
+  .mega-col {
+  padding: 0 8px;
+  border-right: 1px solid #f0f0f0;
+  min-width: 0;            /* ✅ FIX 3: overflow rokta hai */
+  height: auto;
+  align-self: start;
+  overflow: hidden;        /* ✅ text bahar nahi jayega */
+}
+  .mega-col:first-child { padding-left: 0; }
+  .mega-col:last-child  { padding-right: 0; border-right: none; }
+ 
+  .mega-heading {
+    font-size: 0.72rem !important;
+    font-weight: 700;
+    color: #222;
+    text-transform: capitalize;
+    margin: 0 0 4px !important;
+    padding: 0 0 3px !important;
+    border-bottom: 2px solid #a64d79;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.3 !important;
+  }
+ 
+  .mega-panel ul {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .mega-panel ul li {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .mega-link {
+    display: block;
+    font-size: 0.72rem !important;
+    color: #555;
+    text-decoration: none;
+    padding: 0 !important;
+    margin: 0 !important;
+    white-space: normal;
+    word-break: break-word;
+    transition: color 0.15s;
+    line-height: 1.75 !important;
+  }
+  .mega-link:hover { color: #a64d79; }
+ 
+  .mega-item:hover .mega-nav-link { color: #a64d79; }
+ 
+  .mega-nav-link:focus,
+  .mega-nav-link:active,
+  .mega-nav-link:visited {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* ✅ FIXES - Neeche add karo, kuch delete mat karo */
+.mega-panel .mega-link {
+  display: block !important;
+  font-size: 0.72rem !important;
+  font-weight: 400 !important;
+  color: #555 !important;
+  text-decoration: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  line-height: 1.75 !important;
+}
+
+.mega-panel .mega-link:hover {
+  color: #a64d79 !important;
+}
+
+.mega-grid {
+  display: grid !important;
+  grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
+  padding: 10px 20px 14px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  height: auto !important;
+  align-items: start !important;
+}
+
+.mega-col {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  height: auto !important;
+  align-self: start !important;
+}
+
+body.menu-open {
+  overflow: auto !important;
+}
+ 
+  body.menu-open { overflow: hidden; }
+    /* ===== MOBILE RESPONSIVE FIX FOR MEGA MENU ===== */
+    @@media (max-width: 768px) {
+        .mega-panel {
+            max-height: 75vh !important;
+            overflow-y: auto !important;
+        }
+
+        .mega-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 15px 10px !important;
+            padding: 15px !important;
+        }
+
+        .mega-col {
+            border-right: none !important;
+            border-bottom: 1px solid #f0f0f0 !important;
+            padding-bottom: 12px !important;
+        }
+
+        .mega-heading {
+            font-size: 0.85rem !important;
+        }
+
+        .mega-link {
+            font-size: 0.85rem !important;
+            line-height: 2.1 !important;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .mega-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+    }
+</style>
+ 
+<script>
+  const megaItem    = document.querySelector('.mega-item');
+  const megaPanel   = document.querySelector('.mega-panel');
+  const megaNavLink = document.querySelector('.mega-nav-link');
+  let hideTimer;
+ 
+  megaItem.addEventListener('mouseenter', () => {
+    clearTimeout(hideTimer);
+ 
+    // ✅ Navbar ke neeche bilkul sahi position
+    const navbarEl = megaItem.closest('header') || megaItem.closest('nav');
+    if (navbarEl) {
+      const rect = navbarEl.getBoundingClientRect();
+      megaPanel.style.top    = rect.bottom + 'px';
+      megaPanel.style.position = 'fixed';
+      megaPanel.style.left   = '0';
+      megaPanel.style.right  = '0';
+      megaPanel.style.width  = '100%';
+      megaPanel.style.height = 'auto';        // ✅ height auto rakhein
+    }
+ 
+    megaPanel.classList.add('active');
+    document.body.classList.add('menu-open');
+  });
+ 
+  megaItem.addEventListener('mouseleave', () => {
+    hideTimer = setTimeout(() => {
+      megaPanel.classList.remove('active');
+      document.body.classList.remove('menu-open');
+    }, 150);
+  });
+ 
+  megaPanel.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+  megaPanel.addEventListener('mouseleave', () => {
+    hideTimer = setTimeout(() => {
+      megaPanel.classList.remove('active');
+      document.body.classList.remove('menu-open');
+    }, 150);
+  });
+ 
+  megaNavLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    megaPanel.classList.toggle('active');
+    document.body.classList.toggle('menu-open', megaPanel.classList.contains('active'));
+  });
+ 
+  document.addEventListener('click', (e) => {
+    if (!megaItem.contains(e.target)) {
+      megaPanel.classList.remove('active');
+      document.body.classList.remove('menu-open');
+    }
+  });
+</script>

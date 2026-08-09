@@ -1,0 +1,235 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Terms of Service — ArtisanValley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+            body {
+                font-family: 'DM Sans', sans-serif;
+                background: #f5f3ff;
+                min-height: 100vh;
+                padding: 30px 20px;
+                overflow-x: hidden;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+            }
+
+.tos-card { margin: 0 auto; }
+
+        .tos-card {
+            background: #fff;
+            border-radius: 18px;
+            border: 1px solid #ddd6fe;
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .tos-header {
+            background: #a64d79;
+            padding: 28px 32px;
+            color: #fff;
+        }
+
+        .tos-header h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+        .tos-header p { font-size: 0.85rem; opacity: 0.85; }
+
+        .tos-body { padding: 28px 32px;  }
+
+        .tos-section { margin-bottom: 20px; }
+        .tos-section h3 { font-size: 0.9rem; font-weight: 700; color: #a64d79; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .tos-section p { font-size: 0.85rem; color: #555; line-height: 1.7; }
+
+        .highlight-box {
+            background: #f5f3ff;
+            border: 1px solid #ddd6fe;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .highlight-box i { font-size: 1.5rem; color: #a64d79; }
+        .highlight-box p { font-size: 0.85rem; color: #374151; }
+        .highlight-box strong { color: #a64d79; }
+
+        .tos-footer {
+            padding: 20px 32px;
+            border-top: 1px solid #ede9fe;
+            background: #fafafa;
+        }
+
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .checkbox-row input[type="checkbox"] {
+            width: 18px; height: 18px;
+            accent-color: #a64d79;
+            cursor: pointer;
+        }
+
+        .checkbox-row label {
+            font-size: 0.875rem;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        .checkbox-row label span { color: #a64d79; font-weight: 600; }
+
+        .btn-agree {
+            width: 100%;
+            padding: 13px;
+            background: #a64d79;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.2s;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .btn-agree.enabled {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .btn-agree.enabled:hover { background: #880e4f; }
+
+            html {
+                overflow-x: hidden;
+                width: 100%;
+            }
+
+            @@media (max-width: 480px) {
+                body {
+                    padding: 16px 12px;
+                }
+
+                .tos-header {
+                    padding: 20px 18px;
+                }
+
+                .tos-body {
+                    padding: 20px 18px;
+                }
+
+                .tos-footer {
+                    padding: 16px 18px;
+                }
+
+                .tos-header h1 {
+                    font-size: 1.15rem;
+                }
+
+                .highlight-box {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 8px;
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="tos-card">
+        <div class="tos-header">
+            <h1><i class="fas fa-file-contract"></i> Seller Terms of Service</h1>
+            <p>Please read carefully before creating your shop on ArtisanValley</p>
+        </div>
+
+        <div class="tos-body">
+            <div class="highlight-box">
+                <i class="fas fa-store"></i>
+                <p>Each seller can create <strong>only one shop</strong>. Your shop will be reviewed before going live.</p>
+            </div>
+
+            <div class="highlight-box">
+                <i class="fas fa-hand-sparkles"></i>
+                <p><strong>Handmade products only.</strong> Mass-produced or resold items are strictly not allowed.</p>
+            </div>
+
+            <div class="highlight-box">
+                <i class="fas fa-video"></i>
+                <p><strong>Video is mandatory</strong> for every product listing. Products without video will not be approved.</p>
+            </div>
+
+            <div class="highlight-box">
+                <i class="fas fa-calendar-check"></i>
+                <p>You get <strong>1 month free trial</strong>. After that, a subscription fee of <strong>PKR 500/month</strong> applies.</p>
+            </div>
+
+            <div class="tos-section">
+                <h3><i class="fas fa-gavel"></i> 1. General Rules</h3>
+                <p>ArtisanValley is a platform exclusively for handmade product sellers. By registering as a seller, you agree to list only handmade, original products created by yourself or your team.</p>
+            </div>
+
+            <div class="tos-section">
+                <h3><i class="fas fa-shield-alt"></i> 2. Account Policy</h3>
+                <p>Each person is allowed to create only one seller account. Duplicate accounts will be permanently banned without notice.</p>
+            </div>
+
+            <div class="tos-section">
+                <h3><i class="fas fa-credit-card"></i> 3. Subscription</h3>
+                <p>Your first month is completely free. After 30 days, a fixed amount of PKR 500/month will be charged to keep your shop active. Failure to pay will suspend your shop listings.</p>
+            </div>
+
+            <div class="tos-section">
+                <h3><i class="fas fa-truck"></i> 4. Orders & Delivery</h3>
+                <p>Sellers are responsible for fulfilling orders on time and updating order status. ArtisanValley is not responsible for delivery disputes.</p>
+            </div>
+
+            <div class="tos-section">
+                <h3><i class="fas fa-ban"></i> 5. Prohibited Items</h3>
+                <p>Selling counterfeit, illegal, or mass-produced items is strictly prohibited and will result in permanent account termination.</p>
+            </div>
+        </div>
+
+        <div class="tos-footer">
+            <div class="checkbox-row">
+                <input type="checkbox" id="agreeCheck" onchange="toggleBtn()"/>
+                <label for="agreeCheck">
+                    I have read and agree to the <span>Terms of Service</span> of ArtisanValley
+                </label>
+            </div>
+           <form method="post" action="/Account/AcceptTerms">
+                <button type="submit" class="btn-agree" id="agreeBtn" disabled>
+                    <i class="fas fa-check-circle"></i> I Agree — Set Up My Shop
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+       function toggleBtn() {
+    const btn = document.getElementById('agreeBtn');
+    const check = document.getElementById('agreeCheck');
+    if (check.checked) {
+        btn.style.opacity = '1';
+        btn.style.pointerEvents = 'all';
+        btn.removeAttribute('disabled');
+    } else {
+        btn.style.opacity = '0.5';
+        btn.style.pointerEvents = 'none';
+        btn.setAttribute('disabled', 'disabled');
+    }
+}
+    </script>
+</body>
+</html>

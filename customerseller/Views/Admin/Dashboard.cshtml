@@ -1,0 +1,708 @@
+﻿@model customerseller.Models.DashboardViewModel
+@{
+    Layout = "_AdminLayout";
+}
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .main-content {
+        padding: 30px 35px;
+        min-height: 100vh;
+        background: #f5f6fa;
+    }
+
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28px;
+    }
+
+        .topbar h1 {
+            font-size: 1.5rem;
+            color: #1a1a2e;
+            font-weight: 700;
+        }
+
+        .topbar p {
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 3px;
+        }
+
+    .seller-badge {
+        background: linear-gradient(135deg, #a64d79, #880e4f);
+        color: #fff;
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background: #fff;
+        padding: 22px;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border-left: 4px solid #a64d79;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        min-width: 0;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+    }
+
+        .stat-icon.pink {
+            background: #fce4ec;
+            color: #a64d79;
+        }
+
+        .stat-icon.blue {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .stat-icon.yellow {
+            background: #fff8e1;
+            color: #f9a825;
+        }
+
+        .stat-icon.green {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+    .stat-number {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        line-height: 1;
+    }
+
+    .stat-label {
+        color: #888;
+        font-size: 0.8rem;
+        margin-top: 4px;
+    }
+
+    .stat-sub {
+        font-size: 0.75rem;
+        color: #2e7d32;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+
+    .activity-card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        overflow: hidden;
+    }
+
+    .activity-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+
+    .activity-empty {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 25px 22px;
+    }
+
+    .activity-icon {
+        width: 42px;
+        height: 42px;
+        background: #e8f5e9;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #2e7d32;
+        font-size: 1.1rem;
+    }
+
+    .activity-text p {
+        font-size: 0.88rem;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .activity-text span {
+        font-size: 0.78rem;
+        color: #888;
+    }
+
+    .sale-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 14px 22px;
+        border-bottom: 1px solid #f7f7f7;
+        font-size: 0.88rem;
+    }
+
+        .sale-item:last-child {
+            border-bottom: none;
+        }
+
+    .sale-detail {
+        color: #333;
+    }
+
+    .sale-amount {
+        color: #a64d79;
+        font-weight: 700;
+    }
+
+    .stars-row {
+        margin-top: 4px;
+    }
+
+    .star {
+        color: #ddd;
+        font-size: 1rem;
+    }
+
+        .star.filled {
+            color: #f9a825;
+        }
+
+    .live-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #2e7d32;
+        border-radius: 50%;
+        margin-right: 4px;
+        animation: pulse 1.5s infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.4;
+        }
+    }
+
+    .shop-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 22px;
+        border-bottom: 1px solid #f7f7f7;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+        .shop-row:last-child {
+            border-bottom: none;
+        }
+
+    .shop-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+        .shop-info strong {
+            font-size: 0.9rem;
+            color: #1a1a2e;
+            display: block;
+        }
+
+        .shop-info span {
+            font-size: 0.78rem;
+            color: #888;
+        }
+
+    .shop-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-approve {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: none;
+        padding: 7px 16px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .btn-approve:hover {
+            background: #c8e6c9;
+        }
+
+    .btn-reject {
+        background: #fce4ec;
+        color: #c62828;
+        border: none;
+        padding: 7px 16px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .btn-reject:hover {
+            background: #ffcdd2;
+        }
+
+    /* Modal Styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+    .modal-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 420px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+
+    .modal-icon {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+
+    .modal-box h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e1033;
+        margin-bottom: 8px;
+    }
+
+    .modal-box p {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .modal-btn-confirm {
+        padding: 10px 24px;
+        border-radius: 9px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background: #a64d79;
+        color: #fff;
+    }
+
+    .modal-btn-cancel {
+        padding: 10px 24px;
+        border-radius: 9px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1.5px solid #ddd;
+        background: #fff;
+        color: #888;
+    }
+
+    .modal-btn-danger {
+        padding: 10px 24px;
+        border-radius: 9px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background: #fee2e2;
+        color: #c62828;
+    }
+
+    /* Reject Reason Modal */
+    .reject-modal-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 420px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+
+        .reject-modal-box h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e1033;
+            margin-bottom: 16px;
+        }
+
+        .reject-modal-box textarea {
+            width: 100%;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 90px;
+            margin-bottom: 16px;
+            outline: none;
+        }
+
+            .reject-modal-box textarea:focus {
+                border-color: #a64d79;
+            }
+
+    @@media (max-width: 768px) {
+        .main-content {
+            padding: 16px;
+        }
+
+        .topbar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 16px;
+        }
+
+        .stat-number {
+            font-size: 1.4rem;
+        }
+
+        .shop-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .shop-actions {
+            width: 100%;
+        }
+
+            .shop-actions button {
+                flex: 1;
+            }
+    }
+</style>
+
+<div class="main-content">
+    <div class="topbar">
+        <div>
+            <h1>Admin Dashboard</h1>
+            <p>Welcome back! Here's what's happening at Artisan Valley.</p>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+            <div class="seller-badge" style="background:linear-gradient(135deg,#a64d79,#880e4f);">
+                <i class="fas fa-user-shield"></i> Admin
+            </div>
+            <div class="seller-badge">
+                <i class="fas fa-store"></i> Artisan Valley
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon pink"><i class="fas fa-coins"></i></div>
+            <div>
+                <div class="stat-number">Rs. @Model.NetRevenue</div>
+                <div class="stat-label">Net Revenue</div>
+                <div class="stat-sub">↑ @Model.RevenueGrowth% this month</div>
+            </div>
+        </div>
+        <div class="stat-card" style="border-left-color:#1565c0;">
+            <div class="stat-icon blue"><i class="fas fa-shopping-bag"></i></div>
+            <div>
+                <div class="stat-number">@Model.TotalOrders</div>
+                <div class="stat-label">Total Orders</div>
+                <div class="stat-sub" style="color:#1565c0;">Pending: @Model.PendingOrders</div>
+            </div>
+        </div>
+        <div class="stat-card" style="border-left-color:#f9a825;">
+            <div class="stat-icon yellow"><i class="fas fa-star"></i></div>
+            <div>
+                <div class="stat-number">@Model.Rating<span style="font-size:1rem; color:#888; font-weight:400;">/5</span></div>
+                <div class="stat-label">Store Rating</div>
+                <div class="stars-row">
+                    @for (int i = 0; i < 5; i++)
+                    {
+                        <span class="star @(i < Math.Floor(Model.Rating) ? "filled" : "")">★</span>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="stat-card" style="border-left-color:#2e7d32;">
+            <div class="stat-icon green"><i class="fas fa-users"></i></div>
+            <div>
+                <div class="stat-number">@Model.LiveVisitors</div>
+                <div class="stat-label">Live Visitors</div>
+                <div class="stat-sub"><span class="live-dot"></span> Active now</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="activity-card">
+        <div class="activity-header">Recent Sales Activity</div>
+        @if (Model.RecentSales != null && Model.RecentSales.Any())
+        {
+            @foreach (var sale in Model.RecentSales)
+            {
+                <div class="sale-item">
+                    <span class="sale-detail">@sale.Detail</span>
+                    <span class="sale-amount">@sale.Amount</span>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="activity-empty">
+                <div class="activity-icon"><i class="fas fa-circle-check"></i></div>
+                <div class="activity-text">
+                    <p>No new alerts. Your store is running smoothly.</p>
+                    <span>All systems operational</span>
+                </div>
+            </div>
+        }
+    </div>
+
+   
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <div class="modal-icon" id="confirmIcon"></div>
+        <h3 id="confirmTitle"></h3>
+        <p id="confirmMsg"></p>
+        <div class="modal-actions">
+            <button class="modal-btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+            <button class="modal-btn-confirm" id="confirmBtn">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Reason Modal -->
+<div class="modal-overlay" id="rejectModal">
+    <div class="reject-modal-box">
+        <h3>✏️ Enter Rejection Reason</h3>
+        <textarea id="rejectReasonInput" placeholder="Write the reason for rejection..."></textarea>
+        <div class="modal-actions">
+            <button class="modal-btn-cancel" onclick="closeRejectModal()">Cancel</button>
+            <button class="modal-btn-danger" id="rejectConfirmBtn">Reject</button>
+        </div>
+    </div>
+</div>
+
+<!-- Result Modal -->
+<div class="modal-overlay" id="resultModal">
+    <div class="modal-box">
+        <div class="modal-icon" id="resultIcon"></div>
+        <h3 id="resultTitle"></h3>
+        <p id="resultMsg"></p>
+        <div class="modal-actions">
+            <button class="modal-btn-confirm" onclick="closeResultModal()">OK</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── Modal Helpers ──
+    function showConfirm(icon, title, msg, onConfirm) {
+        document.getElementById('confirmIcon').textContent = icon;
+        document.getElementById('confirmTitle').textContent = title;
+        document.getElementById('confirmMsg').textContent = msg;
+        document.getElementById('confirmBtn').onclick = () => { closeConfirmModal(); onConfirm(); };
+        document.getElementById('confirmModal').classList.add('show');
+    }
+    function closeConfirmModal() { document.getElementById('confirmModal').classList.remove('show'); }
+
+    function showRejectModal(onConfirm) {
+        document.getElementById('rejectReasonInput').value = '';
+        document.getElementById('rejectConfirmBtn').onclick = () => {
+            const reason = document.getElementById('rejectReasonInput').value.trim();
+            if (!reason) { showResult('⚠️', 'Required', 'Please enter a rejection reason.'); return; }
+            closeRejectModal();
+            onConfirm(reason);
+        };
+        document.getElementById('rejectModal').classList.add('show');
+    }
+    function closeRejectModal() { document.getElementById('rejectModal').classList.remove('show'); }
+
+    function showResult(icon, title, msg) {
+        document.getElementById('resultIcon').textContent = icon;
+        document.getElementById('resultTitle').textContent = title;
+        document.getElementById('resultMsg').textContent = msg;
+        document.getElementById('resultModal').classList.add('show');
+    }
+    function closeResultModal() { document.getElementById('resultModal').classList.remove('show'); }
+
+    // ── Shops ──
+    async function loadPendingShops() {
+        const res = await fetch('/Admin/GetPendingShops');
+        const shops = await res.json();
+        const container = document.getElementById('pendingShopsContainer');
+        const countBadge = document.getElementById('pendingCount');
+        countBadge.textContent = shops.length + ' Pending';
+
+        if (shops.length === 0) {
+            container.innerHTML = `<div style="display:flex; align-items:center; gap:15px; padding:25px 22px;">
+                <div style="width:42px; height:42px; background:#e8f5e9; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#2e7d32;"><i class="fas fa-circle-check"></i></div>
+                <div><p style="font-size:0.88rem; color:#333; font-weight:600;">No pending shop approvals.</p><span style="font-size:0.78rem; color:#888;">All shops have been reviewed.</span></div>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = shops.map(s => `
+            <div class="shop-row" id="shop-${s.id}">
+                <div class="shop-info">
+                    <strong><i class="fas fa-store" style="margin-right:5px; color:#a64d79;"></i>${s.shopName}</strong>
+                    <span>${s.ownerName} &nbsp;|&nbsp; ${s.email} &nbsp;|&nbsp; CNIC: ${s.cnic}</span>
+                </div>
+                <div class="shop-actions">
+                    <button class="btn-approve" onclick="approveShop(${s.id})"><i class="fas fa-check"></i> Approve</button>
+                    <button class="btn-reject" onclick="rejectShop(${s.id})"><i class="fas fa-times"></i> Reject</button>
+                </div>
+            </div>`).join('');
+    }
+
+    function approveShop(id) {
+        showConfirm('🏪', 'Approve Shop?', 'Are you sure you want to approve this shop? The seller will be notified via email.', async () => {
+            const res = await fetch('/Admin/ApproveShop?id=' + id, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('shop-' + id)?.remove();
+                loadPendingShops();
+                showResult('✅', 'Shop Approved!', 'The seller has been notified via email.');
+            } else {
+                showResult('❌', 'Error', 'Something went wrong. Please try again.');
+            }
+        });
+    }
+
+    function rejectShop(id) {
+        showRejectModal(async (reason) => {
+            const res = await fetch('/Admin/RejectShop?id=' + id, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('shop-' + id)?.remove();
+                loadPendingShops();
+                showResult('❌', 'Shop Rejected', 'The seller has been notified.');
+            } else {
+                showResult('❌', 'Error', 'Something went wrong. Please try again.');
+            }
+        });
+    }
+
+    // ── Products ──
+    async function loadPendingProducts() {
+        const res = await fetch('/Admin/GetPendingProducts');
+        const products = await res.json();
+        const container = document.getElementById('pendingProductsContainer');
+        const countBadge = document.getElementById('pendingProductCount');
+        countBadge.textContent = products.length + ' Pending';
+
+        if (products.length === 0) {
+            container.innerHTML = `<div style="display:flex; align-items:center; gap:15px; padding:25px 22px;">
+                <div style="width:42px; height:42px; background:#e8f5e9; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#2e7d32;"><i class="fas fa-circle-check"></i></div>
+                <div><p style="font-size:0.88rem; color:#333; font-weight:600;">No pending product approvals.</p><span style="font-size:0.78rem; color:#888;">All products have been reviewed.</span></div>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = products.map(p => `
+            <div class="shop-row" id="product-${p.id}">
+                <img src="${p.imageUrl}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; flex-shrink:0;">
+                <div class="shop-info" style="margin-left:12px;">
+                    <strong>${p.title}</strong>
+                    <span>${p.category} &nbsp;|&nbsp; Rs. ${p.price} &nbsp;|&nbsp; ${p.sellerName}</span>
+                    ${p.videoUrl ? `<a href="${p.videoUrl}" target="_blank" style="font-size:0.75rem; color:#a64d79; display:block; margin-top:3px;">▶ Watch Video</a>` : ''}
+                </div>
+                <div class="shop-actions">
+                    <button class="btn-approve" onclick="approveProduct('${p.id}')"><i class="fas fa-check"></i> Approve</button>
+                    <button class="btn-reject" onclick="rejectProduct('${p.id}')"><i class="fas fa-times"></i> Reject</button>
+                </div>
+            </div>`).join('');
+    }
+
+    function approveProduct(id) {
+        showConfirm('📦', 'Approve Product?', 'Are you sure you want to approve this product? It will be visible to customers.', async () => {
+            const res = await fetch('/Admin/ApproveProduct?id=' + id, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('product-' + id)?.remove();
+                loadPendingProducts();
+                showResult('✅', 'Product Approved!', 'The product is now live for customers.');
+            } else {
+                showResult('❌', 'Error', 'Something went wrong. Please try again.');
+            }
+        });
+    }
+
+    function rejectProduct(id) {
+        showRejectModal(async (reason) => {
+            const res = await fetch(`/Admin/RejectProduct?id=${id}&reason=${encodeURIComponent(reason)}`, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('product-' + id)?.remove();
+                loadPendingProducts();
+                showResult('❌', 'Product Rejected', 'The product has been rejected.');
+            } else {
+                showResult('❌', 'Error', 'Something went wrong. Please try again.');
+            }
+        });
+    }
+
+    
+</script>

@@ -1,0 +1,440 @@
+﻿<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Artisan Valley</title>
+    <link rel="icon" href="/customer/images/logoo.png" />
+    <link rel="stylesheet" href="~/customer/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+</head>
+<body>
+    @{
+        var resetMsgVal = TempData["ResetMessage"]?.ToString();
+        var currentPath = Context.Request.Path.Value?.ToLower() ?? "";
+        bool isSellerPage = currentPath.Contains("/account/sellerregister") ||
+                     currentPath.Contains("/account/sellerterms") ||
+                     currentPath.Contains("/account/shopsetup") ||
+                     currentPath.Contains("/account/login") ||
+                     currentPath.Contains("/account/loginverifyotp") ||
+                     currentPath.Contains("/admin/") ||
+                     currentPath.Contains("/moderator/") ||
+                     currentPath.Contains("/courier/");
+    }
+
+    <div class="topbar">A valley of handmade treasures.</div>
+
+    <div class="infobar">
+        <div class="infobar-left">
+            @await Html.PartialAsync("_MegaMenu")
+        </div>
+
+        <a asp-controller="Home" asp-action="Index" class="infobar-center" style="text-decoration: none; color: inherit;">
+            <img src="/customer/images/logoo.png" alt="Artisan Valley" style="height: 110px; width: auto; margin-top: 0px;" />
+        </a>
+
+        <div class="infobar-right">
+            <a href="#" id="searchIcon"><i class="fa-solid fa-magnifying-glass"></i></a>
+
+            @if (Context.Session.GetString("UserEmail") != null)
+            {
+                @if (Context.Session.GetString("UserRole") == "Seller")
+                {
+                    <a asp-controller="Dashboard" asp-action="Dashboard"
+                           style="color:#a64d79; font-size:0.85rem; font-weight:700; text-decoration:none; margin-right:10px;">
+                        🏪 My Dashboard
+                    </a>
+                }
+                else
+                {
+                    <span style="font-size:0.85rem; font-weight:600; margin-right:5px;">
+                        Hi, @Context.Session.GetString("UserName")
+                    </span>
+                }
+                <a asp-controller="Account" asp-action="Logout"
+                       style="color:#a64d79; font-size:0.85rem; font-weight:600; text-decoration:none; margin-left:10px;">
+                    Logout
+                </a>
+            }
+            else
+            {
+                <a href="#" id="loginIcon"><i class="fa-solid fa-user"></i></a>
+            }
+
+            @if (Context.Session.GetString("UserEmail") != null && Context.Session.GetString("UserRole") != "Seller")
+            {
+                <a asp-controller="Chat" asp-action="Messages" style="position:relative; margin-right:8px;">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    <span id="chatUnreadCount" style="display:none; position:absolute; top:-8px; right:-8px; background:#a64d79; color:#fff; font-size:0.65rem; font-weight:700; width:18px; height:18px; border-radius:50%; text-align:center; line-height:18px;">0</span>
+                </a>
+            }
+
+            <a href="javascript:void(0)" onclick="openCart()" id="cartIcon" style="position:relative;">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span id="cartCount" style="display:none; position:absolute; top:-8px; right:-8px; background:#a64d79; color:#fff; font-size:0.65rem; font-weight:700; width:18px; height:18px; border-radius:50%; text-align:center; line-height:18px;">0</span>
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["EmailError"] != null)
+    {
+        <div style="background:red; color:white; padding:10px; text-align:center;">
+            @TempData["EmailError"]
+        </div>
+    }
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <h4>INFORMATION</h4>
+                <ul>
+                    <li><a asp-controller="Home" asp-action="Refund">Refund Policy</a></li>
+                    <li><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
+                    <li><a asp-controller="Home" asp-action="Terms">Terms of Service</a></li>
+                    <li><a asp-controller="Home" asp-action="Shipping">Shipping Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>QUICK LINKS</h4>
+                <ul>
+                    <li><a asp-controller="Home" asp-action="About">About us</a></li>
+                    <li><a asp-controller="Home" asp-action="Contact">Contact Us</a></li>
+                    <li><a asp-controller="Cart" asp-action="OrderConfirmed">My Order</a></li>
+                    <li><a asp-controller="Cart" asp-action="Complaint">File a Complaint</a></li>
+                    <li><a asp-controller="Courier" asp-action="Login">Courier Partner Login</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>MY ACCOUNT</h4>
+                <ul>
+                    <li><a href="#" id="footerLoginLink">Login</a></li>
+                    <li><a href="#" id="footerRegisterLink">Register</a></li>
+                    <li><a href="#" id="footerCartLink">Cart</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <form style="display:flex; align-items:center; margin-bottom:15px; margin-top:36px;" onsubmit="return false;">
+             <input type="email" name="email" placeholder="Your email address" required
+                           style="padding:7px 10px; font-size:0.8rem; border:none; border-radius:4px 0 0 4px; outline:none; width:155px; color:#333; background:#fff; height:34px; box-sizing:border-box;">
+                    <button type="submit" style="height:34px; padding:0 12px; background:#fff; color:#a64d79; border:none; border-radius:0 4px 4px 0; font-weight:700; cursor:pointer; font-size:0.8rem; box-sizing:border-box;">
+                        Enter
+                    </button>
+                </form>
+                <div class="footer-social">
+                    <a href="https://www.facebook.com/"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+        <div style="border-top:1px solid rgba(255,255,255,0.4); margin-top:20px;">
+            <div style="text-align:center; padding:18px 0; font-size:0.9rem; color:#fff; width:100%;">
+                © @DateTime.Now.Year Artisan Valley. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Search Sidebar -->
+    <div id="searchOverlay" class="search-overlay"></div>
+    <div id="searchPopup" class="search-sidebar">
+        <button id="closeSearchPopup" class="close-btn">&times;</button>
+        <h2>SEARCH OUR SITE</h2>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off" />
+            <button type="button" id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+        <ul id="suggestions" class="suggestions-list"></ul>
+        <div id="searchResults" class="search-results"></div>
+        <div id="noResult" class="no-result">
+            <i class="fa-solid fa-magnifying-glass" style="font-size: 2.5rem; color: #ddd; display: block; margin-bottom: 10px;"></i>
+            <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 5px;">Result not found</p>
+            <p style="font-size: 0.9rem; color: #999;">Try searching with different keywords</p>
+        </div>
+    </div>
+
+    @if (!isSellerPage)
+    {
+        <!-- Login Sidebar -->
+        <div id="loginOverlay" class="search-overlay"></div>
+        <div id="loginPopup" class="search-sidebar">
+            <button id="closeLoginPopup" class="close-btn">&times;</button>
+            <h2>LOGIN</h2>
+            @if (TempData["LoginError"] != null)
+            {
+                <div style="background:#ffebee; color:#c62828; padding:10px 14px; border-radius:6px; margin-bottom:15px; font-size:0.9rem;">
+                    ⚠️ @TempData["LoginError"]
+                </div>
+            }
+            <form asp-controller="Account" asp-action="Login" method="post" class="login-form">
+                <input type="hidden" name="returnUrl" value="" id="loginReturnUrl" />
+                <label>Email <span style="color:red">*</span></label>
+               
+                <input type="text" name="email" placeholder="Enter your email" required
+                       autocomplete="new-password"
+                       onfocus="this.type='email'">
+                <input type="text" name="password" placeholder="Enter your password" required minlength="8"
+                       autocomplete="new-password"
+                       onfocus="this.type='password'">
+                <button type="submit" class="login-btn">Login</button>
+                <p class="extra-links">
+                    New customer? <a href="#" id="createAccountLink">Create your account</a><br><br>
+                    Lost password? <a href="#" id="createpasLink">Recover password</a><br><br>
+                    Are you a seller? <a href="/Account/SellerRegister" style="color:#a64d79; font-weight:700;">Login Here</a>
+                </p>
+            </form>
+            <div style="margin-top:15px; border-top:1px solid #f0f0f0; padding-top:12px; text-align:center;">
+                <a href="/Admin/Login" style="color:#bbb; font-size:0.75rem; text-decoration:none; display:inline-block; margin:0 8px;">
+                    <i class="fa-solid fa-shield-halved" style="font-size:0.7rem;"></i> Admin
+                </a>
+                <span style="color:#eee;">|</span>
+                <a href="/Moderator/Login" style="color:#bbb; font-size:0.75rem; text-decoration:none; display:inline-block; margin:0 8px;">
+                    <i class="fa-solid fa-video" style="font-size:0.7rem;"></i> Moderator
+                </a>
+            </div>
+        </div>
+
+        <!-- Register Sidebar -->
+        <div id="registerOverlay" class="register-overlay"></div>
+        <div id="registerSidebar" class="register-sidebar">
+            <button id="closeRegister" class="close-register">&times;</button>
+            <h2>REGISTER</h2>
+            @if (TempData["RegisterError"] != null)
+            {
+                <div style="background:#ffebee; color:#c62828; padding:10px 14px; border-radius:6px; margin-bottom:15px; font-size:0.9rem;">
+                    ⚠️ @TempData["RegisterError"]
+                </div>
+            }
+            <form id="registerForm" asp-controller="Account" asp-action="Register" method="post" autocomplete="off" novalidate>
+                <div style="margin-bottom:15px;">
+                    <input type="text" name="firstName" id="regFirstName" placeholder="First Name" required autocomplete="off">
+                    <span class="field-error" id="err-firstName"></span>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <input type="text" name="lastName" id="regLastName" placeholder="Last Name" required autocomplete="off">
+                    <span class="field-error" id="err-lastName"></span>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <input type="email" name="email" id="regEmail" placeholder="Email *" required autocomplete="new-password">
+                    <span class="field-error" id="err-email"></span>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <input type="password" name="password" id="regPassword" placeholder="Password * (min 8 characters)" required minlength="8" autocomplete="new-password">
+                    <span class="field-error" id="err-password"></span>
+                </div>
+                <button type="submit" class="register-btn">Register</button>
+            </form>
+            <p>Already have an account? <a href="#" id="backToLogin">Login here</a></p>
+        </div>
+
+        <!-- Recover Password Sidebar -->
+        <div id="recoverOverlay" class="register-overlay"></div>
+        <div id="recoverSidebar" class="register-sidebar">
+            <button id="closeRecover" class="close-register">&times;</button>
+            <h2>RESET YOUR PASSWORD</h2>
+            <p>Lost your password? Please enter your email address.<br><br>You will receive a link to create a new password via email.</p>
+            @if (resetMsgVal != null)
+            {
+                bool isResetError = resetMsgVal.Contains("No account") || resetMsgVal.Contains("valid email");
+                string resetBg = isResetError ? "#ffebee" : "#f0fdf4";
+                string resetColor = isResetError ? "#c62828" : "#2e7d32";
+                string resetBorder = isResetError ? "#ffcdd2" : "#a5d6a7";
+                string resetIcon = isResetError ? "⚠️" : "✅";
+                <div style="background:@resetBg; color:@resetColor; padding:12px 14px; border-radius:8px; margin-bottom:15px; font-size:0.9rem; border:1px solid @resetBorder;">
+                    @resetIcon @resetMsgVal
+                </div>
+            }
+            <form asp-controller="Account" asp-action="ResetPassword" method="post">
+                <input type="email" name="email" placeholder="Email address" required>
+                <button type="submit" class="register-btn">Reset Password</button>
+            </form>
+            <p><a href="#" id="recoverCancel">Cancel</a></p>
+        </div>
+    }
+
+    <!-- Cart Sidebar -->
+    <div id="cartOverlay" class="cart-overlay"></div>
+    <div id="cartSidebar" class="cart-sidebar">
+        <button id="closeCart" class="close-cart">&times;</button>
+        <h2 style="margin-top:8px; font-size:1.22rem; font-weight:700;">Your Cart</h2>
+        <div id="emptyCart" class="empty-cart">
+            <p>🛒 Your cart is empty</p>
+        </div>
+        <div id="cartItems" style="padding:20px 0 0 0;"></div>
+        <div id="cartFooter" style="margin-top: auto;">
+            <div id="cartTotal" style="font-weight:700; font-size:1.09rem; padding:16px 0 12px 0; border-top:1px solid #ececec;"></div>
+            <div class="cart-buttons">
+                <a href="/Cart/Index" class="cart-btn" id="viewCartBtn" style="text-align:center; text-decoration:none; display:block;"> Cart</a>
+                <a href="/Cart/Checkout" class="cart-btn checkout" id="checkoutBtn" style="text-align:center; text-decoration:none; display:block;">Checkout</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/customer/js/site.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+            function openCart() {
+                const cartSidebar = document.getElementById('cartSidebar');
+                const cartOverlay = document.getElementById('cartOverlay');
+                if (cartSidebar && cartOverlay) {
+                    cartSidebar.classList.add('active');
+                    cartOverlay.classList.add('active');
+                    renderCart();
+                    updateCartCount();
+                }
+            }
+
+            function closeCart() {
+                document.getElementById('cartSidebar')?.classList.remove('active');
+                document.getElementById('cartOverlay')?.classList.remove('active');
+            }
+
+            function renderCart() {
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                let cartItemsDiv = document.getElementById('cartItems');
+                let emptyCartDiv = document.getElementById('emptyCart');
+                let cartFooter = document.getElementById('cartFooter');
+                let cartTotalDiv = document.getElementById('cartTotal');
+
+                if (!cartItemsDiv) return;
+
+                if (cart.length === 0) {
+                    emptyCartDiv.style.display = 'block';
+                    cartItemsDiv.innerHTML = '';
+                    if (cartFooter) cartFooter.style.display = 'none';
+                    return;
+                }
+
+                emptyCartDiv.style.display = 'none';
+                if (cartFooter) cartFooter.style.display = 'block';
+
+                let html = '';
+                let total = 0;
+
+                cart.forEach((item, index) => {
+                    let itemPrice = parseFloat(item.price) || 0;
+                    let itemQty = parseInt(item.qty) || 1;
+                    total += (itemPrice * itemQty);
+
+                    html += `
+                    <div class="cart-item" style="display:flex; align-items:center; gap:12px; margin-bottom:15px; border-bottom:1px solid #f0f0f0; padding-bottom:12px;">
+                        <img src="${item.img}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
+                        <div style="flex-grow:1;">
+                            <h6 style="margin:0; font-size:0.95rem; font-weight:600; color:#222;">${item.title}</h6>
+                            <p style="margin:4px 0 0; font-size:0.85rem; color:#a64d79; font-weight:700;">Rs. ${itemPrice}</p>
+                            <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                                <button onclick="changeCartQty(${index}, -1)" style="width:26px; height:26px; border-radius:4px; border:1px solid #ddd; background:#f9eef4; color:#a64d79; font-size:1rem; font-weight:700; cursor:pointer; line-height:1;">−</button>
+                                <span style="font-weight:600; font-size:0.95rem;">${itemQty}</span>
+                                <button onclick="changeCartQty(${index}, 1)" style="width:26px; height:26px; border-radius:4px; border:1px solid #ddd; background:#f9eef4; color:#a64d79; font-size:1rem; font-weight:700; cursor:pointer; line-height:1;">+</button>
+                            </div>
+                        </div>
+                        <button onclick="removeCartItem(${index})" style="background:none; border:none; color:#999; cursor:pointer; font-size:1.5rem; font-weight:bold; line-height:1; transition:0.3s;" onmouseover="this.style.color='red'" onmouseout="this.style.color='#999'">&times;</button>
+                    </div>`;
+                });
+
+                cartItemsDiv.innerHTML = html;
+                if (cartTotalDiv) cartTotalDiv.innerHTML = "Subtotal: Rs. " + total.toLocaleString();
+                if (typeof updateCartCount === 'function') updateCartCount();
+            }
+
+            window.removeCartItem = function (index) {
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                cart.splice(index, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+                updateCartCount();
+            };
+
+            window.changeCartQty = function (index, delta) {
+                let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                cart[index].qty = (parseInt(cart[index].qty) || 1) + delta;
+                if (cart[index].qty <= 0) cart.splice(index, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+                renderCart();
+                if (typeof updateCartCount === 'function') updateCartCount();
+            };
+
+            document.addEventListener("DOMContentLoaded", function () {
+                const urlParams = new URLSearchParams(window.location.search);
+                const returnUrl = urlParams.get('returnUrl');
+                if (returnUrl) {
+                    const inp = document.getElementById('loginReturnUrl');
+                    if (inp) inp.value = returnUrl;
+                    const loginPopup = document.getElementById('loginPopup');
+                    const loginOverlay = document.getElementById('loginOverlay');
+                    if (loginPopup && loginOverlay) {
+                        loginPopup.classList.add('active');
+                        loginOverlay.classList.add('active');
+                    }
+                }
+                updateCartCount();
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                @if (TempData["LoginError"] != null)
+                {
+                        <text>
+                            const loginPopup = document.getElementById('loginPopup');
+                            const loginOverlay = document.getElementById('loginOverlay');
+                            if (loginPopup && loginOverlay) {
+                                loginPopup.classList.add('active');
+                                loginOverlay.classList.add('active');
+                            }
+                        </text>
+                }
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                if (localStorage.getItem('pendingCheckout') === 'true') {
+                    const inp = document.getElementById('loginReturnUrl');
+                    if (inp) inp.value = '/Cart/Checkout';
+                    localStorage.removeItem('pendingCheckout');
+                }
+                if (typeof updateCartCount === 'function') updateCartCount();
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                @if (TempData["RegisterError"] != null)
+                {
+                        <text>
+                            const registerSidebar = document.getElementById('registerSidebar');
+                            const registerOverlay = document.getElementById('registerOverlay');
+                            if (registerSidebar && registerOverlay) {
+                                registerSidebar.classList.add('active');
+                                registerOverlay.classList.add('active');
+                            }
+                        </text>
+                }
+            });
+
+            document.addEventListener("DOMContentLoaded", function () {
+                @if (resetMsgVal != null)
+                {
+                        <text>
+                            document.getElementById('recoverSidebar')?.classList.add('active');
+                            document.getElementById('recoverOverlay')?.classList.add('active');
+                        </text>
+                }
+            });
+       
+        async function loadChatUnreadCount() {
+        try {
+        const res = await fetch('/Chat/GetUnreadCount');
+        const data = await res.json();
+        const badge = document.getElementById('chatUnreadCount');
+        if (badge) {
+        if (data.count > 0) {
+        badge.textContent = data.count;
+        badge.style.display = 'inline-block';
+        } else {
+        badge.style.display = 'none';
+        }
+        }
+        } catch(e) {}
+        }
+        loadChatUnreadCount();
+        setInterval(loadChatUnreadCount, 10000);
+    </script>
+</body>
+</html>

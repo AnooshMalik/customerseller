@@ -1,0 +1,257 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rider Login - Artisan Valley</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                background: linear-gradient(135deg, #a64d79, #880e4f);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .login-box {
+                background: #fff;
+                border-radius: 18px;
+                padding: 40px 36px;
+                width: 100%;
+                max-width: 380px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            }
+
+            .login-icon {
+                width: 64px;
+                height: 64px;
+                background: #fdf0f5;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 16px;
+                color: #a64d79;
+                font-size: 1.8rem;
+            }
+
+            .login-box h2 {
+                text-align: center;
+                font-size: 1.3rem;
+                font-weight: 700;
+                color: #1a1a2e;
+                margin-bottom: 6px;
+            }
+
+            .login-box p.sub {
+                text-align: center;
+                font-size: 0.85rem;
+                color: #888;
+                margin-bottom: 24px;
+            }
+
+            .form-group {
+                margin-bottom: 16px;
+            }
+
+                .form-group label {
+                    display: block;
+                    font-size: 0.78rem;
+                    font-weight: 700;
+                    color: #555;
+                    margin-bottom: 6px;
+                    text-transform: uppercase;
+                }
+
+                .form-group input {
+                    width: 100%;
+                    padding: 11px 14px;
+                    border: 1.5px solid #e0e0e0;
+                    border-radius: 8px;
+                    font-size: 0.9rem;
+                    outline: none;
+                    transition: border 0.2s;
+                }
+
+                    .form-group input:focus {
+                        border-color: #a64d79;
+                    }
+
+            .btn-login {
+                width: 100%;
+                padding: 13px;
+                background: #a64d79;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                font-size: 0.95rem;
+                font-weight: 700;
+                cursor: pointer;
+                margin-top: 8px;
+                transition: background 0.2s;
+            }
+
+                .btn-login:hover {
+                    background: #873b63;
+                }
+
+            .error-box {
+                background: #ffebee;
+                color: #c62828;
+                padding: 10px 14px;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                margin-bottom: 16px;
+            }
+
+            @@media (max-width: 400px) {
+                .login-box {
+                    padding: 28px 22px;
+                    border-radius: 14px;
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <div class="login-icon"><i class="fas fa-motorcycle"></i></div>
+        <h2>Rider Login</h2>
+        <p class="sub">Access your delivery orders</p>
+        @if (TempData["RiderError"] != null)
+        {
+            <div class="error-box">⚠️ @TempData["RiderError"]</div>
+        }
+
+        <form method="post" asp-action="Login" asp-controller="Courier">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="text" name="email" placeholder="" autocomplete="new-email" required />
+            
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter your password" autocomplete="new-password" required />
+            </div>
+
+            <div style="text-align:right; margin-bottom:10px;">
+                <a href="javascript:void(0)" onclick="openForgotModal()" style="color:#a64d79; font-size:0.82rem; text-decoration:none;">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="btn-login">Login</button>
+        </form>
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div class="modal-overlay" id="forgotModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-lock-open" style="color:#a64d79;"></i> Forgot Password</h3>
+                <span class="modal-close" onclick="closeForgotModal()">&times;</span>
+            </div>
+            <div style="padding:20px;">
+                <p style="font-size:0.85rem; color:#888; margin-bottom:18px;">Enter your registered rider email address. We'll send you a link to reset your password.</p>
+                <input type="email" id="forgotEmail" placeholder="Email Address" style="width:100%; padding:12px 14px; border:1.5px solid #e0e0e0; border-radius:8px; font-size:0.9rem; margin-bottom:16px; outline:none;">
+                <div id="forgotMsg" style="display:none; font-size:0.85rem; margin-bottom:14px;"></div>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="closeForgotModal()" style="flex:1; padding:12px; background:#f1f5f9; color:#555; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Cancel</button>
+                    <button onclick="submitForgotPassword()" style="flex:1; padding:12px; background:#a64d79; color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer;">Send Reset Link</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+            .modal-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(30,16,50,0.5);
+                z-index: 9999;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .modal-overlay.show {
+                    display: flex;
+                }
+
+            .modal-box {
+                background: #fff;
+                border-radius: 14px;
+                width: 380px;
+                max-width: 90%;
+                overflow: hidden;
+            }
+
+            .modal-header {
+                padding: 18px 20px;
+                border-bottom: 1px solid #f0f0f0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+                .modal-header h3 {
+                    font-size: 1rem;
+                    color: #1a1a2e;
+                }
+
+            .modal-close {
+                cursor: pointer;
+                color: #999;
+                font-size: 1.3rem;
+                line-height: 1;
+            }
+    </style>
+
+    <script>
+            function openForgotModal() {
+                document.getElementById('forgotEmail').value = '';
+                document.getElementById('forgotMsg').style.display = 'none';
+                document.getElementById('forgotModal').classList.add('show');
+            }
+
+            function closeForgotModal() {
+                document.getElementById('forgotModal').classList.remove('show');
+            }
+
+            async function submitForgotPassword() {
+                const email = document.getElementById('forgotEmail').value.trim();
+                const msgBox = document.getElementById('forgotMsg');
+
+                if (!email) {
+                    msgBox.style.color = '#c62828';
+                    msgBox.textContent = 'Please enter your email address.';
+                    msgBox.style.display = 'block';
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('email', email);
+
+                const res = await fetch('/Courier/ForgotPasswordAjax', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.success) {
+                    msgBox.style.color = '#2e7d32';
+                    msgBox.textContent = data.message || 'Reset link sent to your email.';
+                } else {
+                    msgBox.style.color = '#c62828';
+                    msgBox.textContent = data.message || 'Something went wrong.';
+                }
+                msgBox.style.display = 'block';
+            }
+    </script>
+</body>
+</html>

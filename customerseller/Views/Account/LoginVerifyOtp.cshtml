@@ -1,0 +1,390 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Verify OTP — Artisan Valley</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'DM Sans', sans-serif;
+                background: #f5f3ff;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+
+            .otp-wrapper {
+                display: flex;
+                width: 100%;
+                max-width: 900px;
+                min-height: 500px;
+                border-radius: 20px;
+                overflow: hidden;
+                box-shadow: 0 8px 40px rgba(166,77,121,0.13);
+            }
+
+            .otp-left {
+                background: #a64d79;
+                width: 40%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 40px 30px;
+                color: #fff;
+                text-align: center;
+            }
+
+                .otp-left .big-icon {
+                    font-size: 4rem;
+                    margin-bottom: 20px;
+                    opacity: 0.9;
+                }
+
+                .otp-left h2 {
+                    font-size: 1.6rem;
+                    font-weight: 700;
+                    margin-bottom: 12px;
+                }
+
+                .otp-left p {
+                    font-size: 0.88rem;
+                    opacity: 0.85;
+                    line-height: 1.6;
+                }
+
+                .otp-left .brand {
+                    margin-top: 40px;
+                    font-size: 1.1rem;
+                    font-weight: 700;
+                    opacity: 0.6;
+                    letter-spacing: 1px;
+                }
+
+            .otp-right {
+                background: #fff;
+                width: 60%;
+                padding: 50px 45px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+
+                .otp-right h3 {
+                    font-size: 1.3rem;
+                    font-weight: 700;
+                    color: #1a1a2e;
+                    margin-bottom: 8px;
+                }
+
+                .otp-right .subtitle {
+                    font-size: 0.85rem;
+                    color: #888;
+                    margin-bottom: 28px;
+                }
+
+            .info-box {
+                background: #f5f3ff;
+                border: 1px solid #ddd6fe;
+                border-radius: 10px;
+                padding: 13px 16px;
+                margin-bottom: 24px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 0.83rem;
+                color: #374151;
+            }
+
+                .info-box i {
+                    color: #a64d79;
+                    flex-shrink: 0;
+                }
+
+            .error-box {
+                background: #fee2e2;
+                border: 1px solid #fca5a5;
+                border-radius: 10px;
+                padding: 12px 16px;
+                margin-bottom: 20px;
+                color: #991b1b;
+                font-size: 0.83rem;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .field-label {
+                font-size: 0.78rem;
+                font-weight: 700;
+                color: #555;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 12px;
+                display: block;
+            }
+
+            .otp-inputs {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+
+                .otp-inputs input {
+                    width: 52px;
+                    height: 58px;
+                    text-align: center;
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    border: 2px solid #e0e0e0;
+                    border-radius: 12px;
+                    outline: none;
+                    transition: border 0.2s, background 0.2s;
+                    font-family: inherit;
+                    color: #1a1a2e;
+                    background: #fafafa;
+                }
+
+                    .otp-inputs input:focus {
+                        border-color: #a64d79;
+                        background: #fdf4f8;
+                    }
+
+            #otpHidden {
+                display: none;
+            }
+
+            .timer-row {
+                font-size: 0.83rem;
+                color: #888;
+                margin-bottom: 20px;
+            }
+
+                .timer-row span {
+                    color: #a64d79;
+                    font-weight: 700;
+                }
+
+            .btn-verify {
+                width: 100%;
+                padding: 14px;
+                background: linear-gradient(135deg, #a64d79, #880e4f);
+                color: #fff;
+                border: none;
+                border-radius: 12px;
+                font-size: 0.95rem;
+                font-weight: 600;
+                cursor: pointer;
+                font-family: inherit;
+                transition: opacity 0.2s;
+                margin-bottom: 20px;
+            }
+
+                .btn-verify:hover {
+                    opacity: 0.9;
+                }
+
+            .bottom-links {
+                text-align: center;
+                font-size: 0.83rem;
+                color: #888;
+            }
+
+                .bottom-links a {
+                    color: #a64d79;
+                    font-weight: 600;
+                    text-decoration: none;
+                    cursor: pointer;
+                }
+
+                    .bottom-links a:hover {
+                        text-decoration: underline;
+                    }
+
+            #resendMsg {
+                text-align: center;
+                font-size: 0.8rem;
+                margin-top: 8px;
+                display: none;
+            }
+
+            .back-link {
+                display: block;
+                margin-top: 12px;
+                color: #aaa;
+                font-size: 0.82rem;
+                text-decoration: none;
+                text-align: center;
+            }
+
+                .back-link:hover {
+                    color: #a64d79;
+                }
+
+            @@media (max-width: 650px) {
+                .otp-left {
+                    display: none;
+                }
+
+                .otp-right {
+                    width: 100%;
+                    padding: 35px 25px;
+                }
+            }
+
+            @@media (max-width: 420px) {
+                .otp-right {
+                    padding: 28px 16px;
+                }
+
+                .otp-inputs {
+                    gap: 6px;
+                }
+
+                    .otp-inputs input {
+                        width: 42px;
+                        height: 50px;
+                        font-size: 1.2rem;
+                    }
+            }
+    </style>
+</head>
+<body>
+    <div class="otp-wrapper">
+
+        <div class="otp-left">
+            <div class="big-icon"><i class="fas fa-envelope-open-text"></i></div>
+            <h2>OTP Verification</h2>
+            <p>We have sent a 6-digit code to your email. Please check your inbox and enter the code to continue.</p>
+            <div class="brand">Artisan Valley</div>
+        </div>
+
+        <div class="otp-right">
+            <h3>Enter Your OTP</h3>
+            <p class="subtitle">Check your email inbox for the 6-digit code</p>
+
+            <div class="info-box">
+                <i class="fas fa-clock"></i>
+                <span>This code will expire in <strong>5 minutes</strong>. Do not share it with anyone.</span>
+            </div>
+
+            @if (TempData["OtpError"] != null)
+            {
+                <div class="error-box">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    @TempData["OtpError"]
+                </div>
+            }
+
+            <form method="post" asp-action="LoginVerifyOtp" asp-controller="Account" onsubmit="combineOtp()">
+
+                <label class="field-label">Enter 6-Digit Code</label>
+
+                <div class="otp-inputs">
+                    <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+                    <input type="text" maxlength="1" class="otp-digit" inputmode="numeric">
+                </div>
+
+                <input type="hidden" name="otp" id="otpHidden">
+
+                <div class="timer-row">OTP expires in: <span id="countdown">05:00</span></div>
+
+                <button type="submit" class="btn-verify">
+                    <i class="fas fa-check-circle"></i> Verify & Continue
+                </button>
+            </form>
+
+            <div class="bottom-links">
+                Did not get the email?
+                <a href="javascript:void(0)" onclick="resendOtp()">Resend OTP</a>
+            </div>
+            <div id="resendMsg"></div>
+
+            <a href="/Account/Login" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Login
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+            const digits = document.querySelectorAll('.otp-digit');
+
+            digits.forEach((input, index) => {
+                input.addEventListener('input', () => {
+                    input.value = input.value.replace(/[^0-9]/g, '');
+                    if (input.value && index < digits.length - 1)
+                        digits[index + 1].focus();
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !input.value && index > 0)
+                        digits[index - 1].focus();
+                });
+
+                input.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const pasted = e.clipboardData.getData('text').replace(/[^0-9]/g, '');
+                    pasted.split('').forEach((char, i) => {
+                        if (digits[i]) digits[i].value = char;
+                    });
+                    const last = Math.min(pasted.length, digits.length) - 1;
+                    if (digits[last]) digits[last].focus();
+                });
+            });
+
+            function combineOtp() {
+                let otp = '';
+                digits.forEach(d => otp += d.value);
+                document.getElementById('otpHidden').value = otp;
+            }
+
+            let seconds = 300;
+            const timer = setInterval(() => {
+                seconds--;
+                const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                document.getElementById('countdown').textContent = `${m}:${s}`;
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('countdown').textContent = 'Expired!';
+                }
+            }, 1000);
+
+            async function resendOtp() {
+                const res = await fetch('/Account/ResendLoginOtp', { method: 'POST' });
+                const data = await res.json();
+                const msgBox = document.getElementById('resendMsg');
+                if (data.success) {
+                    seconds = 300;
+                    document.getElementById('countdown').textContent = '05:00';
+                    msgBox.style.color = '#2e7d32';
+                    msgBox.textContent = 'OTP sent successfully.';
+                    msgBox.style.display = 'block';
+                } else {
+                    msgBox.style.color = '#c62828';
+                    msgBox.textContent = data.message || 'Failed to resend OTP.';
+                    msgBox.style.display = 'block';
+                }
+                setTimeout(() => { msgBox.style.display = 'none'; }, 4000);
+            }
+    </script>
+</body>
+</html>

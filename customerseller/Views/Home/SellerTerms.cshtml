@@ -1,0 +1,169 @@
+﻿<link href="~/style.css" rel="stylesheet" />
+<link href="~/style.css" rel="stylesheet" />
+
+<style>
+    .terms-hero {
+        background: #a64d79;
+        color: #fff;
+        padding: 30px 35px;
+    }
+
+        .terms-hero h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+    .terms-container {
+        display: flex;
+        gap: 24px;
+        padding: 28px 35px;
+        align-items: flex-start;
+    }
+
+    .terms-sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        background: #fff;
+        border-radius: 12px;
+        padding: 18px;
+        border: 1px solid #ede9fe;
+        position: sticky;
+        top: 20px;
+    }
+
+        .terms-sidebar h3 {
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            color: #1e1033;
+        }
+
+        .terms-sidebar ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .terms-sidebar li {
+            margin-bottom: 8px;
+        }
+
+        .terms-sidebar a {
+            text-decoration: none;
+            color: #6b7280;
+            font-size: 0.82rem;
+        }
+
+            .terms-sidebar a:hover {
+                color: #a64d79;
+            }
+
+    .terms-content {
+        flex: 1;
+        min-width: 0;
+        background: #fff;
+        border-radius: 12px;
+        padding: 26px 30px;
+        border: 1px solid #ede9fe;
+    }
+
+        .terms-content h2 {
+            margin-top: 22px;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            color: #1e1033;
+        }
+
+        .terms-content p {
+            font-size: 0.9rem;
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+    .alert-box {
+        background: #fef3c7;
+        color: #92400e;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        margin-bottom: 16px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @@media (max-width: 900px) {
+        .terms-container {
+            flex-direction: column;
+            padding: 20px 16px;
+            gap: 16px;
+        }
+
+        .terms-sidebar {
+            width: 100%;
+            position: static;
+        }
+
+        .terms-hero {
+            padding: 22px 16px;
+        }
+
+            .terms-hero h1 {
+                font-size: 1.3rem;
+            }
+
+        .terms-content {
+            padding: 20px 18px;
+        }
+    }
+</style>
+@{
+    Layout = "~/Views/Shared/_SellerLayout.cshtml";
+}
+
+@{
+    <!--Terms Of Use-->
+    <section class="terms-hero">
+        <h1>Terms of Use</h1>
+
+    </section>
+
+    <div class="terms-container">
+        <aside class="terms-sidebar">
+            <h3>Quick Navigation</h3>
+            <ul>
+                <li><a href="#acceptance">1. Acceptance of Terms</a></li>
+                <li><a href="#accounts">2. Seller Accounts</a></li>
+                <li><a href="#listing">3. Product Listings</a></li>
+                <li><a href="#payments">4. Payments & Fees</a></li>
+                <li><a href="#returns">5. Returns & Refunds</a></li>
+                <li><a href="#privacy">6. Privacy Policy</a></li>
+            </ul>
+        </aside>
+
+        <main class="terms-content">
+            <p>Welcome to <strong>Artisans</strong>. By using our platform, you agree to comply with and be bound by the following terms and conditions. Please read them carefully.</p>
+
+            <div class="alert-box">
+                Note: Artisans is a marketplace connecting local craftsmen with buyers.
+            </div>
+
+            <h2 id="acceptance">1. Acceptance of Terms</h2>
+            <p>By accessing this website, you confirm that you are at least 18 years old or are accessing the site under the supervision of a parent or legal guardian. These terms apply to all visitors, users, and sellers.</p>
+
+            <h2 id="accounts">2. Seller Accounts</h2>
+            <p>When you create an account as a seller, you must provide accurate and complete information. You are solely responsible for the activity that occurs on your account. Sharing accounts is strictly prohibited.</p>
+
+            <h2 id="listing">3. Product Listings</h2>
+            <p>All products listed must be <strong>handmade</strong> or <strong>artistically crafted</strong>. Reselling mass-produced factory items is against our community guidelines. Artisans reserves the right to remove any listing that does not meet our quality standards.</p>
+
+            <h2 id="payments">4. Payments</h2>
+            <p>Payments are collected upon delivery. Amount will be recieved by our team and verified within  working days.</p>
+
+            <h2 id="returns">5. Returns & Refunds</h2>
+            <p>Custom-made items are not eligible for returns unless they arrive damaged. Buyers must report damages within 48 hours of delivery with photographic evidence.</p>
+
+            <h2 id="privacy">6. Privacy Policy</h2>
+            <p>Your privacy is important to us. We never sell your data to third parties. Please refer to our full Privacy section for more details on how we encrypt your personal information.</p>
+        </main>
+    </div>
+}
