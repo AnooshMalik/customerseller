@@ -845,39 +845,63 @@
       body.classList.toggle('hidden');
     }
 
-       function applyFilters() {
-      let filtered = allProducts.filter(p => {
-        // Price filter
-        const minP = parseFloat(document.getElementById('minPrice').value) || 0;
-        const maxP = parseFloat(document.getElementById('maxPrice').value) || 999999;
-        const price = parseFloat(p.price) || 0;
-        if (price < minP || price > maxP) return false;
+     // Helper: lowercase + sirf letters/numbers rakho, taake "Jewels", "jewels ", "Jewels & Stones" sab match ho jayen
+function norm(str) {
+  return (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
 
-        // Color filter
-        const activeColors = Array.from(document.querySelectorAll('.color-swatch.active'))
-          .map(el => el.getAttribute('data-color'));
-        if (activeColors.length > 0) {
-          const productColor = (p.color || '').toLowerCase();
-          if (!activeColors.includes(productColor)) return false;
-        }
+function getCheckedValues(containerId) {
+  return Array.from(document.querySelectorAll('#' + containerId + ' input[type="checkbox"]:checked'))
+    .map(cb => cb.value);
+}
 
-        // Search filter
-        const search = document.getElementById('searchInput').value.toLowerCase().trim();
-        if (search && !(p.title || '').toLowerCase().includes(search)) return false;
+function applyFilters() {
+  const selectedCategories = getCheckedValues('categoryFilter');
+  const selectedSizes = getCheckedValues('sizeFilter');
 
-       
-
-        return true;
-      });
-
-      // Sorting
-      const sortVal = document.getElementById('sortSelect').value;
-      if (sortVal === 'price-low') filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
-      else if (sortVal === 'price-high') filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
-
-      renderProducts(filtered);
+  let filtered = allProducts.filter(p => {
+    // Category filter
+    if (selectedCategories.length > 0) {
+      const productCategory = norm(p.category);
+      const matches = selectedCategories.some(cat => productCategory.includes(norm(cat)));
+      if (!matches) return false;
     }
 
+    // Size filter
+    if (selectedSizes.length > 0) {
+      const productSizes = (p.sizes || '').split(',').map(s => norm(s));
+      const matches = selectedSizes.some(sz => productSizes.includes(norm(sz)));
+      if (!matches) return false;
+    }
+
+    // Price filter
+    const minP = parseFloat(document.getElementById('minPrice').value) || 0;
+    const maxP = parseFloat(document.getElementById('maxPrice').value) || 999999;
+    const price = parseFloat(p.price) || 0;
+    if (price < minP || price > maxP) return false;
+
+    // Color filter
+    const activeColors = Array.from(document.querySelectorAll('.color-swatch.active'))
+      .map(el => el.getAttribute('data-color'));
+    if (activeColors.length > 0) {
+      const productColor = norm(p.color);
+      if (!activeColors.some(c => productColor.includes(norm(c)))) return false;
+    }
+
+    // Search filter
+    const search = document.getElementById('searchInput').value.toLowerCase().trim();
+    if (search && !(p.title || '').toLowerCase().includes(search)) return false;
+
+    return true;
+  });
+
+  // Sorting
+  const sortVal = document.getElementById('sortSelect').value;
+  if (sortVal === 'price-low') filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+  else if (sortVal === 'price-high') filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+
+  renderProducts(filtered);
+}
     function resetAllFilters() {
       document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
       document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);

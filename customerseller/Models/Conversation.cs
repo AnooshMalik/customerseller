@@ -23,5 +23,12 @@ namespace customerseller.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime LastMessageAt { get; set; } = DateTime.Now;
+
+        // Jab User1 ne "Clear Chat" kiya, us waqt ka timestamp.
+        // Is se pehle ke messages/conversation sirf User1 ko nahi dikhenge.
+        public DateTime? User1ClearedAt { get; set; }
+
+        // Jab User2 ne "Clear Chat" kiya, us waqt ka timestamp.
+        public DateTime? User2ClearedAt { get; set; }
     }
 }

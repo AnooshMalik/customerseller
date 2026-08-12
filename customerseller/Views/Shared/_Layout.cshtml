@@ -59,9 +59,9 @@
                 <a href="#" id="loginIcon"><i class="fa-solid fa-user"></i></a>
             }
 
-            @if (Context.Session.GetString("UserEmail") != null && Context.Session.GetString("UserRole") != "Seller")
+            @if (Context.Session.GetString("UserEmail") != null && Context.Session.GetString("UserRole") != "Seller" && currentPath.Contains("/product/details"))
             {
-                <a asp-controller="Chat" asp-action="Messages" style="position:relative; margin-right:8px;">
+                <a href="/Chat/Messages" onclick="return checkChatLogin(event)" style="position:relative; margin-right:8px;">
                     <i class="fa-solid fa-comment-dots"></i>
                     <span id="chatUnreadCount" style="display:none; position:absolute; top:-8px; right:-8px; background:#a64d79; color:#fff; font-size:0.65rem; font-weight:700; width:18px; height:18px; border-radius:50%; text-align:center; line-height:18px;">0</span>
                 </a>
@@ -206,19 +206,19 @@
                 </div>
             }
             <form id="registerForm" asp-controller="Account" asp-action="Register" method="post" autocomplete="off" novalidate>
-                <div style="margin-bottom:15px;">
+                <div style="margin-bottom:6px;">
                     <input type="text" name="firstName" id="regFirstName" placeholder="First Name" required autocomplete="off">
                     <span class="field-error" id="err-firstName"></span>
                 </div>
-                <div style="margin-bottom:15px;">
+                <div style="margin-bottom:6px;">
                     <input type="text" name="lastName" id="regLastName" placeholder="Last Name" required autocomplete="off">
                     <span class="field-error" id="err-lastName"></span>
                 </div>
-                <div style="margin-bottom:15px;">
+                <div style="margin-bottom:6px;">
                     <input type="email" name="email" id="regEmail" placeholder="Email *" required autocomplete="new-password">
                     <span class="field-error" id="err-email"></span>
                 </div>
-                <div style="margin-bottom:15px;">
+                <div style="margin-bottom:6px;">
                     <input type="password" name="password" id="regPassword" placeholder="Password * (min 8 characters)" required minlength="8" autocomplete="new-password">
                     <span class="field-error" id="err-password"></span>
                 </div>
@@ -269,7 +269,7 @@
             </div>
         </div>
     </div>
-
+    @await Html.PartialAsync("_ChatWidget")
     <script src="~/customer/js/site.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
@@ -284,7 +284,22 @@
                     updateCartCount();
                 }
             }
-
+            function checkChatLogin(e) {
+                var isLoggedIn = @(Context.Session.GetString("UserEmail") != null ? "true" : "false");
+                if (!isLoggedIn) {
+                    e.preventDefault();
+                    const inp = document.getElementById('loginReturnUrl');
+                    if (inp) inp.value = '/Chat/Messages';
+                    const loginPopup = document.getElementById('loginPopup');
+                    const loginOverlay = document.getElementById('loginOverlay');
+                    if (loginPopup && loginOverlay) {
+                        loginPopup.classList.add('active');
+                        loginOverlay.classList.add('active');
+                    }
+                    return false;
+                }
+                return true;
+            }
             function closeCart() {
                 document.getElementById('cartSidebar')?.classList.remove('active');
                 document.getElementById('cartOverlay')?.classList.remove('active');

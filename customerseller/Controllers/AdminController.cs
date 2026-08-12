@@ -108,6 +108,7 @@ namespace customerseller.Controllers
 
             if (otp == savedOtp)
             {
+                HttpContext.Session.Clear();
                 // OTP sahi — Admin session set karo
                 HttpContext.Session.SetString("AdminEmail", "artisanvalley.store@gmail.com");
                 HttpContext.Session.SetString("AdminRole", "Admin");
@@ -188,21 +189,40 @@ namespace customerseller.Controllers
                 "SELECT COUNT(*) FROM Products WHERE IsAdminApproved = 0 AND VideoStatus = 'Approved'", con);
             ViewBag.PendingProductsCount = (int)pendingProductsCmd.ExecuteScalar();
 
+            var totalOrders = _context.Orders.Count();
+            var pendingOrders = _context.Orders.Count(o => o.Status == "Pending" || o.Status == "Placed" || o.Status == "Processing");
+            var netRevenue = _context.Orders
+                .Where(o => o.Status == "Delivered")
+                .Sum(o => (decimal?)o.Total) ?? 0;
+
+            var recentOrders = _context.Orders
+                .OrderByDescending(o => o.OrderDate)
+                .Take(5)
+                .ToList();
+
+            var recentSales = recentOrders.Select(o => new customerseller.Models.SaleActivity
+            {
+                Detail = $"Order #{o.OrderId} — {o.CustomerName ?? (o.FirstName + " " + o.LastName)}",
+                Amount = $"Rs. {o.Total:N0}"
+            }).ToList();
+
             var model = new customerseller.Models.DashboardViewModel
             {
                 SellerName = "Admin",
                 ShopName = "Artisan Valley",
                 AccountStatus = "",
-                NetRevenue = 0,
+                NetRevenue = netRevenue,
                 RevenueGrowth = 0,
-                TotalOrders = 0,
-                PendingOrders = 0,
+                TotalOrders = totalOrders,
+                PendingOrders = pendingOrders,
                 Rating = 0,
                 LiveVisitors = 0,
-                RecentSales = new List<customerseller.Models.SaleActivity>()
+                RecentSales = recentSales
             };
 
             return View(model);
+
+          
         }
         public IActionResult GetPendingShops()
         {
@@ -239,6 +259,7 @@ namespace customerseller.Controllers
 
         public IActionResult Logout()
         {
+            HttpContext.Session.Clear();
             HttpContext.Session.Remove("AdminEmail");
             HttpContext.Session.Remove("AdminRole");
             return RedirectToAction("Login");
@@ -687,37 +708,49 @@ namespace customerseller.Controllers
                 return RedirectToAction("Login");
 
             var orders = _context.Orders
+                .Include(o => o.Items)
                 .OrderByDescending(o => o.OrderDate)
                 .ToList();
+
+            var allProductIds = orders.SelectMany(o => o.Items.Select(i => i.ProductId)).Distinct().ToList();
+            var productMap = _context.Products
+     .Where(p => allProductIds.Contains(p.Id))
+     .ToDictionary(p => p.Id, p => (object)new { p.Category, p.SubCategory });
+
+            ViewBag.ProductMap = productMap;
 
             ViewBag.Total = orders.Count;
             ViewBag.Pending = orders.Count(o => o.Status == "Pending" || o.Status == "Placed");
             ViewBag.Delivered = orders.Count(o => o.Status == "Delivered");
 
-            return View(orders);
+            return View("AdminOrders", orders);
         }
-
         public IActionResult Reports()
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
                 return RedirectToAction("Login");
 
             ViewBag.TotalRevenue = _context.Orders
-                .Where(o => o.Status == "Delivered")
-                .Sum(o => (decimal?)o.Price) ?? 0;
+      .Where(o => o.Status == "Delivered")
+      .Sum(o => (decimal?)o.Total) ?? 0;
 
             ViewBag.TotalOrders = _context.Orders.Count();
             ViewBag.TotalSellers = _context.Users.Count(u => u.Role == "Seller");
             ViewBag.TotalCustomers = _context.Users.Count(u => u.Role == "Customer");
             ViewBag.TotalProducts = _context.Products.Count(p => p.IsAdminApproved == true);
+            ViewBag.TotalComplaints = _context.Complaints.Count();
+            ViewBag.PendingComplaints = _context.Complaints.Count(c => c.Status == "Open" || c.Status == "Escalated");
+            ViewBag.PendingShops = _context.SellerShops.Count(s => s.AdminStatus == "Pending" || s.AdminStatus == null);
 
+            var deliveredOrders = _context.Orders.Where(o => o.Status == "Delivered").ToList();
+            ViewBag.AvgOrderValue = deliveredOrders.Any() ? deliveredOrders.Average(o => o.Total) : 0;
             ViewBag.TopProducts = _context.Products
                 .Where(p => p.IsAdminApproved == true)
                 .OrderByDescending(p => p.Stock)
                 .Take(5)
                 .ToList();
 
-            return View();
+            return View("AdminReports");
         }
 
         public IActionResult Settings()

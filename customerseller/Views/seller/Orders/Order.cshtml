@@ -643,7 +643,7 @@
         <h3>Assign to Courier?</h3>
         <p style="color:#888; font-size:0.9rem; margin:10px 0 20px;">
             Are you sure you want to assign this order to courier?<br>
-            Courier will pickup first, then WhatsApp message will be sent to customer.
+            Customer will be notified via email.
         </p>
         <div class="modal-actions">
             <button class="btn-cancel-modal" onclick="closeConfirmModal()">Cancel</button>
@@ -675,19 +675,6 @@
     </div>
 </div>
 
-<!-- WhatsApp Message Modal -->
-<div class="modal-overlay" id="waModal">
-    <div class="wa-box">
-        <div class="wa-icon"><i class="fab fa-whatsapp"></i></div>
-        <h3>Order Assigned! Send WhatsApp to Customer</h3>
-        <div class="wa-preview" id="waPreview"></div>
-        <a class="btn-wa-send" id="waSendLink" href="#" target="_blank">
-            <i class="fab fa-whatsapp"></i> Send via WhatsApp
-        </a>
-        <br />
-        <button class="btn-wa-close" onclick="closeWaModal()">Close</button>
-    </div>
-</div>
 
 <script>
     function openAssignModal(orderId, customerPhone, customerAddress) {
@@ -736,25 +723,15 @@
 
         if (data.success) {
             closeAssignModal();
-            showWaModal(data.whatsappMessage, data.customerPhone);
+            alert('✅ Order assigned to courier! Email sent to customer.');
+            location.reload();
         } else {
             alert('Error: ' + (data.error || 'Something went wrong'));
         }
     }
 
-    function showWaModal(message, phone) {
-        document.getElementById('waPreview').textContent = message;
-        const cleanPhone = phone.replace(/\D/g, '');
-        const waPhone = cleanPhone.startsWith('0') ? '92' + cleanPhone.substring(1) : cleanPhone;
-        const waUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(message)}`;
-        document.getElementById('waSendLink').href = waUrl;
-        document.getElementById('waModal').classList.add('show');
-    }
+    
 
-    function closeWaModal() {
-        document.getElementById('waModal').classList.remove('show');
-        location.reload();
-    }
 
     function trackMyOrder(orderId) {
         document.getElementById('trackId').textContent = '#' + orderId;

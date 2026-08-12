@@ -100,16 +100,14 @@ namespace customerseller.Controllers
 
             if (otp == savedOtp)
             {
-                string email = HttpContext.Session.GetString("ModEmailPending");
+                string email = HttpContext.Session.GetString("ModEmailPending");   // ← pehle read karo
                 string role = (email.ToLower() == AdminEmail.ToLower()) ? "Admin" : "Moderator";
+
+                HttpContext.Session.Clear();                                       // ← ab clear karo
                 HttpContext.Session.SetString("ModeratorEmail", email);
                 HttpContext.Session.SetString("ModeratorRole", role);
-                HttpContext.Session.Remove("ModOtp");
-                HttpContext.Session.Remove("ModOtpExpiry");
-                HttpContext.Session.Remove("ModEmailPending");
                 return RedirectToAction("Dashboard");
             }
-
             TempData["OtpError"] = "Invalid OTP.";
             return View();
         }
@@ -460,6 +458,7 @@ namespace customerseller.Controllers
         }
         public IActionResult Logout()
         {
+            HttpContext.Session.Clear();
             HttpContext.Session.Remove("ModeratorEmail");
             HttpContext.Session.Remove("ModeratorRole");
             return RedirectToAction("Login");

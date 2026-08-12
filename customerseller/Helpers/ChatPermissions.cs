@@ -11,8 +11,8 @@ namespace customerseller.Helpers
     ("Customer", "Seller"), ("Seller", "Customer"),
     ("Seller", "Admin"),    ("Admin", "Seller"),
     ("Admin", "Moderator"), ("Moderator", "Admin"),
-    ("Seller", "Moderator"),("Moderator", "Seller"),
     ("Courier", "Admin"),   ("Admin", "Courier"),
+    ("Courier", "Seller"),  ("Seller", "Courier"),
 };
 
         public static bool IsAllowed(string role1, string role2)

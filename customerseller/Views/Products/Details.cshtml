@@ -436,9 +436,9 @@
         <div>
             <span class="pd-badge">Handmade</span>
             <div style="margin:12px 0;">
-                <a href="#" style="display:inline-flex; align-items:center; gap:6px; font-size:0.85rem; color:#666; text-decoration:none;">
-                    <i class="fa-solid fa-store" style="color:#a64d79;"></i>
-                    Sold by <strong style="color:#a64d79;">@ViewBag.ShopName</strong>
+                <a href="javascript:void(0)" onclick="startSellerChat()" style="display:inline-flex; align-items:center; gap:6px; font-size:0.85rem; color:#666; text-decoration:none;">
+                    <i class="fa-solid fa-comment-dots" style="color:#a64d79;"></i>
+                    Message <strong style="color:#a64d79;">@ViewBag.ShopName</strong>
                 </a>
             </div>
 
@@ -535,12 +535,7 @@
                     </div>
                 </div>
             }
-            <button onclick="startSellerChat()" title="Message Seller"
-                    style="position:fixed; bottom:30px; right:30px; width:58px; height:58px; border-radius:50%;
-                background:#a64d79; color:#fff; border:none; box-shadow:0 4px 16px rgba(0,0,0,0.25);
-                font-size:1.4rem; cursor:pointer; z-index:9998; display:flex; align-items:center; justify-content:center;">
-                <i class="fa-solid fa-comment-dots"></i>
-            </button>
+           
         </div>
     </div>
 
@@ -581,6 +576,16 @@
                     </div>
                     <p class="r-comment">@r.Comment</p>
                     <span class="r-date">@r.CreatedAt.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture)</span>
+
+                    @if (!string.IsNullOrEmpty(r.SellerResponse))
+                    {
+                        <div style="background:#f9eef4; border-left:3px solid #a64d79; border-radius:8px; padding:10px 14px; margin-top:10px;">
+                            <div style="font-size:0.78rem; font-weight:700; color:#a64d79; margin-bottom:4px;">
+                                <i class="fa-solid fa-store"></i> Seller's Response
+                            </div>
+                            <p style="font-size:0.85rem; color:#444; margin:0;">@r.SellerResponse</p>
+                        </div>
+                    }
                 </div>
             }
         }
@@ -717,16 +722,65 @@
             var content = btn.nextElementSibling;
             content.classList.toggle('open');
         }
-                async function startSellerChat() {
-            if (!isUserLoggedIn) {
-                const loginPopup = document.getElementById('loginPopup');
-                const loginOverlay = document.getElementById('loginOverlay');
-                if (loginPopup && loginOverlay) {
-                    loginPopup.classList.add('active');
-                    loginOverlay.classList.add('active');
-                }
-                return;
+       async function startSellerChat() {
+    if (!isUserLoggedIn) {
+        const inp = document.getElementById('loginReturnUrl');
+        if (inp) inp.value = '/Chat/Messages';
+        const loginPopup = document.getElementById('loginPopup');
+        const loginOverlay = document.getElementById('loginOverlay');
+        if (loginPopup && loginOverlay) {
+            loginPopup.classList.add('active');
+            loginOverlay.classList.add('active');
+        }
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('otherEmail', '@Model.SellerEmail');
+    formData.append('otherRole', 'Seller');
+    formData.append('productId', '@Model.Id');
+
+    const res = await fetch('/Chat/StartConversation', { method: 'POST', body: formData });
+    const data = await res.json();
+
+    if (data.success) {
+        // Open the floating widget instead of navigating to a separate page
+        if (typeof window.cwOpen === 'function') {
+            window.cwOpen();
+            const convRes = await fetch('/Chat/GetConversations');
+            const convs = await convRes.json();
+            const match = convs.find(c => c.conversationId === data.conversationId);
+            if (match && typeof window.cwOpenConversation === 'function') {
+                window.cwOpenConversation(match.conversationId, match.otherName, match.otherRole);
             }
+        }
+    } else {
+        alert(data.message || 'Could not start chat.');
+    }
+}
+            const formData = new FormData();
+            formData.append('otherEmail', '@Model.SellerEmail');
+            formData.append('otherRole', 'Seller');
+            formData.append('productId', '@Model.Id');
+
+            const res = await fetch('/Chat/StartConversation', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                // Open the floating widget instead of navigating to a separate page
+                if (typeof window.cwOpen === 'function') {
+                    window.cwOpen();
+                    const convRes = await fetch('/Chat/GetConversations');
+                    const convs = await convRes.json();
+                    const match = convs.find(c => c.conversationId === data.conversationId);
+                    if (match && typeof window.cwOpenConversation === 'function') {
+                        window.cwOpenConversation(match.conversationId, match.otherName, match.otherRole);
+                    }
+                }
+            } else {
+                alert(data.message || 'Could not start chat.');
+            }
+        }
 
             const formData = new FormData();
             formData.append('otherEmail', '@Model.SellerEmail');

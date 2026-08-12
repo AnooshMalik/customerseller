@@ -446,7 +446,7 @@
         </div>
         <a href="/Chat/Messages" class="nav-item" style="text-decoration:none; position:relative;">
             <i class="fas fa-comment-dots"></i> Messages
-            <span id="chatUnreadBadge" style="display:none; margin-left:auto; background:#dc2626; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.72rem;">0</span>
+    <span id="chatUnreadBadge" style="margin-left:auto; background:#a64d79; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.72rem; display:inline-block;">0</span>
         </a>
         <div class="sidebar-bottom">
             <a href="/Courier/Logout" class="logout-item" onclick="return confirmLogout(event)">
@@ -536,7 +536,7 @@
                         <span>Rs. @o.Total.ToString("N0")</span>
                     </div>
 
-                    @if (o.CourierStatus != "Delivered")
+                    @if (o.CourierStatus != "Delivered" && o.CourierStatus != "Cancelled")
                     {
                         <div class="order-actions">
                             @if (o.CourierStatus == "Assigned")
@@ -549,16 +549,14 @@
                                 <i class="fas fa-check-circle"></i> Mark Delivered
                             </button>
                         </div>
+                        <button class="btn-cancel-order" onclick="openCancelModal('@o.OrderId')" style="width:100%; margin-top:10px; padding:10px; background:#fee2e2; color:#c62828; border:none; border-radius:8px; font-size:0.85rem; font-weight:600; cursor:pointer;">
+                            <i class="fas fa-ban"></i> Cancel Order (Customer Refused)
+                        </button>
                     }
-                    else
+                    else if (o.CourierStatus == "Cancelled")
                     {
-                        <div style="margin-top:12px; font-size:0.85rem; color:#059669;">
-                            <i class="fas fa-check-circle"></i>
-                            Delivered on @o.DeliveredAt?.ToString("dd MMM yyyy, hh:mm tt", new System.Globalization.CultureInfo("en-US"))
-                            @if (o.PaymentReceived == false)
-                            {
-                                <span style="color:#c62828;"> — Payment Issue: @o.PaymentNotReceivedReason</span>
-                            }
+                        <div style="margin-top:12px; font-size:0.85rem; color:#c62828;">
+                            <i class="fas fa-ban"></i> Order Cancelled — @o.PaymentNotReceivedReason
                         </div>
                     }
                 </div>
@@ -588,6 +586,18 @@
                 <button class="btn-confirm-modal" onclick="confirmDelivery()">Confirm</button>
             </div>
            
+        </div>
+    </div>
+    <!-- Cancel Order Modal -->
+    <div class="modal-overlay" id="cancelOrderModal">
+        <div class="modal-box">
+            <h3><i class="fas fa-ban" style="color:#c62828;"></i> Cancel This Order?</h3>
+            <input type="hidden" id="cancelOrderId">
+            <textarea class="reason-input" id="cancelReasonInput" style="display:block;" placeholder="Reason (e.g. customer refused to accept, unreachable...)"></textarea>
+            <div class="modal-actions">
+                <button class="btn-cancel-modal" onclick="closeCancelModal()">Back</button>
+                <button class="btn-confirm-modal" style="background:#c62828;" onclick="confirmCancelOrder()">Confirm Cancel</button>
+            </div>
         </div>
     </div>
     <!-- Logout Confirm Modal -->
@@ -640,16 +650,15 @@
                     document.getElementById('btnNotReceived').classList.add('selected', 'notreceived');
                 }
             }
-
-                    fetch('/Chat/GetUnreadCount')
-            .then(r => r.json())
-            .then(d => {
-                const badge = document.getElementById('chatUnreadBadge');
-                if (d.count > 0) {
-                    badge.textContent = d.count;
-                    badge.style.display = 'inline-block';
-                }
-            });
+          async function loadCourierChatBadge() {
+    try {
+        const res = await fetch('/Chat/GetUnreadCount');
+        const d = await res.json();
+        document.getElementById('chatUnreadBadge').textContent = d.count ?? 0;
+    } catch (e) {}
+}
+loadCourierChatBadge();
+setInterval(loadCourierChatBadge, 10000);
             async function confirmDelivery() {
                 if (paymentReceived === null) {
                     alert('Please select payment status.');
@@ -684,6 +693,35 @@
                  await fetch('/Courier/Logout');
                  window.location.replace('/');
              }
+
+            function openCancelModal(orderId) {
+                document.getElementById('cancelOrderId').value = orderId;
+                document.getElementById('cancelReasonInput').value = '';
+                document.getElementById('cancelOrderModal').classList.add('show');
+            }
+
+            function closeCancelModal() {
+                document.getElementById('cancelOrderModal').classList.remove('show');
+            }
+
+            async function confirmCancelOrder() {
+                const orderId = document.getElementById('cancelOrderId').value;
+                const reason = document.getElementById('cancelReasonInput').value.trim();
+                if (!reason) { alert('Please enter a reason.'); return; }
+
+                const res = await fetch('/Courier/CancelOrderByRider', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `orderId=${encodeURIComponent(orderId)}&reason=${encodeURIComponent(reason)}`
+                });
+                const data = await res.json();
+                if (data.success) {
+                    closeCancelModal();
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'Something went wrong'));
+                }
+            }
     </script>
 </body>
 </html>

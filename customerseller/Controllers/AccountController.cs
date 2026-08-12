@@ -60,6 +60,7 @@ namespace customerseller.Controllers
 
             if (BCrypt.Net.BCrypt.Verify(password, foundUser.Password))
             {
+                HttpContext.Session.Clear();
                 // OTP hata diya — seedha login
                 HttpContext.Session.SetString("UserEmail", foundUser.Email);
                 HttpContext.Session.SetString("UserName", foundUser.FirstName);
@@ -186,7 +187,7 @@ namespace customerseller.Controllers
                 Role = "Customer"
             });
             _context.SaveChanges();
-
+            HttpContext.Session.Clear();
             HttpContext.Session.SetString("UserEmail", email);
             HttpContext.Session.SetString("UserName", firstName);
             HttpContext.Session.SetString("UserRole", "Customer");
@@ -611,7 +612,7 @@ namespace customerseller.Controllers
                 Role = "Seller"
             });
             _context.SaveChanges();
-
+            HttpContext.Session.Clear();
             HttpContext.Session.SetString("UserEmail", email);
             HttpContext.Session.SetString("UserName", firstName);
             HttpContext.Session.SetString("UserRole", "Seller");
@@ -675,7 +676,7 @@ namespace customerseller.Controllers
                 TempData["LoginError"] = "Account not found.";
                 return RedirectToAction("Login");
             }
-
+            HttpContext.Session.Clear();
             HttpContext.Session.SetString("UserEmail", foundUser.Email);
             HttpContext.Session.SetString("UserName", foundUser.FirstName);
             HttpContext.Session.SetString("UserRole", foundUser.Role ?? "Seller");

@@ -128,9 +128,9 @@
         <div class="login-icon"><i class="fas fa-motorcycle"></i></div>
         <h2>Rider Login</h2>
         <p class="sub">Access your delivery orders</p>
-        @if (TempData["RiderError"] != null)
+        @if (TempData["CourierError"] != null)
         {
-            <div class="error-box">⚠️ @TempData["RiderError"]</div>
+            <div class="error-box">⚠️ @TempData["CourierError"]</div>
         }
 
         <form method="post" asp-action="Login" asp-controller="Courier">

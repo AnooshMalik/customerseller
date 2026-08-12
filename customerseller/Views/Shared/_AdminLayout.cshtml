@@ -430,11 +430,10 @@
                 </a>
 
                 <!-- SYSTEM -->
-                <hr class="nav-divider" />
-                <a asp-controller="Chat" asp-action="Messages">
-                    <i class="fas fa-comment-dots"></i> Messages
-                    <span class="nav-badge" id="chatUnreadCount" style="display:none;">0</span>
-                </a>
+               <a asp-controller="Chat" asp-action="Messages">
+    <i class="fas fa-comment-dots"></i> Messages
+    <span class="nav-badge" id="chatUnreadCount">0</span>
+</a>
 
                 <a asp-controller="Admin" asp-action="Settings">
                     <i class="fas fa-cog"></i> Settings
@@ -511,43 +510,42 @@
         });
         })();
 
+            async function loadSidebarCounts() {
+                try {
+                    const res = await fetch('/Admin/GetPendingShops');
+                    const shops = await res.json();
+                    if (shops && !shops.error) {
+                        document.getElementById('shopRequestCount').textContent = shops.length;
+                    }
+                } catch (e) { }
 
-        async function loadSidebarCounts() {
-        try {
-        const res = await fetch('/Admin/GetPendingShops');
-        const shops = await res.json();
-        if (shops && !shops.error) {
-        document.getElementById('shopRequestCount').textContent = shops.length;
-        }
-        } catch(e) {}
+                try {
+                    const res2 = await fetch('/Admin/GetOpenComplaints');
+                    const data = await res2.json();
+                    if (data && !data.error) {
+                        document.getElementById('complaintCount').textContent = data.count;
+                    }
+                } catch (e) { }
 
-        try {
-        const res2 = await fetch('/Admin/GetOpenComplaints');
-        const data = await res2.json();
-        if (data && !data.error) {
-        document.getElementById('complaintCount').textContent = data.count;
-        }
-        } catch(e) {}
+                try {
+                    const res3 = await fetch('/Admin/GetPendingProducts');
+                    const products = await res3.json();
+                    if (products && !products.error) {
+                        document.getElementById('productCount').textContent = products.length;
+                    }
+                } catch (e) { }
 
-        try {
-        const res3 = await fetch('/Admin/GetPendingProducts');
-        const products = await res3.json();
-        if (products && !products.error) {
-        document.getElementById('productCount').textContent = products.length;
-        }
-        try {
-        const res4 = await fetch('/Chat/GetUnreadCount');
-        const data4 = await res4.json();
-        const badge = document.getElementById('chatUnreadCount');
-        if (data4.count > 0) {
-        badge.textContent = data4.count;
-        badge.style.display = 'inline-block';
-        }
-        } catch(e) {}
-        } catch(e) {}
-        }
+               try {
+    const res4 = await fetch('/Chat/GetUnreadCount');
+    const data4 = await res4.json();
+    document.getElementById('chatUnreadCount').textContent = data4.count ?? 0;
+} catch (e) { }
+            }
 
+            loadSidebarCounts();
+            setInterval(loadSidebarCounts, 10000);
         loadSidebarCounts();
+            setInterval(loadSidebarCounts, 10000);
     </script>
 </body>
 </html>

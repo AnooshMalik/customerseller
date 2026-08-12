@@ -336,9 +336,11 @@
         document.getElementById('cancelForm').submit();
     }
 
-    // Button click pe modal open ho
-    document.querySelector('#cancelForm button[type=submit]').addEventListener('click', function(e) {
-        e.preventDefault();
-        openCancelModal();
-    });
+    const cancelBtn = document.querySelector('#cancelForm button[type=submit]');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            openCancelModal();
+        });
+    }
 </script>

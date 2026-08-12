@@ -322,7 +322,7 @@
             };
 
             <div class="complaint-card" data-status="@c.Status" data-search="@c.CustomerName @c.SellerName @c.TicketNumber @c.ComplaintType">
-                <div class="complaint-header">
+                    <div class="complaint-header" onclick="toggleComplaint(@c.Id, event)" style="cursor:pointer;">
                     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                         <span class="ticket-no">@c.TicketNumber</span>
                         <span class="badge @statusClass">@c.Status</span>
@@ -336,12 +336,18 @@
                             </span>
                         }
                     </div>
-                    <span style="font-size:0.78rem; color:#9ca3af;">
-                        @c.CreatedAt.ToString("dd MMM yyyy, hh:mm tt", System.Globalization.CultureInfo.InvariantCulture)
-                    </span>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <span style="font-size:0.78rem; color:#9ca3af;">
+                                @c.CreatedAt.ToString("dd MMM yyyy, hh:mm tt", System.Globalization.CultureInfo.InvariantCulture)
+                            </span>
+                            <button onclick="event.stopPropagation(); deleteComplaint(@c.Id)" title="Delete Complaint"
+                                    style="background:#fee2e2; color:#dc2626; border:none; width:26px; height:26px; border-radius:50%; cursor:pointer; font-size:0.9rem; line-height:1;">
+                                &times;
+                            </button>
+                        </div>
                 </div>
 
-                <div class="complaint-body">
+                    <div class="complaint-body" id="body-@c.Id" style="display:none;">
                     <div class="info-grid">
                         <div class="info-item">
                             <label>Customer</label>
@@ -444,6 +450,7 @@
                                 <i class="fas fa-ban"></i> Mark Fake
                             </button>
                         </div>
+
                     }
                     else
                     {
@@ -472,7 +479,18 @@
         <button class="modal-btn" onclick="closeModal()">OK</button>
     </div>
 </div>
-
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="deleteConfirmModal">
+    <div class="modal-box">
+        <div class="modal-icon">🗑️</div>
+        <h3>Delete Complaint?</h3>
+        <p>This action cannot be undone. Are you sure?</p>
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button class="modal-btn" style="background:#f1f5f9; color:#555;" onclick="closeDeleteConfirm()">Cancel</button>
+            <button class="modal-btn" style="background:#dc2626;" onclick="proceedDelete()">Delete</button>
+        </div>
+    </div>
+</div>
 <script>
     let shouldReloadOnClose = false;
 
@@ -489,7 +507,10 @@
             location.reload();
         }
     }
-
+    function toggleComplaint(id, e) {
+    const body = document.getElementById('body-' + id);
+    body.style.display = body.style.display === 'none' ? 'block' : 'none';
+}
 function filterCards(status, btn) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -541,4 +562,30 @@ async function markFake(id) {
     if (data.success) showModal('🚫', 'Marked Fake!', 'Complaint marked as fake. Customer strike added.');
     else showModal('❌', 'Error', 'Something went wrong.');
 }
+   
+    let pendingDeleteId = null;
+
+    function deleteComplaint(id) {
+        pendingDeleteId = id;
+        document.getElementById('deleteConfirmModal').classList.add('show');
+    }
+
+    function closeDeleteConfirm() {
+        document.getElementById('deleteConfirmModal').classList.remove('show');
+        pendingDeleteId = null;
+    }
+
+    async function proceedDelete() {
+        const id = pendingDeleteId;
+        closeDeleteConfirm();
+
+        const res = await fetch('/Complaint/DeleteComplaint', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `complaintId=${id}`
+        });
+        const data = await res.json();
+        if (data.success) showModal('🗑️', 'Deleted!', 'Complaint has been removed.');
+        else showModal('❌', 'Error', 'Something went wrong.');
+    }
 </script>

@@ -201,35 +201,60 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var o in Model)
-                {
-                    <tr data-status="@(o.Status ?? "Pending")">
-                        <td style="font-family:monospace; font-size:0.82rem; color:#7c3aed;">
-                            #@(o.OrderId?.Length > 8 ? o.OrderId.Substring(0, 8).ToUpper() : o.OrderId)
-                        </td>
-                        <td>
-                            <div style="font-weight:600;">@(o.CustomerName ?? $"{o.FirstName} {o.LastName}")</div>
-                            <div style="font-size:0.78rem; color:#6b7280;">@o.Email</div>
-                        </td>
-                        <td>@(o.ProductName ?? "—")</td>
-                        <td style="font-weight:700; color:#a64d79;">Rs. @o.Total.ToString("N0")</td>
-                        <td style="font-size:0.82rem; color:#6b7280;">
-                            @o.OrderDate.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture)
-                        </td>
-                        <td>
-                            @{
-                                var statusClass = o.Status switch {
-                                    "Placed"    => "badge-placed",
-                                    "Shipped"   => "badge-shipped",
-                                    "Delivered" => "badge-delivered",
-                                    "Cancelled" => "badge-cancelled",
-                                    _           => "badge-pending"
-                                };
-                            }
-                            <span class="badge @statusClass">@(o.Status ?? "Pending")</span>
-                        </td>
-                    </tr>
-                }
+                    @foreach (var o in Model)
+                    {
+                        <tr data-status="@(o.Status ?? "Pending")">
+                            <td style="font-family:monospace; font-size:0.82rem; color:#7c3aed;">
+                                #@(o.OrderId?.Length > 8 ? o.OrderId.Substring(0, 8).ToUpper() : o.OrderId)
+                            </td>
+                            <td>
+                                <div style="font-weight:600;">@(o.CustomerName ?? $"{o.FirstName} {o.LastName}")</div>
+                                <div style="font-size:0.78rem; color:#6b7280;">@o.Email</div>
+                            </td>
+                            <td>
+                                @if (o.Items != null && o.Items.Any())
+                                {
+                                    var pm = (Dictionary<string, object>)ViewBag.ProductMap;
+                                    var cats = o.Items
+                                        .Where(i => pm.ContainsKey(i.ProductId))
+                                        .Select(i =>
+                                        {
+                                            dynamic p = pm[i.ProductId];
+                                            string sub = p.SubCategory != null ? p.SubCategory.ToString() : "";
+                                            return string.IsNullOrEmpty(sub) ? p.Category.ToString() : $"{p.Category} / {sub}";
+                                        })
+                                        .Distinct();
+
+                                    <div style="font-weight:600;">@string.Join(", ", o.Items.Select(i => i.Title))</div>
+                                    <div style="font-size:0.78rem; color:#6b7280;">
+                                        Seller: @string.Join(", ", o.Items.Select(i => i.SellerShopName).Distinct())
+                                    </div>
+                                    <div style="font-size:0.75rem; color:#9ca3af;">@string.Join(", ", cats)</div>
+                                }
+                                else
+                                {
+                                    <span>—</span>
+                                }
+                            </td>
+                            <td style="font-weight:700; color:#a64d79;">Rs. @o.Total.ToString("N0")</td>
+                            <td style="font-size:0.82rem; color:#6b7280;">
+                                @o.OrderDate.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture)
+                            </td>
+                            <td>
+                                @{
+                                    var statusClass = o.Status switch
+                                    {
+                                        "Placed" => "badge-placed",
+                                        "Shipped" => "badge-shipped",
+                                        "Delivered" => "badge-delivered",
+                                        "Cancelled" => "badge-cancelled",
+                                        _ => "badge-pending"
+                                    };
+                                }
+                                <span class="badge @statusClass">@(o.Status ?? "Pending")</span>
+                            </td>
+                        </tr>
+                    }
             </tbody>
         </table>
         </div>

@@ -1322,13 +1322,22 @@ html {
     height: 100%;
     background: #fff;
     box-shadow: -2px 0 12px rgba(0, 0, 0, 0.15);
-    padding: 40px 30px;
+    padding: 30px 30px;
     box-sizing: border-box;
     transform: translateX(100%);
     transition: transform 0.4s ease;
     z-index: 1000;
     overflow-y: auto;
 }
+
+    .register-sidebar input {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 2px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
 
 .register-overlay.active {
     opacity: 1;
@@ -1346,14 +1355,7 @@ html {
     letter-spacing: 0.5px;
 }
 
-.register-sidebar input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
+  
 
 .register-btn {
     width: 100%;
@@ -2034,5 +2036,36 @@ html {
     color: #c62828;
     font-size: 0.78rem;
     margin-top: 4px;
-    min-height: 16px;
+    min-height: 0;
+}
+.product-carousel-wrapper {
+    overflow: hidden;
+    width: 100%;
+    padding: 10px 0;
+}
+
+.product-carousel-track {
+    display: flex;
+    gap: 28px;
+    width: max-content;
+    animation: productScroll 30s linear infinite;
+}
+
+    .product-carousel-track:hover {
+        animation-play-state: paused;
+    }
+
+@keyframes productScroll {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+.product-carousel-track .product-card {
+    width: 220px;
+    flex-shrink: 0;
 }

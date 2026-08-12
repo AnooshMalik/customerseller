@@ -70,7 +70,6 @@ namespace customerseller.Controllers.seller
             return list;
         }
 
-        // ==================== SELLER SIDE ACTION (Fixed) ====================
         public IActionResult SellerReviews()
         {
             var sellerEmail = HttpContext.Session.GetString("UserEmail");
@@ -79,9 +78,10 @@ namespace customerseller.Controllers.seller
                 return RedirectToAction("Index", "Home");
 
             var reviews = new List<Review>();
+            var rawData = new List<(int Id, string ProductId, string CustomerName, int Rating, string Comment, DateTime CreatedAt, string SellerResponse)>();
+
             using (var con = new SqlConnection(_conn))
             {
-                // ✅ Sirf is seller ke reviews lao
                 var cmd = new SqlCommand(
                     "SELECT * FROM Reviews WHERE SellerEmail = @sellerEmail ORDER BY CreatedAt DESC", con);
                 cmd.Parameters.AddWithValue("@sellerEmail", sellerEmail);
@@ -89,18 +89,51 @@ namespace customerseller.Controllers.seller
                 using var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
-                    reviews.Add(new Review
-                    {
-                        Id = (int)reader["Id"],
-                        ProductId = reader["ProductId"].ToString(),
-                        UserName = reader["CustomerName"].ToString(),
-                        CustomerName = reader["CustomerName"].ToString(),
-                        Rating = (int)reader["Rating"],
-                        Comment = reader["Comment"].ToString(),
-                        CreatedAt = (DateTime)reader["CreatedAt"]
-                    });
+                    rawData.Add((
+                        (int)reader["Id"],
+                        reader["ProductId"].ToString(),
+                        reader["CustomerName"].ToString(),
+                        (int)reader["Rating"],
+                        reader["Comment"].ToString(),
+                        (DateTime)reader["CreatedAt"],
+                        reader["SellerResponse"] == DBNull.Value ? null : reader["SellerResponse"].ToString()
+                    ));
                 }
             }
+
+            foreach (var r in rawData)
+            {
+                string productTitle = "Product";
+                using (var con2 = new SqlConnection(_conn))
+                {
+                    var pcmd = new SqlCommand("SELECT Title FROM Products WHERE Id = @pid", con2);
+                    pcmd.Parameters.AddWithValue("@pid", r.ProductId ?? "");
+                    con2.Open();
+                    productTitle = pcmd.ExecuteScalar()?.ToString() ?? "Product";
+                }
+
+                var customerName = string.IsNullOrEmpty(r.CustomerName) ? "Customer" : r.CustomerName;
+                var initials = string.Join("", customerName.Split(' ')
+                    .Where(w => w.Length > 0)
+                    .Take(2)
+                    .Select(w => char.ToUpper(w[0])));
+
+                reviews.Add(new Review
+                {
+                    Id = r.Id,
+                    ProductId = r.ProductId,
+                    ProductName = productTitle,
+                    UserName = customerName,
+                    CustomerName = customerName,
+                    CustomerInitials = string.IsNullOrEmpty(initials) ? "U" : initials,
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    CreatedAt = r.CreatedAt,
+                    DateLabel = r.CreatedAt.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("en-US")),
+                    SellerResponse = r.SellerResponse
+                });
+            }
+
             return View("~/Views/Seller/Review/SellerReviews.cshtml", reviews);
         }
 

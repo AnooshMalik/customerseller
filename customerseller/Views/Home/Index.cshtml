@@ -219,7 +219,8 @@
 <!-- Best Seller Section -->
 <h2 class="best-seller-heading" id="best-sellers">Best Sellers</h2>
 
-<div class="product-row">
+<div class="product-carousel-wrapper">
+    <div class="product-carousel-track">
     @{
         var productIndex = 0;
         // Different ratings for each product
@@ -268,6 +269,7 @@
     </a>
     <button class="plus-btn" onclick="event.preventDefault(); event.stopPropagation(); addToCart('@product.Id')">+</button>
 </div>        }
+
         
     }
     else

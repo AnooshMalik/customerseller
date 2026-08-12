@@ -288,5 +288,33 @@ namespace customerseller.Controllers
             }
             catch { }
         }
+        [HttpPost]
+        public IActionResult DeleteComplaint(int complaintId)
+        {
+            if (HttpContext.Session.GetString("AdminEmail") == null)
+                return Json(new { error = "Unauthorized" });
+
+            var complaint = _context.Complaints.Find(complaintId);
+            if (complaint == null) return Json(new { error = "Not found" });
+
+            if (!string.IsNullOrEmpty(complaint.EvidenceImageUrl))
+            {
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot",
+                    complaint.EvidenceImageUrl.TrimStart('/'));
+                if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+            }
+
+            if (!string.IsNullOrEmpty(complaint.SellerProofImageUrl))
+            {
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot",
+                    complaint.SellerProofImageUrl.TrimStart('/'));
+                if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+            }
+
+            _context.Complaints.Remove(complaint);
+            _context.SaveChanges();
+
+            return Json(new { success = true });
+        }
     }
 }

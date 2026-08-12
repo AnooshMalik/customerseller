@@ -17,24 +17,16 @@ namespace customerseller.Controllers
 
         public IActionResult Index()
         {
-            var bestSellerIds = new List<string>
-    {
-        "3f38c029-bfd0-433c-b92b-24c7f7c38440", 
-        "b1b46c0b-bbf5-48e2-b6ef-efbc8d9ed876", 
-        "64ed08ff-b538-4214-9fa8-52595d57a0a0", 
-        "6cdbd0fe-a742-447b-b39d-be8092e9a03f"  
-    };
-
             var products = _context.Products
-                .Where(p => bestSellerIds.Contains(p.Id))
+                .Where(p => p.IsAdminApproved)
+                .OrderByDescending(p => p.Id)
+                .Take(8)
                 .ToList();
-
-            
-            products = products.OrderBy(p => bestSellerIds.IndexOf(p.Id)).ToList();
 
             return View(products);
         }
 
+       
         public IActionResult About() => View();
         public IActionResult Contact() => View();
         public IActionResult Privacy() => View();

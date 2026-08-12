@@ -1,0 +1,908 @@
+﻿@{
+    var cwEmail = Context.Session.GetString("UserEmail");
+    var cwRole = Context.Session.GetString("UserRole");
+}
+@if (!string.IsNullOrEmpty(cwEmail) && cwRole != "Seller")
+{
+    <style>
+        .cw-toggle {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9990;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #a64d79;
+            color: #fff;
+            border: none;
+            box-shadow: 0 6px 20px rgba(166,77,121,0.4);
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+
+            .cw-toggle:hover {
+                transform: scale(1.06);
+            }
+
+        .cw-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #dc2626;
+            color: #fff;
+            font-size: 0.68rem;
+            font-weight: 700;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        .cw-panel {
+            position: fixed;
+            bottom: 96px;
+            right: 24px;
+            z-index: 99991;
+            width: 370px;
+            max-width: 92vw;
+            height: 540px;
+            max-height: 75vh;
+            background: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            display: none;
+            flex-direction: column;
+            font-family: 'Segoe UI', sans-serif;
+            top: auto !important;
+            left: auto !important;
+        }
+
+            .cw-panel.show {
+                display: flex;
+            }
+
+        .cw-header {
+            background: linear-gradient(135deg,#a64d79,#873b63);
+            color: #fff;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .cw-header-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .cw-header-icons {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+            .cw-header-icons i {
+                cursor: pointer;
+                font-size: 0.95rem;
+                opacity: 0.9;
+            }
+
+                .cw-header-icons i:hover {
+                    opacity: 1;
+                }
+
+        .cw-mychats-link {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 0.72rem;
+            font-weight: 600;
+            opacity: 0.95;
+            background: rgba(255,255,255,0.15);
+            padding: 5px 10px;
+            border-radius: 14px;
+        }
+
+            .cw-mychats-link:hover {
+                opacity: 1;
+                background: rgba(255,255,255,0.25);
+            }
+
+        .cw-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f9f5f8;
+            min-height: 0;
+        }
+
+        .cw-list-top {
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0e0ea;
+            background: #fff;
+            flex-shrink: 0;
+        }
+
+            .cw-list-top span {
+                font-weight: 700;
+                font-size: 0.9rem;
+                color: #333;
+            }
+
+        .cw-conv-list {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .cw-conv-item {
+            padding: 12px 16px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            cursor: pointer;
+            border-bottom: 1px solid #f5eef2;
+        }
+
+            .cw-conv-item:hover {
+                background: #fdf5f9;
+            }
+
+        .cw-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #a64d79;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .cw-conv-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .cw-conv-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .cw-conv-role {
+            font-size: 0.68rem;
+            color: #a64d79;
+            font-weight: 600;
+        }
+
+        .cw-conv-last {
+            font-size: 0.75rem;
+            color: #888;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .cw-empty {
+            padding: 30px 16px;
+            text-align: center;
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        .cw-chat-header {
+            padding: 12px 16px;
+            background: #fff;
+            border-bottom: 1px solid #f0e0ea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .cw-back {
+            cursor: pointer;
+            color: #a64d79;
+            font-size: 1rem;
+        }
+
+        .cw-messages {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .cw-bubble {
+            max-width: 78%;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .cw-mine {
+            align-self: flex-end;
+            background: #a64d79;
+            color: #fff;
+            border-bottom-right-radius: 3px;
+        }
+
+        .cw-theirs {
+            align-self: flex-start;
+            background: #fff;
+            color: #333;
+            border-bottom-left-radius: 3px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
+
+        .cw-theirs-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            align-self: flex-start;
+            max-width: 90%;
+        }
+
+            .cw-theirs-row .cw-avatar {
+                width: 26px;
+                height: 26px;
+                font-size: 0.62rem;
+            }
+
+        .cw-time {
+            font-size: 0.62rem;
+            opacity: 0.7;
+            display: block;
+            margin-top: 3px;
+        }
+
+        .cw-seen-tag {
+            display: block;
+            font-size: 0.62rem;
+            opacity: 0.85;
+            margin-top: 2px;
+            text-align: right;
+        }
+
+        .cw-input-area {
+            padding: 10px 12px;
+            background: #fff;
+            border-top: 1px solid #f0e0ea;
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+            .cw-input-area input {
+                flex: 1;
+                padding: 9px 14px;
+                border: 1.5px solid #e8d5e0;
+                border-radius: 20px;
+                font-size: 0.82rem;
+                outline: none;
+            }
+
+                .cw-input-area input:focus {
+                    border-color: #a64d79;
+                }
+
+        .cw-hamburger {
+            color: #a64d79;
+            font-size: 1.1rem;
+            cursor: pointer;
+            align-self: center;
+            flex-shrink: 0;
+            opacity: 0.85;
+        }
+
+            .cw-hamburger:hover {
+                opacity: 1;
+            }
+
+        .cw-send {
+            background: #a64d79;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .cw-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(30,16,50,0.5);
+            z-index: 9995;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .cw-modal-overlay.show {
+                display: flex;
+            }
+
+        .cw-modal-box {
+            background: #fff;
+            border-radius: 14px;
+            width: 320px;
+            max-height: 420px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cw-modal-head {
+            padding: 14px 18px;
+            border-bottom: 1px solid #f0e0ea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            .cw-modal-head h4 {
+                font-size: 0.92rem;
+                color: #1a1a2e;
+            }
+
+        .cw-modal-close {
+            cursor: pointer;
+            color: #999;
+        }
+
+        .cw-modal-list {
+            overflow-y: auto;
+        }
+
+        .cw-modal-item {
+            padding: 10px 18px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            cursor: pointer;
+        }
+
+            .cw-modal-item:hover {
+                background: #fdf5f9;
+            }
+
+        /* Chat-style option pills (Khaadi-style bot flow) */
+        .cw-pill-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-self: flex-start;
+            max-width: 92%;
+            width: 80%;
+            margin-left: 34px;
+        }
+
+        .cw-pill-btn {
+            background: #fdeef5;
+            color: #a64d79;
+            border: 1.5px solid #f0c9dd;
+            border-radius: 20px;
+            padding: 9px 16px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            width: 100%;
+            text-align: center;
+        }
+
+            .cw-pill-btn:hover {
+                background: #a64d79;
+                color: #fff;
+                border-color: #a64d79;
+            }
+
+            .cw-pill-btn:disabled {
+                opacity: 0.5;
+                cursor: default;
+            }
+
+        @@media (max-width: 480px) {
+            .cw-panel {
+                right: 10px;
+                bottom: 84px;
+                width: 94vw;
+                height: 70vh;
+            }
+
+            .cw-toggle {
+                right: 14px;
+                bottom: 14px;
+            }
+        }
+    </style>
+
+    <button class="cw-toggle" id="cwToggle" onclick="cwOpen()">
+        <i class="fa-solid fa-comment-dots"></i>
+    </button>
+
+    <div class="cw-panel" id="cwPanel">
+        <div class="cw-header">
+            <div class="cw-header-title"><i class="fa-solid fa-comments"></i> Messages</div>
+            <div class="cw-header-icons">
+                <div class="cw-mychats-link" id="cwMyChatsLink" onclick="cwShowChatList()">
+                    <i class="fa-solid fa-address-book"></i> My Chats
+                </div>
+                <i class="fa-solid fa-chevron-down" onclick="cwClose()"></i>
+                <i class="fa-solid fa-xmark" onclick="cwClose()"></i>
+            </div>
+        </div>
+        <div class="cw-body">
+
+            <!-- Default view: unified bot conversation -->
+            <div id="cwBotView" style="display:flex; flex-direction:column; flex:1; min-height:0;">
+                <div class="cw-messages" id="cwBotMessages"></div>
+                <div class="cw-input-area">
+                    <i class="fa-solid fa-bars cw-hamburger" onclick="cwShowChatList()" title="My Chats"></i>
+                    <input type="text" id="cwBotInput" placeholder="Write your message" onkeypress="if(event.key==='Enter') cwBotSend()" />
+                    <button class="cw-send" onclick="cwBotSend()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+
+            <!-- My Chats: real conversations with sellers/support -->
+            <div id="cwChatListView" style="display:none; flex-direction:column; flex:1; min-height:0;">
+                <div class="cw-list-top">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <i class="fa-solid fa-arrow-left cw-back" onclick="cwBackToBot()"></i>
+                        <span>My Chats</span>
+                    </div>
+                </div>
+                <div class="cw-conv-list" id="cwConvList">
+                    <div class="cw-empty">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Individual real chat -->
+            <div id="cwChatView" style="display:none; flex:1; flex-direction:column; overflow:hidden; min-height:0;">
+                <div class="cw-chat-header">
+                    <i class="fa-solid fa-arrow-left cw-back" onclick="cwBackToList()"></i>
+                    <div class="cw-avatar" id="cwChatAvatar"></div>
+                    <div>
+                        <div class="cw-conv-name" id="cwChatName"></div>
+                        <div class="cw-conv-role" id="cwChatRole"></div>
+                    </div>
+                </div>
+                <div class="cw-messages" id="cwMessages"></div>
+                <div class="cw-input-area">
+                    <i class="fa-solid fa-bars cw-hamburger" onclick="cwShowChatList()" title="My Chats"></i>
+                    <input type="text" id="cwMsgInput" placeholder="Write your message" onkeypress="if(event.key==='Enter') cwSendMessage()" />
+                    <button class="cw-send" onclick="cwSendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cw-modal-overlay" id="cwNewChatModal">
+        <div class="cw-modal-box">
+            <div class="cw-modal-head">
+                <h4>Select a Seller</h4>
+                <span class="cw-modal-close" onclick="cwCloseNewChat()">&times;</span>
+            </div>
+            <div class="cw-modal-list" id="cwPartnersList">
+                <div class="cw-empty">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
+    <script>
+        (function() {
+            const cwCurrentEmail = '@Html.Raw(cwEmail)';
+            let cwConvId = null;
+            let cwConnection = null;
+            let cwBotStarted = false;
+
+            // ---- Predefined bot categories & FAQ content (edit these anytime) ----
+            const cwCategories = ['Exchange', 'Order', 'Deliveries', 'Store', 'Others'];
+
+            const cwFaqs = {
+                Exchange: [
+                    { q: "How do I exchange a product?", a: "You can request an exchange within 7 days of delivery from your Order History page. Just select the item and tap 'Request Exchange'." },
+                    { q: "What items are not eligible for exchange?", a: "Customized or made-to-order items, sale items, and used products usually can't be exchanged. Check the product page for the exact policy." },
+                    { q: "How long does an exchange take?", a: "Once your returned item is received and approved, the replacement is usually shipped out within 3-5 working days." }
+                ],
+                Order: [
+                    { q: "How do I cancel or get a refund for my order?", a: "For cancellations or refunds, please connect with the seller directly using your Order ID — they'll be able to help you right away." },
+                    { q: "I received the wrong item", a: "We're really sorry about that! Please connect with the seller directly with your Order ID and they'll arrange a replacement or refund." },
+                    { q: "I was charged twice for my order", a: "Please connect with the seller directly with your Order ID and payment proof — they'll help resolve the duplicate charge." }
+                ],
+                Deliveries: [
+                    { q: "When will my order arrive?", a: "We currently deliver only within Rawalpindi. Orders are usually delivered within 3-7 working days." },
+                    { q: "Where can I find my tracking number?", a: "Your tracking number is sent to you by email or SMS as soon as your order is confirmed." },
+                    { q: "My order hasn't been dispatched yet", a: "If it's been more than 2 days and your order still hasn't shipped, please connect with the seller directly so they can update you." }
+                ],
+                Store: [
+                    { q: "How do I find a specific seller's shop?", a: "The seller's shop name is shown at the top of each product's detail page — tap it to visit their shop." },
+                    { q: "How do I leave a review for a shop?", a: "You'll find the reviews section at the bottom of each product's detail page." }
+                ],
+                Others: [
+                    { q: "How do I contact customer support?", a: "For most order or account issues, the quickest way is to connect directly with the seller using the option below." },
+                    { q: "How do I update my account details?", a: "After logging in, go to My Account from the top menu, then Profile Settings, to update your name, address, or contact details." },
+                    { q: "I have a different question", connect: true }
+                ]
+            };
+
+            function cwInitials(name) {
+                if (!name) return "?";
+                const parts = name.trim().split(" ");
+                return parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
+            }
+            function cwEsc(str) {
+                const d = document.createElement('div');
+                d.textContent = str || '';
+                return d.innerHTML;
+            }
+            function cwTime(dateStr) {
+                return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            window.cwOpen = function() {
+                document.getElementById('cwPanel').classList.add('show');
+                if (!cwBotStarted) {
+                    cwStartBotConversation();
+                    cwBotStarted = true;
+                }
+            };
+            window.cwClose = function() {
+                document.getElementById('cwPanel').classList.remove('show');
+            };
+
+            function cwShowView(id) {
+                ['cwBotView', 'cwChatListView', 'cwChatView'].forEach(v => {
+                    document.getElementById(v).style.display = (v === id) ? 'flex' : 'none';
+                });
+            }
+
+            window.cwShowChatList = function() {
+                cwShowView('cwChatListView');
+                cwLoadConversations();
+            };
+            window.cwBackToBot = function() {
+                cwShowView('cwBotView');
+            };
+            window.cwBackToList = function() {
+                cwShowView('cwChatListView');
+                cwLoadConversations();
+                cwConvId = null;
+            };
+
+            // ---- Unified bot conversation (Khaadi-style) ----
+            function cwBotBox() {
+                return document.getElementById('cwBotMessages');
+            }
+
+            function cwAppendBotBubble(text) {
+                const box = cwBotBox();
+                box.insertAdjacentHTML('beforeend', `
+                            <div class="cw-theirs-row">
+                                <div class="cw-avatar">AV</div>
+                                <div class="cw-bubble cw-theirs">${cwEsc(text)}</div>
+                            </div>`);
+                box.scrollTop = box.scrollHeight;
+            }
+            function cwAppendMineBubble(text) {
+                const box = cwBotBox();
+                box.insertAdjacentHTML('beforeend', `<div class="cw-bubble cw-mine">${cwEsc(text)}</div>`);
+                box.scrollTop = box.scrollHeight;
+            }
+            function cwAppendPills(options, onSelect) {
+                const box = cwBotBox();
+                const wrap = document.createElement('div');
+                wrap.className = 'cw-pill-wrap';
+                options.forEach((opt) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'cw-pill-btn';
+                    btn.type = 'button';
+                    btn.textContent = opt;
+                    btn.onclick = () => {
+                        Array.from(wrap.querySelectorAll('.cw-pill-btn')).forEach(b => b.disabled = true);
+                        onSelect(opt);
+                    };
+                    wrap.appendChild(btn);
+                });
+                box.appendChild(wrap);
+                box.scrollTop = box.scrollHeight;
+            }
+
+            function cwStartBotConversation() {
+                const box = cwBotBox();
+                box.innerHTML = '';
+                const startTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                box.insertAdjacentHTML('beforeend', `<div style="text-align:center; font-size:0.7rem; color:#999; margin:4px 0;">Chat started at ${startTime}</div>`);
+                cwAppendBotBubble("Hi! I'm the Artisan Valley Assistant. How can I help you today?");
+                cwShowCategoryMenu();
+            }
+
+            function cwShowCategoryMenu() {
+                setTimeout(() => {
+                    cwAppendBotBubble("Please choose one of the following:");
+                    cwAppendPills(cwCategories, cwHandleCategorySelect);
+                }, 200);
+            }
+
+            function cwHandleCategorySelect(category) {
+                cwAppendMineBubble(category);
+                setTimeout(() => {
+                    cwAppendBotBubble("Here are some common questions about " + category + ":");
+                    const options = cwFaqs[category].map(item => item.q);
+                    options.push('Back to Menu');
+                    cwAppendPills(options, (selected) => {
+                        if (selected === 'Back to Menu') {
+                            cwAppendMineBubble(selected);
+                            cwShowCategoryMenu();
+                        } else {
+                            cwHandleFaqSelection(category, selected);
+                        }
+                    });
+                }, 300);
+            }
+
+            function cwHandleFaqSelection(category, selectedQ) {
+                cwAppendMineBubble(selectedQ);
+                const item = (cwFaqs[category] || []).find(i => i.q === selectedQ);
+
+                if (item && item.connect) {
+                    setTimeout(() => {
+                        cwAppendBotBubble("Tap Yes below to connect with a seller.");
+                        cwAppendPills(['Yes', 'No'], (choice) => {
+                            cwAppendMineBubble(choice);
+                            if (choice === 'Yes') {
+                                setTimeout(() => cwOpenSellerSelect(), 300);
+                            } else {
+                                cwShowCategoryMenu();
+                            }
+                        });
+                    }, 350);
+                    return;
+                }
+
+                setTimeout(() => {
+                    cwAppendBotBubble(item ? item.a : "Sorry, I don't have an answer for that right now.");
+                    cwAppendFeedback(category);
+                }, 350);
+            }
+
+            function cwAppendFeedback(category) {
+                setTimeout(() => {
+                    cwAppendBotBubble("Was this helpful?");
+                    cwAppendPills(['Yes', 'No'], (choice) => {
+                        cwAppendMineBubble(choice);
+                        if (choice === 'Yes') {
+                            setTimeout(() => {
+                                cwAppendBotBubble("Glad I could help!");
+                                cwAppendPills(['Back to Menu'], () => {
+                                    cwAppendMineBubble('Back to Menu');
+                                    cwShowCategoryMenu();
+                                });
+                            }, 300);
+                        } else {
+                            setTimeout(() => {
+                                cwAppendBotBubble("Sorry about that. Would you like to chat with a seller directly?");
+                                cwAppendPills(['Yes, connect me', 'Back to Menu'], (choice2) => {
+                                    cwAppendMineBubble(choice2);
+                                    if (choice2 === 'Yes, connect me') {
+                                        setTimeout(() => cwOpenSellerSelect(), 300);
+                                    } else {
+                                        cwShowCategoryMenu();
+                                    }
+                                });
+                            }, 300);
+                        }
+                    });
+                }, 250);
+            }
+
+            // Free text typed into the persistent bot input bar
+            window.cwBotSend = function() {
+                const input = document.getElementById('cwBotInput');
+                const text = input.value.trim();
+                if (!text) return;
+                cwAppendMineBubble(text);
+                input.value = '';
+                setTimeout(() => {
+                    cwAppendPills(cwCategories, cwHandleCategorySelect);
+                }, 300);
+            };
+
+            // ---- Seller selection (for real chats) ----
+            window.cwOpenSellerSelect = async function() {
+                document.getElementById('cwNewChatModal').classList.add('show');
+                const res = await fetch('/Chat/GetChatPartners');
+                const data = await res.json();
+                const sellers = data.filter(p => p.role === 'Seller');
+                const list = document.getElementById('cwPartnersList');
+                if (!sellers.length) {
+                    list.innerHTML = '<div class="cw-empty">No sellers available right now.</div>';
+                    return;
+                }
+                list.innerHTML = sellers.map(p => `
+                                    <div class="cw-modal-item" onclick="cwStartChat('${p.email}','${p.role}','${cwEsc(p.name)}')">
+                                        <div class="cw-avatar">${cwInitials(p.name)}</div>
+                                        <div>
+                                            <div class="cw-conv-name">${cwEsc(p.name)}</div>
+                                            <div class="cw-conv-role">${p.role}</div>
+                                        </div>
+                                    </div>
+                                `).join('');
+            };
+            window.cwCloseNewChat = function() {
+                document.getElementById('cwNewChatModal').classList.remove('show');
+            };
+            window.cwStartChat = async function(otherEmail, otherRole, otherName) {
+                const fd = new FormData();
+                fd.append('otherEmail', otherEmail);
+                fd.append('otherRole', otherRole);
+                const res = await fetch('/Chat/StartConversation', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    cwCloseNewChat();
+                    await cwLoadConversations();
+                    cwOpenConversation(data.conversationId, otherName || otherEmail, otherRole);
+                } else {
+                    alert(data.message || 'Could not start chat.');
+                }
+            };
+
+            window.cwLoadConversations = async function() {
+                const res = await fetch('/Chat/GetConversations');
+                let data = await res.json();
+                // Customers should never see Moderator conversations in this widget
+                data = data.filter(c => c.otherRole !== 'Moderator');
+                const list = document.getElementById('cwConvList');
+                if (!data.length) {
+                    list.innerHTML = '<div class="cw-empty">No conversations yet. Tap "+ New" to start one.</div>';
+                    return;
+                }
+                list.innerHTML = data.map(c => `
+                                            <div class="cw-conv-item" onclick="cwOpenConversation(${c.conversationId}, '${cwEsc(c.otherName)}', '${c.otherRole}')">
+                                                <div class="cw-avatar">${cwInitials(c.otherName)}</div>
+                                                <div class="cw-conv-info">
+                                                    <div class="cw-conv-name">${cwEsc(c.otherName)}</div>
+                                                    <div class="cw-conv-role">${c.otherRole}</div>
+                                                    <div class="cw-conv-last">${cwEsc(c.lastMessage || 'No messages yet')}</div>
+                                                </div>
+                                            </div>
+                                        `).join('');
+            };
+
+            window.cwOpenConversation = async function(id, name, role) {
+                cwConvId = id;
+                if (cwConnection) await cwConnection.invoke('JoinConversation', id);
+
+                cwShowView('cwChatView');
+                document.getElementById('cwChatAvatar').textContent = cwInitials(name);
+                document.getElementById('cwChatName').textContent = name;
+                document.getElementById('cwChatRole').textContent = role;
+
+                const res = await fetch('/Chat/GetMessages?conversationId=' + id);
+                const messages = await res.json();
+                const box = document.getElementById('cwMessages');
+                box.innerHTML = messages.map(cwBubble).join('');
+                box.scrollTop = box.scrollHeight;
+                // Only show "Seen" if the server confirms the other person already read it
+                cwUpdateSeenIndicatorFromData();
+            };
+
+            function cwBubble(m) {
+                return `<div class="cw-bubble ${m.isMine ? 'cw-mine' : 'cw-theirs'}" data-mine="${!!m.isMine}" data-read="${!!m.isRead}">
+                                            ${cwEsc(m.messageText)}
+                                            <span class="cw-time">${cwTime(m.sentAt)}</span>
+                                        </div>`;
+            }
+
+            // Used right after loading messages from the server - trusts the real isRead flag
+            function cwUpdateSeenIndicatorFromData() {
+                document.querySelectorAll('#cwMessages .cw-seen-tag').forEach(el => el.remove());
+                const mine = document.querySelectorAll('#cwMessages .cw-bubble[data-mine="true"]');
+                if (!mine.length) return;
+                const last = mine[mine.length - 1];
+                if (last.dataset.read === 'true') {
+                    last.insertAdjacentHTML('beforeend', '<span class="cw-seen-tag">✓✓ Seen</span>');
+                }
+            }
+
+            // Used when a live "MessagesSeen" event confirms the other person just read it
+            function cwMarkLastMineSeenNow() {
+                document.querySelectorAll('#cwMessages .cw-seen-tag').forEach(el => el.remove());
+                const mine = document.querySelectorAll('#cwMessages .cw-bubble[data-mine="true"]');
+                if (mine.length) {
+                    mine[mine.length - 1].insertAdjacentHTML('beforeend', '<span class="cw-seen-tag">✓✓ Seen</span>');
+                }
+            }
+
+            window.cwSendMessage = async function() {
+                const input = document.getElementById('cwMsgInput');
+                const text = input.value.trim();
+                if (!text || !cwConvId) return;
+                await cwConnection.invoke('SendMessage', cwConvId, text);
+                input.value = '';
+            };
+
+            async function cwSetupSignalR() {
+                cwConnection = new signalR.HubConnectionBuilder()
+                    .withUrl('/chatHub')
+                    .withAutomaticReconnect()
+                    .build();
+                cwConnection.on('ReceiveMessage', (msg) => {
+                    if (msg.conversationId === cwConvId) {
+                        const box = document.getElementById('cwMessages');
+                        const isMine = msg.senderEmail === cwCurrentEmail;
+                        // Remove any old "Seen" tag - a brand new message hasn't been seen yet
+                        document.querySelectorAll('#cwMessages .cw-seen-tag').forEach(el => el.remove());
+                        box.insertAdjacentHTML('beforeend', cwBubble({ ...msg, isMine, isRead: false }));
+                        box.scrollTop = box.scrollHeight;
+                    }
+                    cwLoadConversations();
+                    cwLoadUnread();
+                });
+                cwConnection.on('NewMessageNotification', () => {
+                    cwLoadConversations();
+                    cwLoadUnread();
+                });
+                cwConnection.on('MessagesSeen', (data) => {
+                    // Fires only when the OTHER person actually opened the chat and read it
+                    if (data.conversationId === cwConvId && data.seenBy !== cwCurrentEmail) {
+                        cwMarkLastMineSeenNow();
+                    }
+                });
+                await cwConnection.start();
+            }
+
+            async function cwLoadUnread() {
+                // Unread badge disabled - kept as no-op in case it's needed again later
+            }
+
+            // Support for the "open param" coming from product pages - jumps straight to My Chats
+            document.addEventListener('DOMContentLoaded', function() {
+                const params = new URLSearchParams(window.location.search);
+                const openId = params.get('openChat');
+                if (openId) {
+                    cwOpen();
+                    fetch('/Chat/GetConversations').then(r => r.json()).then(data => {
+                        const match = data.find(c => c.conversationId === parseInt(openId));
+                        if (match) cwOpenConversation(match.conversationId, match.otherName, match.otherRole);
+                    });
+                }
+            });
+
+            cwSetupSignalR();
+            cwLoadUnread();
+            setInterval(cwLoadUnread, 10000);
+        })();
+    </script>
+}

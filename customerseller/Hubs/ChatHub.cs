@@ -77,10 +77,51 @@ namespace customerseller.Hubs
                 ? conversation.User2Email
                 : conversation.User1Email;
 
+            var receiverRole = conversation.User1Email == senderEmail
+                ? conversation.User2Role
+                : conversation.User1Role;
+
             await Clients.Group(receiverEmail).SendAsync("NewMessageNotification", new
             {
                 conversationId = conversationId
             });
+
+            // Agar customer/buyer ne ek Seller ko pehli baar message kiya hai,
+            // to seller ki taraf se ek dummy/auto reply turant chala jaye.
+            if (senderRole != "Seller" && receiverRole == "Seller")
+            {
+                var senderMessageCount = _context.Messages.Count(m =>
+                    m.ConversationId == conversationId && m.SenderEmail == senderEmail);
+
+                if (senderMessageCount == 1)
+                {
+                    var autoReply = new Message
+                    {
+                        ConversationId = conversationId,
+                        SenderEmail = receiverEmail,
+                        SenderRole = "Seller",
+                        MessageText = "Hi! I am the Artisan Valley seller. I'll reply as soon as I'm free 😊",
+                        IsRead = false
+                    };
+
+                    _context.Messages.Add(autoReply);
+                    conversation.LastMessageAt = System.DateTime.Now;
+                    _context.SaveChanges();
+
+                    // Sirf customer (jisne message shuru kiya) ko live bubble dikhao.
+                    // Seller ki apni open chat mein ye khud-ba-khud nahi aana chahiye,
+                    // isliye poore "conv_" group ki jagah sirf customer ke personal group ko bhejte hain.
+                    await Clients.Group(senderEmail).SendAsync("ReceiveMessage", new
+                    {
+                        id = autoReply.Id,
+                        conversationId = autoReply.ConversationId,
+                        senderEmail = autoReply.SenderEmail,
+                        senderRole = autoReply.SenderRole,
+                        messageText = autoReply.MessageText,
+                        sentAt = autoReply.SentAt
+                    });
+                }
+            }
         }
 
         private string GetSessionEmail()

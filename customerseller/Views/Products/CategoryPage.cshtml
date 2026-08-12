@@ -5,36 +5,39 @@
 }
 
 <style>
-    .category-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        max-width: 1100px;
-        margin: 38px auto 25px auto;
-        padding: 0 10px;
-    }
+   .category-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;   /* space-between se change kiya */
+    position: relative;         /* naya */
+    max-width: 1100px;
+    margin: 38px auto 25px auto;
+    padding: 0 10px;
+}
 
-    .category-title-main {
-        font-size: 2.2rem;
-        font-weight: bold;
-        margin: 0;
-        text-align: left;
-    }
+.category-title-main {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin: 0;
+    text-align: center;   /* left se change kiya */
+}
 
-    .filter-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #222;
-        text-decoration: none;
-        border: 1.5px solid #ccc;
-        border-radius: 6px;
-        padding: 8px 18px;
-        transition: border-color 0.2s, color 0.2s;
-        white-space: nowrap;
-    }
+.filter-link {
+    position: absolute;   /* naya */
+    right: 10px;           /* naya */
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #222;
+    text-decoration: none;
+    border: 1.5px solid #ccc;
+    border-radius: 6px;
+    padding: 8px 18px;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+}
 
         .filter-link:hover {
             border-color: #a64d79;
@@ -164,23 +167,21 @@
     }
 
     @@media (max-width: 600px) {
-        .category-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 14px;
-        }
-
-        .product-row {
-            grid-template-columns: 1fr;
-        }
+    .category-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        position: static;
     }
 
-    .no-products {
-        text-align: center;
-        padding: 60px 20px;
-        color: #666;
-        font-size: 1.2rem;
+    .filter-link {
+        position: static;
     }
+
+    .product-row {
+        grid-template-columns: 1fr;
+    }
+}
 </style>
 
 <div class="category-header">

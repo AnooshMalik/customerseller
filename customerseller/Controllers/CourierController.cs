@@ -114,7 +114,7 @@ namespace customerseller.Controllers
                 TempData["CourierError"] = "Account not found.";
                 return RedirectToAction("Login");
             }
-
+            HttpContext.Session.Clear();
             HttpContext.Session.SetString("CourierEmail", courier.Email);
             HttpContext.Session.SetString("CourierName", courier.CompanyName);
             HttpContext.Session.SetInt32("CourierId", courier.Id);
@@ -249,6 +249,7 @@ namespace customerseller.Controllers
         }
         public IActionResult Logout()
         {
+            HttpContext.Session.Clear();
             HttpContext.Session.Remove("CourierEmail");
             HttpContext.Session.Remove("CourierName");
             HttpContext.Session.Remove("CourierId");
@@ -357,6 +358,48 @@ namespace customerseller.Controllers
                 <h2 style='color:#a64d79;'>Order Delivered</h2>
                 <p>Order <strong>#{order.OrderId}</strong> has been delivered.</p>
                 <p>{statusMsg}</p>
+            </div>"
+                };
+                using var client = new MailKit.Net.Smtp.SmtpClient();
+                client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
+                client.Send(message);
+                client.Disconnect(true);
+            }
+            catch { }
+
+            return Json(new { success = true });
+        }
+        [HttpPost]
+        public IActionResult CancelOrderByRider(string orderId, string reason)
+        {
+            var courierId = HttpContext.Session.GetInt32("CourierId");
+            if (courierId == null) return Json(new { error = "Unauthorized" });
+
+            var order = _context.Orders.FirstOrDefault(o => o.OrderId == orderId && o.CourierCompanyId == courierId);
+            if (order == null) return Json(new { error = "Not found" });
+
+            order.CourierStatus = "Cancelled";
+            order.Status = "Cancelled";
+            order.CancelledDate = DateTime.Now;
+            order.LastUpdatedAt = DateTime.Now;
+            order.PaymentReceived = false;
+            order.PaymentNotReceivedReason = reason;
+
+            _context.SaveChanges();
+
+            try
+            {
+                var message = new MimeMessage();
+                message.From.Add(new MailboxAddress("Artisan Valley", "artisanvalley.store@gmail.com"));
+                message.To.Add(new MailboxAddress("", order.Email));
+                message.Subject = $"Order Cancelled — #{order.OrderId}";
+                message.Body = new TextPart("html")
+                {
+                    Text = $@"<div style='font-family:sans-serif;'>
+                <h2 style='color:#c62828;'>Order Cancelled</h2>
+                <p>Order <strong>#{order.OrderId}</strong> was cancelled during delivery.</p>
+                <p>Reason: {reason}</p>
             </div>"
                 };
                 using var client = new MailKit.Net.Smtp.SmtpClient();

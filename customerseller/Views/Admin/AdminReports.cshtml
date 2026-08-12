@@ -3,107 +3,323 @@
 }
 
 <style>
-    .page-header { padding: 28px 35px 0; }
-    .page-header h1 { font-size: 1.6rem; font-weight: 700; color: #1e1033; }
-    .page-header p { color: #6b7280; font-size: 0.9rem; margin-top: 4px; }
-    .content-area { padding: 24px 35px; }
+    .page-header {
+        padding: 26px 40px 0;
+    }
 
-    .stats-grid {
+    .page-header h1 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1e1033;
+        letter-spacing: -0.5px;
+    }
+
+    .page-header p {
+        color: #8b8397;
+        font-size: 0.85rem;
+        margin-top: 3px;
+    }
+
+    .content-area {
+        padding: 22px 40px 40px;
+    }
+
+    /* Top row: revenue + 3 side stats */
+    .top-row {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 16px;
-        margin-bottom: 28px;
+        grid-template-columns: 1.6fr 1fr;
+        gap: 18px;
+        margin-bottom: 20px;
     }
-    .stat-card {
-        background: #fff;
-        border-radius: 14px;
-        padding: 22px;
-        border: 1px solid #ede9fe;
-        box-shadow: 0 2px 8px rgba(166,77,121,0.06);
-        text-align: center;
-    }
-    .stat-icon {
-        width: 50px; height: 50px;
-        border-radius: 14px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.3rem;
-        margin: 0 auto 12px;
-    }
-    .stat-value { font-size: 1.8rem; font-weight: 700; color: #1e1033; }
-    .stat-label { font-size: 0.8rem; color: #6b7280; margin-top: 4px; }
 
-    .section-card {
+    .revenue-card {
+        background: linear-gradient(135deg, #a64d79 0%, #6d1943 100%);
+        border-radius: 18px;
+        padding: 30px 32px;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .revenue-card::after {
+        content: '';
+        position: absolute;
+        top: -60px; right: -60px;
+        width: 200px; height: 200px;
+        background: rgba(255,255,255,0.07);
+        border-radius: 50%;
+    }
+
+    .revenue-card::before {
+        content: '';
+        position: absolute;
+        bottom: -80px; left: -40px;
+        width: 160px; height: 160px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50%;
+    }
+
+    .revenue-label {
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.85;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 1;
+        position: relative;
+    }
+
+    .revenue-amount {
+        font-size: 2.6rem;
+        font-weight: 800;
+        letter-spacing: -1px;
+        z-index: 1;
+        position: relative;
+    }
+
+    .revenue-sub {
+        font-size: 0.8rem;
+        opacity: 0.75;
+        margin-top: 6px;
+        z-index: 1;
+        position: relative;
+    }
+
+    .side-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .mini-stat {
         background: #fff;
         border-radius: 14px;
-        border: 1px solid #ede9fe;
-        overflow: hidden;
-        margin-bottom: 24px;
+        border: 1px solid #f0ebfa;
+        padding: 14px 18px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex: 1;
+        transition: box-shadow 0.2s ease;
     }
-    .section-header {
-        padding: 16px 22px;
-        border-bottom: 1px solid #f5f0ff;
-        font-size: 0.95rem;
-        font-weight: 700;
+
+    .mini-stat:hover {
+        box-shadow: 0 6px 18px rgba(166,77,121,0.1);
+    }
+
+    .mini-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .mini-text h3 {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #1e1033;
+        line-height: 1.1;
+    }
+
+    .mini-text p {
+        font-size: 0.72rem;
+        color: #8b8397;
+        margin-top: 3px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    /* Stats strip */
+    .stats-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 22px;
+    }
+
+    .strip-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #f0ebfa;
+        padding: 18px 20px;
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .strip-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 22px rgba(166,77,121,0.1);
+    }
+
+    .strip-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        margin: 0 auto 10px;
+    }
+
+    .strip-value {
+        font-size: 1.5rem;
+        font-weight: 800;
         color: #1e1033;
     }
-    .section-header i { color: #a64d79; margin-right: 8px; }
+
+    .strip-label {
+        font-size: 0.7rem;
+        color: #8b8397;
+        margin-top: 3px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    /* Top products section */
+    .section-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #f0ebfa;
+        overflow: hidden;
+    }
+
+    .section-header {
+        padding: 20px 26px;
+        border-bottom: 1px solid #f5f0ff;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e1033;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .section-header .title-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .section-header i {
+        color: #a64d79;
+        font-size: 0.95rem;
+    }
+
+    .rank-badge {
+        width: 24px;
+        height: 24px;
+        border-radius: 7px;
+        background: #f5f0ff;
+        color: #a64d79;
+        font-size: 0.72rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
 
     .product-row {
         display: flex;
         align-items: center;
         gap: 14px;
-        padding: 14px 22px;
-        border-bottom: 1px solid #f9f9f9;
-    }
-    .product-row:last-child { border-bottom: none; }
-    .product-row img {
-        width: 44px; height: 44px;
-        border-radius: 8px; object-fit: cover;
-        background: #f5f3ff;
-    }
-    .product-info { flex: 1; }
-    .product-info .ptitle { font-size: 0.88rem; font-weight: 600; color: #1e1033; }
-    .product-info .pcat { font-size: 0.75rem; color: #6b7280; margin-top: 2px; }
-    .product-stock {
-        font-size: 0.82rem; font-weight: 700;
-        color: #a64d79;
-        background: #fdf0f6;
-        padding: 4px 12px;
-        border-radius: 20px;
+        padding: 14px 26px;
+        border-bottom: 1px solid #faf7fd;
+        transition: background 0.15s ease;
     }
 
-    .revenue-big {
-        text-align: center;
-        padding: 30px;
-        background: linear-gradient(135deg, #a64d79, #880e4f);
-        border-radius: 14px;
-        color: #fff;
-        margin-bottom: 24px;
+    .product-row:hover {
+        background: #fdf9fc;
     }
-    .revenue-big .label { font-size: 0.85rem; opacity: 0.8; margin-bottom: 8px; }
-    .revenue-big .amount { font-size: 2.8rem; font-weight: 700; }
-    .revenue-big .sub { font-size: 0.8rem; opacity: 0.7; margin-top: 6px; }
+
+    .product-row:last-child {
+        border-bottom: none;
+    }
+
+    .product-row img {
+        width: 46px;
+        height: 46px;
+        border-radius: 11px;
+        object-fit: cover;
+        background: #f5f3ff;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .product-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .product-info .ptitle {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #1e1033;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .product-info .pcat {
+        font-size: 0.75rem;
+        color: #8b8397;
+        margin-top: 2px;
+    }
+
+    .product-stock {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #a64d79;
+        background: #fdf0f6;
+        padding: 5px 13px;
+        border-radius: 20px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    @@media (max-width: 900px) {
+        .top-row {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-strip {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
 
     @@media (max-width: 480px) {
         .page-header {
-            padding: 20px 16px 0;
+            padding: 18px 16px 0;
         }
 
         .content-area {
-            padding: 16px;
+            padding: 14px;
         }
 
-        .revenue-big {
-            padding: 22px 16px;
+        .revenue-card {
+            padding: 24px 20px;
         }
 
-            .revenue-big .amount {
-                font-size: 2rem;
-            }
+        .revenue-amount {
+            font-size: 2rem;
+        }
 
-        .stats-grid {
+        .stats-strip {
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 10px;
         }
 
         .product-row {
@@ -120,62 +336,98 @@
 
 <div class="content-area">
 
-    <!-- Revenue Banner -->
-    <div class="revenue-big">
-        <div class="label"><i class="fas fa-chart-line"></i> Total Revenue (Delivered Orders)</div>
-        <div class="amount">Rs. @ViewBag.TotalRevenue.ToString("N0")</div>
-        <div class="sub">From all successfully delivered orders</div>
+    <!-- Top Row: Revenue + Side Stats -->
+    <div class="top-row">
+        <div class="revenue-card">
+            <div class="revenue-label"><i class="fas fa-chart-line"></i> Total Revenue (Delivered Orders)</div>
+            <div class="revenue-amount">Rs. @ViewBag.TotalRevenue.ToString("N0")</div>
+            <div class="revenue-sub">From all successfully delivered orders</div>
+        </div>
+
+        <div class="side-stats">
+            <div class="mini-stat">
+                <div class="mini-icon" style="background:#fff3e0;">
+                    <i class="fas fa-flag" style="color:#e65100;"></i>
+                </div>
+                <div class="mini-text">
+                    <h3>@ViewBag.PendingComplaints</h3>
+                    <p>Open Complaints</p>
+                </div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-icon" style="background:#f3e8ff;">
+                    <i class="fas fa-store-alt-slash" style="color:#9333ea;"></i>
+                </div>
+                <div class="mini-text">
+                    <h3>@ViewBag.PendingShops</h3>
+                    <p>Pending Shop Requests</p>
+                </div>
+            </div>
+            <div class="mini-stat">
+                <div class="mini-icon" style="background:#fce7f3;">
+                    <i class="fas fa-receipt" style="color:#db2777;"></i>
+                </div>
+                <div class="mini-text">
+                    <h3>Rs. @(((decimal)ViewBag.AvgOrderValue).ToString("N0"))</h3>
+                    <p>Avg Order Value</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Stats Grid -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#ede9fe;">
+    <!-- Stats Strip -->
+    <div class="stats-strip">
+        <div class="strip-card">
+            <div class="strip-icon" style="background:#ede9fe;">
                 <i class="fas fa-shopping-cart" style="color:#7c3aed;"></i>
             </div>
-            <div class="stat-value">@ViewBag.TotalOrders</div>
-            <div class="stat-label">Total Orders</div>
+            <div class="strip-value">@ViewBag.TotalOrders</div>
+            <div class="strip-label">Total Orders</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#fce4ec;">
+        <div class="strip-card">
+            <div class="strip-icon" style="background:#fce4ec;">
                 <i class="fas fa-store" style="color:#a64d79;"></i>
             </div>
-            <div class="stat-value">@ViewBag.TotalSellers</div>
-            <div class="stat-label">Active Sellers</div>
+            <div class="strip-value">@ViewBag.TotalSellers</div>
+            <div class="strip-label">Active Sellers</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#e0f2fe;">
+        <div class="strip-card">
+            <div class="strip-icon" style="background:#e0f2fe;">
                 <i class="fas fa-users" style="color:#0369a1;"></i>
             </div>
-            <div class="stat-value">@ViewBag.TotalCustomers</div>
-            <div class="stat-label">Customers</div>
+            <div class="strip-value">@ViewBag.TotalCustomers</div>
+            <div class="strip-label">Customers</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background:#d1fae5;">
+        <div class="strip-card">
+            <div class="strip-icon" style="background:#d1fae5;">
                 <i class="fas fa-box" style="color:#059669;"></i>
             </div>
-            <div class="stat-value">@ViewBag.TotalProducts</div>
-            <div class="stat-label">Live Products</div>
+            <div class="strip-value">@ViewBag.TotalProducts</div>
+            <div class="strip-label">Live Products</div>
         </div>
     </div>
 
     <!-- Top Products -->
     <div class="section-card">
         <div class="section-header">
-            <i class="fas fa-star"></i> Top Products
+            <div class="title-group">
+                <i class="fas fa-star"></i> Top Products
+            </div>
         </div>
         @if (ViewBag.TopProducts != null)
         {
+            int rank = 1;
             foreach (var p in ViewBag.TopProducts)
             {
                 <div class="product-row">
+                    <div class="rank-badge">#@rank</div>
                     @if (!string.IsNullOrEmpty(p.ImageUrl))
                     {
                         <img src="@p.ImageUrl" alt="@p.Title" />
                     }
                     else
                     {
-                        <div style="width:44px; height:44px; background:#f5f3ff; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                        <div style="width:46px; height:46px; background:#f5f3ff; border-radius:11px; display:flex; align-items:center; justify-content:center;">
                             <i class="fas fa-box" style="color:#a64d79;"></i>
                         </div>
                     }
@@ -185,8 +437,8 @@
                     </div>
                     <div class="product-stock">Stock: @p.Stock</div>
                 </div>
+                rank++;
             }
         }
-    </div>
 
 </div>

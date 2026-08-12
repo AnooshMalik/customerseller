@@ -324,6 +324,12 @@ namespace customerseller.Controllers
         // Metal & Wire
         { "metal", "MetalWire" }, { "wire", "MetalWire" },
         { "candle holder", "MetalCandleHolders" }, { "candle", "MetalCandleHolders" },
+
+        { "miti", "ClayPottery" }, { "mitti", "ClayPottery" },
+{ "bartan", "ClayPottery" }, { "bartan set", "ClayPottery" },
+{ "kapra", "FabricTextile" }, { "kapda", "FabricTextile" },
+{ "chandi", "Jewels" }, { "sona", "Jewels" },
+{ "lakri", "Wood" }, { "lakdi", "Wood" },
     };
 
             // Step 1: Exact match
@@ -337,8 +343,18 @@ namespace customerseller.Controllers
                     return RedirectToAction(categoryMap[key]);
             }
 
-            // Step 3: Fuzzy word-by-word search
-            var words = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var stopWords = new HashSet<string> { "ka", "ki", "ke", "ko", "se", "mein", "hai", "wala", "wali", "aur", "the", "and", "for", "with", "a", "an", "of" };
+            var words = query.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Where(w => w.Length >= 3 && !stopWords.Contains(w))
+                .ToArray();
+
+            if (words.Length == 0)
+            {
+                ViewBag.NoResults = true;
+                ViewBag.SearchQuery = query;
+                ViewBag.CategoryTitle = $"Search Results for \"{query}\"";
+                return View("CategoryPage", new List<Product>());
+            }
             var allProducts = _context.Products
                 .Where(p => p.VideoStatus == "Approved" && p.IsAdminApproved == true)
                 .ToList();
@@ -468,6 +484,21 @@ namespace customerseller.Controllers
                     insertCmd.ExecuteNonQuery();
                 }
             }
+            // Duplicate check: same seller, same title, price — pichle 30 second ke andar
+            var recentDuplicate = _context.Products.FirstOrDefault(p =>
+                p.SellerEmail == product.SellerEmail &&
+                p.Title == product.Title &&
+                p.Price == product.Price);
+
+            if (recentDuplicate != null)
+            {
+                TempData["Error"] = "This product already exists.";
+                return RedirectToAction("SellerProduct");
+            }
+
+            _context.Products.Add(product);
+            _context.SaveChanges();
+
             _context.Products.Add(product);
             _context.SaveChanges();
             if (Request.Headers["X-Add-More"] == "true")
