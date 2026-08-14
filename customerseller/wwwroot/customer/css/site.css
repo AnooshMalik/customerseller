@@ -22,11 +22,10 @@ html {
     font-size: 12px;
     display: block;
 }
-
-/* 2. INFO BAR - STICKY ALWAYS VISIBLE */
 .infobar {
     background: #ffffff;
-    height: 65px;
+    height: 60px;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -43,7 +42,7 @@ html {
     flex: 1;
     display: flex;
     align-items: center;
-    height: 65px;
+    height: 90px;
 }
 
 .infobar-left {
@@ -129,10 +128,15 @@ html {
     cursor: pointer;
     transition: color 0.2s;
 }
-
+    .infobar-center img {
+        position: relative;
+        top: 10px; 
+    }
     .infobar-center:hover {
         color: #873b63;
     }
+
+
 
 .banner-slider {
     width: 100%;
@@ -467,9 +471,9 @@ html {
 
 .cat-card-sub {
     font-size: 11px;
-    color: #888;
+    color: #666; /* #888 se change kiya */
     line-height: 1.4;
-}/* 4. STORY SECTION - REDUCED HEIGHT & WORKING BUTTON */
+}
 .story-section-fixed {
     background: #8A9A6A;
     padding: 40px 20px;
@@ -513,7 +517,7 @@ html {
 }
 
 .story-subtitle {
-    color: #ffd4e5;
+    color: #ffe6f0;
     font-size: 12px;
     font-weight: 600;
     letter-spacing: 2px;
@@ -1661,6 +1665,8 @@ html {
 
     .story-section-fixed {
         padding: 40px 20px;
+        background: #5b6b44;
+        margin: 40px 0;
     }
 
     .categories {

@@ -1,10 +1,17 @@
-﻿<head>
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Artisan Valley</title>
+    <meta name="description" content="Artisan Valley — Discover handmade treasures crafted by skilled artisans. Shop fabric, wood, clay, jewels, and more." />
+    <link rel="preload" as="image" href="~/customer/images/banner1.jpeg" fetchpriority="high">
     <link rel="icon" href="/customer/images/logoo.png" />
     <link rel="stylesheet" href="~/customer/css/site.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"></noscript>
 </head>
 <body>
     @{
@@ -28,11 +35,11 @@
         </div>
 
         <a asp-controller="Home" asp-action="Index" class="infobar-center" style="text-decoration: none; color: inherit;">
-            <img src="/customer/images/logoo.png" alt="Artisan Valley" style="height: 110px; width: auto; margin-top: 0px;" />
+            <img src="/customer/images/logoo.png" alt="Artisan Valley" style="height: 80px; width: auto;" />
         </a>
 
         <div class="infobar-right">
-            <a href="#" id="searchIcon"><i class="fa-solid fa-magnifying-glass"></i></a>
+            <a href="#" id="searchIcon" aria-label="Search products"><i class="fa-solid fa-magnifying-glass"></i></a>
 
             @if (Context.Session.GetString("UserEmail") != null)
             {
@@ -56,18 +63,18 @@
             }
             else
             {
-                <a href="#" id="loginIcon"><i class="fa-solid fa-user"></i></a>
+                <a href="#" id="loginIcon" aria-label="Login"><i class="fa-solid fa-user"></i></a>
             }
 
             @if (Context.Session.GetString("UserEmail") != null && Context.Session.GetString("UserRole") != "Seller" && currentPath.Contains("/product/details"))
             {
-                <a href="/Chat/Messages" onclick="return checkChatLogin(event)" style="position:relative; margin-right:8px;">
+               <a href="/Chat/Messages" onclick="return checkChatLogin(event)" aria-label="Messages" style="position:relative; margin-right:8px;">
                     <i class="fa-solid fa-comment-dots"></i>
                     <span id="chatUnreadCount" style="display:none; position:absolute; top:-8px; right:-8px; background:#a64d79; color:#fff; font-size:0.65rem; font-weight:700; width:18px; height:18px; border-radius:50%; text-align:center; line-height:18px;">0</span>
                 </a>
             }
 
-            <a href="javascript:void(0)" onclick="openCart()" id="cartIcon" style="position:relative;">
+           <a href="javascript:void(0)" onclick="openCart()" id="cartIcon" aria-label="Shopping cart" style="position:relative;">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span id="cartCount" style="display:none; position:absolute; top:-8px; right:-8px; background:#a64d79; color:#fff; font-size:0.65rem; font-weight:700; width:18px; height:18px; border-radius:50%; text-align:center; line-height:18px;">0</span>
             </a>
@@ -123,8 +130,8 @@
                     </button>
                 </form>
                 <div class="footer-social">
-                    <a href="https://www.facebook.com/"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://www.instagram.com/"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.facebook.com/" aria-label="Follow us on Facebook"><i class="fab fa-facebook-f"></i></a>
+<a href="https://www.instagram.com/" aria-label="Follow us on Instagram"><i class="fab fa-instagram"></i></a>
                 </div>
             </div>
         </div>
@@ -142,7 +149,7 @@
         <h2>SEARCH OUR SITE</h2>
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off" />
-            <button type="button" id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i></button>
+           <button type="button" id="searchBtn" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
         </div>
         <ul id="suggestions" class="suggestions-list"></ul>
         <div id="searchResults" class="search-results"></div>
@@ -433,21 +440,21 @@
                 }
             });
        
-        async function loadChatUnreadCount() {
-        try {
+       async function loadChatUnreadCount() {
+    try {
         const res = await fetch('/Chat/GetUnreadCount');
         const data = await res.json();
         const badge = document.getElementById('chatUnreadCount');
         if (badge) {
-        if (data.count > 0) {
-        badge.textContent = data.count;
-        badge.style.display = 'inline-block';
-        } else {
-        badge.style.display = 'none';
+            if (data.count > 0) {
+                badge.textContent = data.count;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
         }
-        }
-        } catch(e) {}
-        }
+    } catch(e) {}
+}
         loadChatUnreadCount();
         setInterval(loadChatUnreadCount, 10000);
     </script>

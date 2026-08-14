@@ -493,6 +493,13 @@
 </div>
 
 <script>
+    function openModal() {
+        document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').classList.remove('active');
+    }
     // Same map as AddProduct page — keep in sync if you add new categories there
     const subCategoryMap = {
         'FabricTextile': { label: '🧵 Fabric & Textile', subs: [

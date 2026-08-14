@@ -630,7 +630,7 @@
     <script>
         var isUserLoggedIn = @(Context.Session.GetString("UserEmail") != null ? "true" : "false");
 
-                    function pdQty(delta) {
+        function pdQty(delta) {
             var el = document.getElementById('pd-qty-val');
             var msgEl = document.getElementById('pd-qty-msg');
             var current = parseInt(el.innerText) || 1;
@@ -647,6 +647,7 @@
 
             el.innerText = newVal;
         }
+
         function pdColor(el, name) {
             document.querySelectorAll('.pd-color').forEach(c => c.classList.remove('on'));
             el.classList.add('on');
@@ -717,47 +718,25 @@
             } catch (e) { console.error("Buy Now Error:", e); }
         }
 
-                function toggleDescription(btn) {
+        function toggleDescription(btn) {
             btn.classList.toggle('active');
             var content = btn.nextElementSibling;
             content.classList.toggle('open');
         }
-       async function startSellerChat() {
-    if (!isUserLoggedIn) {
-        const inp = document.getElementById('loginReturnUrl');
-        if (inp) inp.value = '/Chat/Messages';
-        const loginPopup = document.getElementById('loginPopup');
-        const loginOverlay = document.getElementById('loginOverlay');
-        if (loginPopup && loginOverlay) {
-            loginPopup.classList.add('active');
-            loginOverlay.classList.add('active');
-        }
-        return;
-    }
 
-    const formData = new FormData();
-    formData.append('otherEmail', '@Model.SellerEmail');
-    formData.append('otherRole', 'Seller');
-    formData.append('productId', '@Model.Id');
-
-    const res = await fetch('/Chat/StartConversation', { method: 'POST', body: formData });
-    const data = await res.json();
-
-    if (data.success) {
-        // Open the floating widget instead of navigating to a separate page
-        if (typeof window.cwOpen === 'function') {
-            window.cwOpen();
-            const convRes = await fetch('/Chat/GetConversations');
-            const convs = await convRes.json();
-            const match = convs.find(c => c.conversationId === data.conversationId);
-            if (match && typeof window.cwOpenConversation === 'function') {
-                window.cwOpenConversation(match.conversationId, match.otherName, match.otherRole);
+        async function startSellerChat() {
+            if (!isUserLoggedIn) {
+                const inp = document.getElementById('loginReturnUrl');
+                if (inp) inp.value = '/Chat/Messages';
+                const loginPopup = document.getElementById('loginPopup');
+                const loginOverlay = document.getElementById('loginOverlay');
+                if (loginPopup && loginOverlay) {
+                    loginPopup.classList.add('active');
+                    loginOverlay.classList.add('active');
+                }
+                return;
             }
-        }
-    } else {
-        alert(data.message || 'Could not start chat.');
-    }
-}
+
             const formData = new FormData();
             formData.append('otherEmail', '@Model.SellerEmail');
             formData.append('otherRole', 'Seller');
@@ -767,7 +746,6 @@
             const data = await res.json();
 
             if (data.success) {
-                // Open the floating widget instead of navigating to a separate page
                 if (typeof window.cwOpen === 'function') {
                     window.cwOpen();
                     const convRes = await fetch('/Chat/GetConversations');
@@ -777,21 +755,6 @@
                         window.cwOpenConversation(match.conversationId, match.otherName, match.otherRole);
                     }
                 }
-            } else {
-                alert(data.message || 'Could not start chat.');
-            }
-        }
-
-            const formData = new FormData();
-            formData.append('otherEmail', '@Model.SellerEmail');
-            formData.append('otherRole', 'Seller');
-            formData.append('productId', '@Model.Id');
-
-            const res = await fetch('/Chat/StartConversation', { method: 'POST', body: formData });
-            const data = await res.json();
-
-            if (data.success) {
-                window.location.href = '/Chat/Messages?open=' + data.conversationId;
             } else {
                 alert(data.message || 'Could not start chat.');
             }

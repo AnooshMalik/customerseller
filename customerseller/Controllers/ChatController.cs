@@ -21,12 +21,17 @@ namespace customerseller.Controllers
             _hubContext = hubContext;
         }
 
-
         public IActionResult Messages()
         {
             var (email, role) = GetCurrentUser();
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Index", "Home");
+
+            // Poori page ko browser cache karne se roko — warna dusre tab/session
+            // mein purani role wali cached HTML dikh sakti hai
+            Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
 
             ViewBag.CurrentEmail = email;
             ViewBag.CurrentRole = role;
@@ -52,9 +57,10 @@ namespace customerseller.Controllers
                 var otherRole = c.User1Email == email ? c.User2Role : c.User1Role;
 
                 // Safety net: agar yeh pairing current ChatPermissions rules ke hisab se
-                // allowed nahi hai (role change ho gaya ya purani/stale row hai), to
-                // Admin ko chhod kar kisi ko bhi yeh conversation mat dikhao.
-                if (role != "Admin" && otherRole != "Admin" && !ChatPermissions.IsAllowed(role, otherRole))
+                // allowed nahi hai (role change ho gaya ya purani/stale row hai, ya koi
+                // stray Customer-Admin row hai), to yeh conversation kisi ko mat dikhao —
+                // Admin ko bhi nahi. Admin sirf Seller/Courier/Moderator se chat kar sakta hai.
+                if (!ChatPermissions.IsAllowed(role, otherRole))
                     return null;
 
                 // Is user ne kab chat clear ki thi (agar ki hai to)

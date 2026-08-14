@@ -86,9 +86,7 @@ namespace customerseller.Hubs
                 conversationId = conversationId
             });
 
-            // Agar customer/buyer ne ek Seller ko pehli baar message kiya hai,
-            // to seller ki taraf se ek dummy/auto reply turant chala jaye.
-            if (senderRole != "Seller" && receiverRole == "Seller")
+            if (senderRole == "Customer" && receiverRole == "Seller")
             {
                 var senderMessageCount = _context.Messages.Count(m =>
                     m.ConversationId == conversationId && m.SenderEmail == senderEmail);

@@ -529,6 +529,8 @@ namespace customerseller.Controllers
             return View();
         }
 
+       
+
         [HttpPost]
         public IActionResult ResetPassword(string token, string newPassword)
         {
@@ -753,13 +755,8 @@ namespace customerseller.Controllers
             return View("AdminReports");
         }
 
-        public IActionResult Settings()
-        {
-            if (HttpContext.Session.GetString("AdminEmail") == null)
-                return RedirectToAction("Login");
-            return View();
-        }
-
+      
+        
         public IActionResult Complaints()
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)

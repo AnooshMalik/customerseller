@@ -33,7 +33,14 @@ else
     app.UseExceptionHandler("/Home/Error");
 }
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append(
+            "Cache-Control", "public,max-age=604800"); // 7 din
+    }
+});
 app.UseRouting();
 app.UseSession();
 app.UseAntiforgery();

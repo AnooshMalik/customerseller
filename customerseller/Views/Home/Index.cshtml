@@ -5,11 +5,11 @@
 
 <!-- Banner Slider -->
 <div class="banner-slider">
-    <div class="slides">
-        <div class="slide"><img src="~/customer/images/banner1.jpeg" alt="Slide 1"></div>
-        <div class="slide"><img src="~/customer/images/banner2.jpeg" alt="Slide 2"></div>
-        <div class="slide"><img src="~/customer/images/banner3.jpg" alt="Slide 3"></div>
-    </div>
+   <div class="slides">
+    <div class="slide"><img src="~/customer/images/banner1.jpeg" alt="Slide 1" fetchpriority="high" loading="eager"></div>
+    <div class="slide"><img src="~/customer/images/banner2.jpeg" alt="Slide 2" loading="lazy"></div>
+    <div class="slide"><img src="~/customer/images/banner3.jpg" alt="Slide 3" loading="lazy"></div>
+</div>
     <span class="prev"></span>
     <span class="next"></span>
     <div class="dots">
@@ -175,7 +175,7 @@
     <div class="story-content-wrapper">
         <!-- IMAGE LEFT -->
         <div class="story-visual">
-            <img src="~/customer/images/st.jpg" alt="Artisan crafting handmade products">
+            <img src="~/customer/images/st.jpg" alt="Artisan crafting handmade products" loading="lazy">
         </div>
 
         <!-- TEXT RIGHT -->
@@ -248,9 +248,9 @@
             
            <div class="product-card" style="position:relative;">
     <a href="/Products/Details/@product.Id" style="display:block; text-decoration:none; color:inherit;">
-        <div class="image-wrapper">
-            <img src="@imagePath" alt="@product.Title" />
-        </div>
+       <div class="image-wrapper">
+    <img src="@imagePath" alt="@product.Title" loading="lazy" />
+</div>
         <div class="product-info">
             <h3>@product.Title</h3>
             <p style="font-size:0.78rem; color:#888; margin:4px 0; line-height:1.4;">
