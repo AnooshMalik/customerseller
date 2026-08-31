@@ -48,7 +48,7 @@
                 height: calc(100vh - 54px);
             }
 
-            /* LEFT PANEL — conversation list */
+            
             .conv-panel {
                 width: 340px;
                 background: #fff;
@@ -157,7 +157,7 @@
                 font-size: 0.85rem;
             }
 
-            /* RIGHT PANEL — chat window */
+            
             .chat-panel {
                 flex: 1;
                 display: flex;
@@ -310,7 +310,7 @@
                     color: #ddd;
                 }
 
-            /* NEW CHAT MODAL */
+          
             .modal-overlay {
                 display: none;
                 position: fixed;
@@ -505,7 +505,7 @@
         </div>
     </div>
 
-    <!-- Edit Message Modal -->
+   
     <div class="modal-overlay" id="editMsgModal">
         <div class="modal-box" style="width:340px;">
             <div class="modal-header">
@@ -521,7 +521,7 @@
             </div>
         </div>
     </div>
-    <!-- Delete Message Modal -->
+   
     <div class="modal-overlay" id="deleteMsgModal">
         <div class="modal-box" style="width:320px;">
             <div class="modal-header">
@@ -537,7 +537,7 @@
             </div>
         </div>
     </div>
-    <!-- Clear Chat Modal -->
+  
     <div class="modal-overlay" id="clearChatModal">
         <div class="modal-box" style="width:320px;">
             <div class="modal-header">
@@ -562,10 +562,7 @@
             let connectionReadyPromise = null;
             let adminContacts = [];
             let adminSearchTerm = '';
-
-            // Canned auto-reply text sent automatically from a seller's account when they're offline.
-            // It should stay visible to the customer, but not clutter the seller's own view of their chat.
-            const AUTO_REPLY_TEXT = "Hi! I am the Artisan Valley seller. I'll reply as soon as I'm free 😊";
+ const AUTO_REPLY_TEXT = "Hi! I am the Artisan Valley seller. I'll reply as soon as I'm free ";
 
             function initials(name) {
                 if (!name) return "?";
@@ -609,7 +606,7 @@
                         };
                     });
 
-                    // Edge case: a conversation exists with someone no longer in the partners list
+                   
                     conversations.forEach(c => {
                         if (!merged.find(m => m.otherEmail === c.otherEmail)) {
                             merged.push(Object.assign({}, c, { hasConversation: true }));
@@ -670,7 +667,7 @@
                     openConversation(conversationId, name, role);
                     return;
                 }
-                // No conversation yet with this contact - create one, then open it
+               
                 const formData = new FormData();
                 formData.append('otherEmail', email);
                 formData.append('otherRole', role);
@@ -726,7 +723,7 @@
                 const res = await fetch('/Chat/GetMessages?conversationId=' + conversationId);
                 const messages = await res.json();
                 const box = document.getElementById('chatMessages');
-                // Hide the seller's own auto-reply from their own view of the conversation
+              
                 const visibleMessages = messages.filter(m => !(m.isMine && m.messageText === AUTO_REPLY_TEXT));
                 box.innerHTML = visibleMessages.map(renderBubble).join('');
                 box.scrollTop = box.scrollHeight;
@@ -784,9 +781,7 @@
                             box.scrollTop = box.scrollHeight;
                         }
                         if (!isMine) {
-                            // Conversation is actively open - mark this new message as read right away
-                            // so the unread badge in the left list doesn't stay stuck.
-                            fetch('/Chat/GetMessages?conversationId=' + currentConversationId).then(() => loadConversations());
+                             fetch('/Chat/GetMessages?conversationId=' + currentConversationId).then(() => loadConversations());
                         } else {
                             loadConversations();
                         }

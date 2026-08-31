@@ -9,16 +9,79 @@
     var sellerEmail = Context.Session.GetString("UserEmail");
     var sellerRole = Context.Session.GetString("UserRole");
 
+    DateTime? subscriptionEnd = null;
+
     if (sellerRole == "Seller" && !string.IsNullOrEmpty(sellerEmail))
     {
         using var con = new SqlConnection(Configuration.GetConnectionString("DefaultConnection"));
         con.Open();
 
-        var cmd = new SqlCommand("SELECT IsApproved FROM SellerShops WHERE SellerEmail = @email", con);
+        var cmd = new SqlCommand("SELECT IsApproved, SubscriptionEnd FROM SellerShops WHERE SellerEmail = @email", con);
         cmd.Parameters.AddWithValue("@email", sellerEmail);
 
-        var result = cmd.ExecuteScalar();
-        isApproved = result != null && result != DBNull.Value && (bool)result;
+        var reader2 = cmd.ExecuteReader();
+        if (reader2.Read())
+        {
+            isApproved = reader2["IsApproved"] != DBNull.Value && (bool)reader2["IsApproved"];
+            subscriptionEnd = reader2["SubscriptionEnd"] != DBNull.Value ? (DateTime?)reader2["SubscriptionEnd"] : null;
+        }
+        reader2.Close();
+    }
+
+    bool isSubscriptionLocked = false;
+    bool isSubscriptionGrace = false;
+    int graceDaysLeft = 0;
+
+    if (subscriptionEnd.HasValue)
+    {
+        var daysSinceExpiry = (DateTime.Now - subscriptionEnd.Value).TotalDays;
+        if (daysSinceExpiry > 2)
+        {
+            isSubscriptionLocked = true;
+        }
+        else if (daysSinceExpiry > 0)
+        {
+            isSubscriptionGrace = true;
+            graceDaysLeft = 2 - (int)Math.Floor(daysSinceExpiry);
+        }
+    }
+
+    bool isTempBlocked = false;
+    string blockReason = "";
+    string blockUntil = "";
+    bool hasPendingPayment = false;
+    bool isChatPage = ViewContext.RouteData.Values["controller"]?.ToString() == "Chat";
+    bool isSubscriptionPage = ViewContext.RouteData.Values["controller"]?.ToString() == "Subscription";
+
+    if (sellerRole == "Seller" && !string.IsNullOrEmpty(sellerEmail))
+    {
+        using var conPay = new SqlConnection(Configuration.GetConnectionString("DefaultConnection"));
+        conPay.Open();
+        var payCmd = new SqlCommand("SELECT COUNT(*) FROM PaymentSubmissions WHERE SellerEmail = @email AND Status = 'Pending'", conPay);
+        payCmd.Parameters.AddWithValue("@email", sellerEmail);
+        hasPendingPayment = (int)payCmd.ExecuteScalar() > 0;
+    }
+    if (sellerRole == "Seller" && !string.IsNullOrEmpty(sellerEmail))
+    {
+        using var conBlock = new SqlConnection(Configuration.GetConnectionString("DefaultConnection"));
+        conBlock.Open();
+        var blockCmd = new SqlCommand("SELECT IsBlocked, BlockExpiry, BlockReason FROM Users WHERE Email = @email", conBlock);
+        blockCmd.Parameters.AddWithValue("@email", sellerEmail);
+        var blockReader = blockCmd.ExecuteReader();
+        if (blockReader.Read())
+        {
+            bool isBlocked = blockReader["IsBlocked"] != DBNull.Value && (bool)blockReader["IsBlocked"];
+            if (isBlocked)
+            {
+                var expiry = blockReader["BlockExpiry"] != DBNull.Value ? (DateTime?)blockReader["BlockExpiry"] : null;
+                if (expiry.HasValue)
+                {
+                    isTempBlocked = true;
+                    blockUntil = expiry.Value.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture);
+                }
+                blockReason = blockReader["BlockReason"]?.ToString() ?? "No reason provided";
+            }
+        }
     }
 }
 <!DOCTYPE html>
@@ -134,6 +197,7 @@
                 </div>
             }
 
+
             <nav>
                 <div class="nav-active">
                     <a asp-controller="Dashboard" asp-action="Dashboard">
@@ -159,7 +223,7 @@
                     </a>
                     <a asp-controller="SellerComplaint" asp-action="Index">
                         <i class="fas fa-flag"></i> Complaints
-                        <span id="sellerComplaintBadge" style="margin-left:auto; background:#dc2626; color:#fff; font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:20px; min-width:18px; text-align:center;"></span>
+                        <span id="sellerComplaintBadge" style="display:none; margin-left:auto; background:#dc2626; color:#fff; font-size:0.65rem; font-weight:700; padding:2px 7px; border-radius:20px; min-width:18px; text-align:center;"></span>
                     </a>
                     <a asp-controller="Review" asp-action="SellerReviews">
                         <i class="fas fa-star"></i> Reviews
@@ -167,7 +231,9 @@
                     <a asp-controller="Payments" asp-action="Payments">
                         <i class="fas fa-wallet"></i> Payments
                     </a>
+
                 }
+
                 else
                 {
                     <a href="javascript:void(0)" class="nav-disabled" title="Available after admin approval">
@@ -186,6 +252,9 @@
                         <i class="fas fa-wallet"></i> Payments
                     </a>
                 }
+                <a asp-controller="Subscription" asp-action="Pay">
+                    <i class="fas fa-credit-card"></i> Subscription
+                </a>
 
                 <a asp-controller="Profile" asp-action="Profile">
                     <i class="fas fa-user-circle"></i> Profile
@@ -214,8 +283,116 @@
             </div>
         </div>
     </div>
-    <main>
-        @RenderBody()
+    <main style="position:relative;">
+        @if (isTempBlocked)
+        {
+            <div style="position:sticky; top:0; z-index:5000; background:#fee2e2; border-bottom:2px solid #dc2626; padding:14px 24px; display:flex; align-items:center; gap:10px;">
+                <i class="fas fa-lock" style="color:#dc2626; font-size:1.1rem;"></i>
+                <div>
+                    <strong style="color:#991b1b;">Your shop is temporarily blocked until @blockUntil.</strong>
+                    <div style="font-size:0.85rem; color:#7f1d1d; margin-top:2px;">Reason: @blockReason</div>
+                    @if (!isChatPage)
+                    {
+                        <div style="font-size:0.8rem; color:#7f1d1d; margin-top:4px;">You can still use Messages to contact support.</div>
+                    }
+                </div>
+            </div>
+
+            @if (isChatPage)
+            {
+                @RenderBody()
+            }
+            else
+            {
+                <div style="position:relative;">
+                    <div style="pointer-events:none; opacity:0.5;">
+                        @RenderBody()
+                    </div>
+                    <div style="position:absolute; inset:0; z-index:10;"></div>
+                </div>
+            }
+        }
+        else if (isSubscriptionLocked)
+        {
+            @if (hasPendingPayment)
+            {
+                <div style="position:sticky; top:0; z-index:5000; background:#dbeafe; border-bottom:2px solid #2563eb; padding:14px 24px; display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-clock" style="color:#2563eb; font-size:1.1rem;"></i>
+                    <div>
+                        <strong style="color:#1e3a8a;">Payment submitted, awaiting review.</strong>
+                        <div style="font-size:0.85rem; color:#1e40af; margin-top:2px;">
+                            Your dashboard will unlock automatically once our team approves your payment.
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div style="position:sticky; top:0; z-index:5000; background:#fee2e2; border-bottom:2px solid #dc2626; padding:14px 24px; display:flex; align-items:center; gap:10px;">
+                    <i class="fas fa-lock" style="color:#dc2626; font-size:1.1rem;"></i>
+                    <div>
+                        <strong style="color:#991b1b;">Your dashboard is locked due to an unpaid subscription.</strong>
+                        <div style="font-size:0.85rem; color:#7f1d1d; margin-top:2px;">Please complete your payment to restore access.</div>
+                        @if (!isChatPage && !isSubscriptionPage)
+                        {
+                            <a asp-controller="Subscription" asp-action="Pay" style="display:inline-block; margin-top:8px; background:#dc2626; color:#fff; padding:6px 16px; border-radius:6px; font-size:0.82rem; font-weight:600; text-decoration:none;">
+                                Pay Now
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+            @if (isChatPage || isSubscriptionPage)
+            {
+                @RenderBody()
+            }
+            else
+            {
+                <div style="position:relative;">
+                    <div style="pointer-events:none; opacity:0.5;">
+                        @RenderBody()
+                    </div>
+                    <div style="position:absolute; inset:0; z-index:10;"></div>
+                </div>
+            }
+        }
+        else
+        {
+            @if (isSubscriptionGrace)
+            {
+                @if (hasPendingPayment)
+                {
+                    <div style="position:sticky; top:0; z-index:5000; background:#dbeafe; border-bottom:2px solid #2563eb; padding:14px 24px; display:flex; align-items:center; gap:10px;">
+                        <i class="fas fa-clock" style="color:#2563eb; font-size:1.1rem;"></i>
+                        <div>
+                            <strong style="color:#1e3a8a;">Payment submitted, awaiting review.</strong>
+                            <div style="font-size:0.85rem; color:#1e40af; margin-top:2px;">
+                                Our team will verify your payment shortly. Your dashboard will unlock automatically once approved.
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div style="position:sticky; top:0; z-index:5000; background:#fff3cd; border-bottom:2px solid #d97706; padding:14px 24px; display:flex; align-items:center; gap:10px;">
+                        <i class="fas fa-exclamation-triangle" style="color:#d97706; font-size:1.1rem;"></i>
+                        <div>
+                            <strong style="color:#92400e;">Your subscription has expired.</strong>
+                            <div style="font-size:0.85rem; color:#78350f; margin-top:2px;">
+                                Please pay within @graceDaysLeft day@(graceDaysLeft != 1 ? "s" : "") to avoid your dashboard being locked.
+                            </div>
+                            @if (!isSubscriptionPage)
+                            {
+                                <a asp-controller="Subscription" asp-action="Pay" style="display:inline-block; margin-top:8px; background:#d97706; color:#fff; padding:6px 16px; border-radius:6px; font-size:0.82rem; font-weight:600; text-decoration:none;">
+                                    Pay Now
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            @RenderBody()
+        }
     </main>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
     <script>

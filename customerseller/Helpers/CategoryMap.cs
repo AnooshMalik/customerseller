@@ -3,9 +3,6 @@ using System.Linq;
 
 namespace customerseller.Helpers
 {
-    // Yeh class AddProduct.cshtml ke JS "subCategoryMap" ka exact C# mirror hai.
-    // Bulk upload ke waqt Excel me di gayi SubCategory value ko validate karne
-    // aur uski Main Category pata karne ke liye use hoti hai.
     public static class CategoryMap
     {
         public static readonly Dictionary<string, List<string>> MainToSub = new()
@@ -22,7 +19,6 @@ namespace customerseller.Helpers
             ["MetalWire"] = new() { "MetalEarrings", "MetalVases", "MetalFigurines", "MetalWallArt", "CandleHolders", "MetalWire" },
         };
 
-        // SubCategory code -> Main Category code (reverse lookup, banaya ek dafa static constructor me)
         public static readonly Dictionary<string, string> SubToMain =
             MainToSub.SelectMany(kv => kv.Value.Select(sub => new { Main = kv.Key, Sub = sub }))
                      .ToDictionary(x => x.Sub, x => x.Main);

@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Verify Email";
+}
+<div class="container text-center mt-5">
+    @if (ViewBag.Message != null)
+    {
+        <h3 style="color:#a64d79;">@ViewBag.Message</h3>
+        <a href="/Login/Login" class="btn" style="background:#a64d79;color:white;">Go to Login</a>
+    }
+    else if (ViewBag.Error != null)
+    {
+        <h3 style="color:red;">@ViewBag.Error</h3>
+    }
+</div>

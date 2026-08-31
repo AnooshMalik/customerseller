@@ -26,6 +26,8 @@ namespace customerseller.Models
 
         public DbSet<Conversation> Conversations { get; set; }
         public DbSet<Message> Messages { get; set; }
+        public DbSet<PendingRegistration> PendingRegistrations { get; set; }
+        public DbSet<PaymentSubmission> PaymentSubmissions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

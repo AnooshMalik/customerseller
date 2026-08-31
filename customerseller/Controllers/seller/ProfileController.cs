@@ -21,7 +21,7 @@ namespace customerseller.Controllers.seller
                 _context.Database.GetConnectionString());
             con.Open();
 
-            // Users table se data lo
+           
             var userCmd = new Microsoft.Data.SqlClient.SqlCommand(
                 "SELECT FirstName, LastName, Email, Phone FROM Users WHERE Email = @email", con);
             userCmd.Parameters.AddWithValue("@email", email);
@@ -35,7 +35,7 @@ namespace customerseller.Controllers.seller
             }
             userReader.Close();
 
-            // SellerShops se data lo
+            
             var shopCmd = new Microsoft.Data.SqlClient.SqlCommand(
      "SELECT ShopName, CNIC, SubCategories, SellerPhone, SellerArea FROM SellerShops WHERE SellerEmail = @email", con);
             shopCmd.Parameters.AddWithValue("@email", email);
@@ -74,14 +74,14 @@ namespace customerseller.Controllers.seller
                 _context.Database.GetConnectionString());
             con.Open();
 
-            // Users table update karo
+           
             var userCmd = new Microsoft.Data.SqlClient.SqlCommand(
                 "UPDATE Users SET Phone = @phone WHERE Email = @email", con);
             userCmd.Parameters.AddWithValue("@phone", model.Phone ?? "");
             userCmd.Parameters.AddWithValue("@email", email);
             userCmd.ExecuteNonQuery();
 
-            // SellerShops update karo + Categories bhi + IsApproved = 0 (admin review)
+           
             var shopCmd = new Microsoft.Data.SqlClient.SqlCommand(
                 "UPDATE SellerShops SET ShopName = @shop, SubCategories = @categories, IsApproved = 0 WHERE SellerEmail = @email", con);
             shopCmd.Parameters.AddWithValue("@shop", model.ShopName ?? "");
@@ -89,7 +89,7 @@ namespace customerseller.Controllers.seller
             shopCmd.Parameters.AddWithValue("@email", email);
             shopCmd.ExecuteNonQuery();
 
-            // Session update karo
+           
             HttpContext.Session.SetString("ShopName", model.ShopName ?? "");
 
             TempData["ProfileSuccess"] = "Profile updated! Your shop is under admin review again.";

@@ -2,6 +2,8 @@
     ViewData["Title"] = "File a Complaint";
     var orderId = ViewBag.OrderId as string ?? "";
     var amount = ViewBag.Amount as string ?? "";
+    var customerName = ViewBag.CustomerName as string ?? "";
+    var customerEmail = ViewBag.CustomerEmail as string ?? "";
 }
 
 <style>
@@ -259,15 +261,15 @@
             <div class="form-grid">
                 <div class="form-field">
                     <label>Your Name <span>*</span></label>
-                    <input type="text" id="cf-name" placeholder="e.g. Ali Hassan">
+                    <input type="text" id="cf-name" placeholder=" " value="@customerName">
                 </div>
                 <div class="form-field">
                     <label>Phone Number <span>*</span></label>
-                    <input type="tel" id="cf-phone" placeholder="03XX-XXXXXXX">
+                    <input type="tel" id="cf-phone" placeholder=" ">
                 </div>
                 <div class="form-field full">
                     <label>Email Address</label>
-                    <input type="email" id="cf-email" placeholder="your@email.com">
+                    <input type="email" id="cf-email" placeholder=" " value="@customerEmail" readonly>
                 </div>
                 <div class="form-field">
                     <label>Order ID <span>*</span></label>

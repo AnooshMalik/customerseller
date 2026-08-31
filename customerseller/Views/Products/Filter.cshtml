@@ -311,7 +311,7 @@
             transform: translateX(16px);
         }
 
-    /* ===== MAIN CONTENT ===== */
+    
     .main-content {
         flex: 1;
         min-width: 0;
@@ -681,12 +681,12 @@
     }
 </style>
 
-<!-- Mobile Overlay -->
+
 <div class="sidebar-overlay-filter" id="sidebarOverlay"></div>
 
 <div class="page-wrapper">
 
-    <!-- ===== FILTER SIDEBAR ===== -->
+   
     <aside class="filter-sidebar" id="filterSidebar">
         <div class="sidebar-header">
             <h3><i class="fa-solid fa-sliders"></i> Filters</h3>
@@ -699,21 +699,26 @@
             <div class="filter-section-header" onclick="toggleSection(this)">
                 <span>Category</span><i class="fa-solid fa-chevron-down"></i>
             </div>
-            <div class="filter-section-body" id="categoryFilter">
-                <label class="filter-option"><input type="checkbox" value="fabric" onchange="applyFilters()"> Fabric & Textile <span class="count">12</span></label>
-                <label class="filter-option"><input type="checkbox" value="wool" onchange="applyFilters()"> Wool & Yarn <span class="count">8</span></label>
-                <label class="filter-option"><input type="checkbox" value="leather" onchange="applyFilters()"> Leather <span class="count">15</span></label>
-                <label class="filter-option"><input type="checkbox" value="wood" onchange="applyFilters()"> Wood <span class="count">10</span></label>
-                <label class="filter-option"><input type="checkbox" value="clay" onchange="applyFilters()"> Clay & Pottery <span class="count">9</span></label>
-                <label class="filter-option"><input type="checkbox" value="jewels" onchange="applyFilters()"> Jewels <span class="count">14</span></label>
-                <label class="filter-option"><input type="checkbox" value="paper" onchange="applyFilters()"> Paper & Cards <span class="count">7</span></label>
-                <label class="filter-option"><input type="checkbox" value="jute" onchange="applyFilters()"> Jute & Natural <span class="count">6</span></label>
-                <label class="filter-option"><input type="checkbox" value="resin" onchange="applyFilters()"> Resin & Epoxy <span class="count">11</span></label>
-                <label class="filter-option"><input type="checkbox" value="metal" onchange="applyFilters()"> Metal & Wire <span class="count">8</span></label>
-            </div>
+           <div class="filter-section-body" id="categoryFilter">
+    <label class="filter-option"><input type="checkbox" value="FabricTextile" onchange="applyFilters()"> Fabric & Textile</label>
+    <label class="filter-option"><input type="checkbox" value="WoolYarn" onchange="applyFilters()"> Wool & Yarn</label>
+    <label class="filter-option"><input type="checkbox" value="Leather" onchange="applyFilters()"> Leather</label>
+    <label class="filter-option"><input type="checkbox" value="Wood" onchange="applyFilters()"> Wood</label>
+    <label class="filter-option"><input type="checkbox" value="ClayPottery" onchange="applyFilters()"> Clay & Pottery</label>
+    <label class="filter-option"><input type="checkbox" value="Jewels" onchange="applyFilters()"> Jewels</label>
+    <label class="filter-option"><input type="checkbox" value="PaperCards" onchange="applyFilters()"> Paper & Cards</label>
+    <label class="filter-option"><input type="checkbox" value="JuteNatural" onchange="applyFilters()"> Jute & Natural</label>
+    <label class="filter-option"><input type="checkbox" value="ResinEpoxy" onchange="applyFilters()"> Resin & Epoxy</label>
+    <label class="filter-option"><input type="checkbox" value="MetalWire" onchange="applyFilters()"> Metal & Wire</label>
+</div>
+            <div class="filter-section" id="subCategorySection" style="display:none;">
+    <div class="filter-section-header" onclick="toggleSection(this)">
+        <span>Subcategory</span><i class="fa-solid fa-chevron-down"></i>
+    </div>
+    <div class="filter-section-body" id="subCategoryFilter">
+    </div>
+</div>
         </div>
-
-        <!-- PRICE -->
         <div class="filter-section">
             <div class="filter-section-header" onclick="toggleSection(this)">
                 <span>Price Range</span><i class="fa-solid fa-chevron-down"></i>
@@ -728,10 +733,6 @@
                 <div class="price-labels"><span>Rs. 0</span><span>Rs. 50,000</span></div>
             </div>
         </div>
-
-      
-
-        <!-- SIZE -->
         <div class="filter-section">
             <div class="filter-section-header" onclick="toggleSection(this)">
                 <span>Size</span><i class="fa-solid fa-chevron-down"></i>
@@ -746,7 +747,7 @@
             </div>
         </div>
 
-        <!-- COLOR -->
+       
         <div class="filter-section">
             <div class="filter-section-header" onclick="toggleSection(this)">
                 <span>Color</span><i class="fa-solid fa-chevron-down"></i>
@@ -772,7 +773,7 @@
        
     </aside>
 
-    <!-- ===== MAIN CONTENT ===== -->
+   
     <div class="main-content">
 
         <div class="section-heading">
@@ -810,12 +811,92 @@
 </div>
 
 <script>
-    // ===== SIMPLE DATA PASS =====
+    const subCategoryMap = {
+    'FabricTextile': [
+        { val: 'CushionCovers', label: 'Cushion Covers' },
+        { val: 'PrintedKurtas', label: 'Printed Kurtas' },
+        { val: 'TieDyeDupattas', label: 'Tie-Dye Dupattas' },
+        { val: 'FabricToteBags', label: 'Tote Bags' },
+        { val: 'FabricTextile', label: 'General Fabric' }
+    ],
+    'WoolYarn': [
+        { val: 'Sweaters', label: 'Sweaters' },
+        { val: 'CrochetBags', label: 'Crochet Bags' },
+        { val: 'StorageBaskets', label: 'Storage Baskets' },
+        { val: 'Beanies', label: 'Beanies' },
+        { val: 'WoolYarn', label: 'General Wool' }
+    ],
+    'Leather': [
+        { val: 'LeatherHandbags', label: 'Handbags' },
+        { val: 'Wallets', label: 'Wallets' },
+        { val: 'Belts', label: 'Belts' },
+        { val: 'LeatherKeychains', label: 'Keychains' },
+        { val: 'Journals', label: 'Journals' },
+        { val: 'Leather', label: 'General Leather' }
+    ],
+    'Wood': [
+        { val: 'PhotoFrames', label: 'Photo Frames' },
+        { val: 'WoodNecklaces', label: 'Necklaces' },
+        { val: 'WoodToys', label: 'Toys' },
+        { val: 'ServingTrays', label: 'Serving Trays' },
+        { val: 'WoodShowpieces', label: 'Showpieces' },
+        { val: 'WoodKeychains', label: 'Keychains' },
+        { val: 'Wood', label: 'General Wood' }
+    ],
+    'ClayPottery': [
+        { val: 'FlowerPots', label: 'Flower Pots' },
+        { val: 'CoffeeMugs', label: 'Coffee Mugs' },
+        { val: 'ClayVases', label: 'Vases' },
+        { val: 'ClayEarrings', label: 'Earrings' },
+        { val: 'ClayFigurines', label: 'Figurines' },
+        { val: 'ClayPottery', label: 'General Clay' }
+    ],
+    'Jewels': [
+        { val: 'Necklaces', label: 'Necklaces' },
+        { val: 'Bracelets', label: 'Bracelets' },
+        { val: 'Rings', label: 'Rings' },
+        { val: 'Bangles', label: 'Bangles' },
+        { val: 'JewelEarrings', label: 'Earrings' },
+        { val: 'Jewels', label: 'General Jewels' }
+    ],
+    'PaperCards': [
+        { val: 'GreetingCards', label: 'Greeting Cards' },
+        { val: 'GiftBoxes', label: 'Gift Boxes' },
+        { val: 'PaperFlowers', label: 'Paper Flowers' },
+        { val: 'PaperShowpieces', label: 'Showpieces' },
+        { val: 'Scrapbooks', label: 'Scrapbooks' },
+        { val: 'PaperCards', label: 'General Paper' }
+    ],
+    'JuteNatural': [
+        { val: 'JuteBags', label: 'Bags' },
+        { val: 'Baskets', label: 'Baskets' },
+        { val: 'Trays', label: 'Trays' },
+        { val: 'DriedBouquets', label: 'Dried Bouquets' },
+        { val: 'Paintings', label: 'Paintings' },
+        { val: 'JuteNatural', label: 'General Jute' }
+    ],
+    'ResinEpoxy': [
+        { val: 'Coasters', label: 'Coasters' },
+        { val: 'ResinEarrings', label: 'Earrings' },
+        { val: 'ResinKeychains', label: 'Keychains' },
+        { val: 'WallArt', label: 'Wall Art' },
+        { val: 'ResinServingTrays', label: 'Serving Trays' },
+        { val: 'ResinEpoxy', label: 'General Resin' }
+    ],
+    'MetalWire': [
+        { val: 'MetalEarrings', label: 'Earrings' },
+        { val: 'MetalVases', label: 'Vases' },
+        { val: 'MetalFigurines', label: 'Figurines' },
+        { val: 'MetalWallArt', label: 'Wall Art' },
+        { val: 'CandleHolders', label: 'Candle Holders' },
+        { val: 'MetalWire', label: 'General Metal' }
+    ]
+};
     const allProducts = @Html.Raw(Json.Serialize(Model ?? new List<customerseller.Models.Product>()));
 
     console.log('✅ Products loaded:', allProducts.length);
 
-    // Render initial products
+    
     function renderProducts(products) {
       const grid = document.getElementById('productsGrid');
       if (products.length === 0) {
@@ -838,49 +919,82 @@
       document.getElementById('productCount').textContent = products.length;
     }
 
-    // Filter functions
+    
     function toggleSection(header) {
       const body = header.nextElementSibling;
       header.classList.toggle('collapsed');
       body.classList.toggle('hidden');
     }
 
-     // Helper: lowercase + sirf letters/numbers rakho, taake "Jewels", "jewels ", "Jewels & Stones" sab match ho jayen
+     
 function norm(str) {
   return (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
+function updateSubCategoryOptions() {
+  const selectedCategories = getCheckedValues('categoryFilter');
+  const subSection = document.getElementById('subCategorySection');
+  const subContainer = document.getElementById('subCategoryFilter');
 
+  if (selectedCategories.length === 0) {
+    subSection.style.display = 'none';
+    subContainer.innerHTML = '';
+    return;
+  }
+
+  let possibleSubs = [];
+  selectedCategories.forEach(mainCat => {
+    if (subCategoryMap[mainCat]) possibleSubs = possibleSubs.concat(subCategoryMap[mainCat]);
+  });
+
+  const existingCodes = new Set(allProducts.map(p => p.category));
+  const relevantSubs = possibleSubs.filter(s => existingCodes.has(s.val));
+
+  if (relevantSubs.length === 0) {
+    subSection.style.display = 'none';
+    subContainer.innerHTML = '';
+    return;
+  }
+
+  subSection.style.display = 'block';
+  subContainer.innerHTML = relevantSubs.map(s => `
+    <label class="filter-option">
+      <input type="checkbox" value="${s.val}" onchange="applyFilters()"> ${s.label}
+    </label>
+  `).join('');
+}
 function getCheckedValues(containerId) {
   return Array.from(document.querySelectorAll('#' + containerId + ' input[type="checkbox"]:checked'))
     .map(cb => cb.value);
 }
-
 function applyFilters() {
   const selectedCategories = getCheckedValues('categoryFilter');
+  const selectedSubCategories = getCheckedValues('subCategoryFilter');
   const selectedSizes = getCheckedValues('sizeFilter');
 
   let filtered = allProducts.filter(p => {
-    // Category filter
-    if (selectedCategories.length > 0) {
-      const productCategory = norm(p.category);
-      const matches = selectedCategories.some(cat => productCategory.includes(norm(cat)));
-      if (!matches) return false;
+
+    
+    if (selectedSubCategories.length > 0) {
+      if (!selectedSubCategories.includes(p.category)) return false;
+    } else if (selectedCategories.length > 0) {
+      let allowedCodes = [];
+      selectedCategories.forEach(mainCat => {
+        if (subCategoryMap[mainCat]) allowedCodes = allowedCodes.concat(subCategoryMap[mainCat].map(s => s.val));
+      });
+      if (!allowedCodes.includes(p.category)) return false;
     }
 
-    // Size filter
     if (selectedSizes.length > 0) {
       const productSizes = (p.sizes || '').split(',').map(s => norm(s));
       const matches = selectedSizes.some(sz => productSizes.includes(norm(sz)));
       if (!matches) return false;
     }
 
-    // Price filter
     const minP = parseFloat(document.getElementById('minPrice').value) || 0;
     const maxP = parseFloat(document.getElementById('maxPrice').value) || 999999;
     const price = parseFloat(p.price) || 0;
     if (price < minP || price > maxP) return false;
 
-    // Color filter
     const activeColors = Array.from(document.querySelectorAll('.color-swatch.active'))
       .map(el => el.getAttribute('data-color'));
     if (activeColors.length > 0) {
@@ -888,27 +1002,27 @@ function applyFilters() {
       if (!activeColors.some(c => productColor.includes(norm(c)))) return false;
     }
 
-    // Search filter
     const search = document.getElementById('searchInput').value.toLowerCase().trim();
     if (search && !(p.title || '').toLowerCase().includes(search)) return false;
 
     return true;
   });
 
-  // Sorting
   const sortVal = document.getElementById('sortSelect').value;
   if (sortVal === 'price-low') filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
   else if (sortVal === 'price-high') filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
 
   renderProducts(filtered);
 }
-    function resetAllFilters() {
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-      document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
-      document.getElementById('minPrice').value = '0';
-      document.getElementById('maxPrice').value = '50000';
-      renderProducts(allProducts);
-    }
+   function resetAllFilters() {
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  document.getElementById('minPrice').value = '0';
+  document.getElementById('maxPrice').value = '50000';
+  document.getElementById('subCategorySection').style.display = 'none';
+  document.getElementById('subCategoryFilter').innerHTML = '';
+  renderProducts(allProducts);
+}
 
     function toggleColor(el) {
       el.classList.toggle('active');
@@ -931,5 +1045,8 @@ function applyFilters() {
     }
 
     document.getElementById('sidebarOverlay').addEventListener('click', closeMobileFilter);
+    document.querySelectorAll('#categoryFilter input[type="checkbox"]').forEach(cb => {
+  cb.addEventListener('change', updateSubCategoryOptions);
+});
     renderProducts(allProducts);
 </script>

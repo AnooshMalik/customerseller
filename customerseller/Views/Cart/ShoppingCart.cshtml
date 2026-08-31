@@ -165,7 +165,7 @@
             let total = 0;
             let html = '<div class="cart-table-container" style="max-width:900px; margin: 0 auto;">';
 
-            // 1. Loop ke andar sirf product ki row honi chahiye
+           
             cart.forEach((item, index) => {
                 let itemPrice = parseFloat(item.price) || 0;
                 let itemQty = parseInt(item.qty) || 1;
@@ -183,7 +183,7 @@
                 </div>`;
             });
 
-            // 2. Total aur Checkout button loop se bahar hona chahiye
+           
             html += `
                 <div style="margin-top:40px; text-align:right; border-top: 2px solid #f9f9f9; padding-top:20px;">
                     <h2 style="margin-bottom:25px; font-weight:800; color:#222;">Total: Rs. ${total.toLocaleString()}</h2>
@@ -212,7 +212,7 @@
                 return;
             }
 
-            // Role check karo
+        
             const res = await fetch('/Account/GetUserRole');
             const data = await res.json();
 
@@ -224,7 +224,7 @@
             window.location.href = '/Cart/Checkout';
         };
 
-        // Page load hotay hi function call karein
+      
         document.addEventListener('DOMContentLoaded', renderCart);
     </script>
 }

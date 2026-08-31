@@ -52,7 +52,7 @@
                 }
                 else
                 {
-                    <span style="font-size:0.85rem; font-weight:600; margin-right:5px;">
+                    <span style="font-size:0.85rem; font-weight:600; margin-right:5px; color:#a64d79;">
                         Hi, @Context.Session.GetString("UserName")
                     </span>
                 }
@@ -81,13 +81,31 @@
         </div>
     </div>
 
+   
     @if (TempData["EmailError"] != null)
-    {
-        <div style="background:red; color:white; padding:10px; text-align:center;">
-            @TempData["EmailError"]
-        </div>
-    }
-
+{
+    <div id="emailErrorToast" style="position:fixed; top:20px; right:20px; z-index:9999; background:#ffebee; color:#c62828; border:1px solid #ffcdd2; padding:12px 18px; border-radius:8px; font-size:0.9rem; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+        ⚠️ @TempData["EmailError"]
+    </div>
+    <script>
+        setTimeout(function () {
+            var t = document.getElementById('emailErrorToast');
+            if (t) t.style.display = 'none';
+        }, 4000);
+    </script>
+}
+    @if (TempData["VerifySuccess"] != null)
+{
+    <div id="verifyToast" style="position:fixed; top:20px; right:20px; z-index:9999; background:#f0fdf4; color:#2e7d32; border:1px solid #a5d6a7; padding:12px 18px; border-radius:8px; font-size:0.9rem; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+        ✅ @TempData["VerifySuccess"]
+    </div>
+    <script>
+        setTimeout(function () {
+            var t = document.getElementById('verifyToast');
+            if (t) t.style.display = 'none';
+        }, 4000);
+    </script>
+}
     <main>
         @RenderBody()
     </main>
@@ -109,7 +127,11 @@
                     <li><a asp-controller="Home" asp-action="About">About us</a></li>
                     <li><a asp-controller="Home" asp-action="Contact">Contact Us</a></li>
                     <li><a asp-controller="Cart" asp-action="OrderConfirmed">My Order</a></li>
-                    <li><a asp-controller="Cart" asp-action="Complaint">File a Complaint</a></li>
+                    <li>
+                        <a asp-controller="Cart" asp-action="Complaint" onclick="return checkLoginRequired(event, '/Cart/Complaint')">
+                            File a Complaint
+                        </a>
+                    </li>
                     <li><a asp-controller="Courier" asp-action="Login">Courier Partner Login</a></li>
                 </ul>
             </div>
@@ -122,13 +144,14 @@
                 </ul>
             </div>
             <div class="footer-col">
-                <form style="display:flex; align-items:center; margin-bottom:15px; margin-top:36px;" onsubmit="return false;">
-             <input type="email" name="email" placeholder="Your email address" required
-                           style="padding:7px 10px; font-size:0.8rem; border:none; border-radius:4px 0 0 4px; outline:none; width:155px; color:#333; background:#fff; height:34px; box-sizing:border-box;">
-                    <button type="submit" style="height:34px; padding:0 12px; background:#fff; color:#a64d79; border:none; border-radius:0 4px 4px 0; font-weight:700; cursor:pointer; font-size:0.8rem; box-sizing:border-box;">
-                        Enter
-                    </button>
-                </form>
+               <form id="newsletterForm" style="display:flex; align-items:center; margin-bottom:8px; margin-top:36px;">
+     <input type="email" name="email" id="newsletterEmail" placeholder="Your email address" required
+                   style="padding:7px 10px; font-size:0.8rem; border:none; border-radius:4px 0 0 4px; outline:none; width:155px; color:#333; background:#fff; height:34px; box-sizing:border-box;">
+            <button type="submit" style="height:34px; padding:0 12px; background:#fff; color:#a64d79; border:none; border-radius:0 4px 4px 0; font-weight:700; cursor:pointer; font-size:0.8rem; box-sizing:border-box;">
+                Enter
+            </button>
+        </form>
+        <div id="newsletterMsg" style="font-size:0.75rem; margin-bottom:8px; min-height:14px;"></div>
                 <div class="footer-social">
                     <a href="https://www.facebook.com/" aria-label="Follow us on Facebook"><i class="fab fa-facebook-f"></i></a>
 <a href="https://www.instagram.com/" aria-label="Follow us on Instagram"><i class="fab fa-instagram"></i></a>
@@ -142,7 +165,7 @@
         </div>
     </footer>
 
-    <!-- Search Sidebar -->
+  
     <div id="searchOverlay" class="search-overlay"></div>
     <div id="searchPopup" class="search-sidebar">
         <button id="closeSearchPopup" class="close-btn">&times;</button>
@@ -206,6 +229,12 @@
         <div id="registerSidebar" class="register-sidebar">
             <button id="closeRegister" class="close-register">&times;</button>
             <h2>REGISTER</h2>
+          @if (TempData["RegisterSuccess"] != null)
+            {
+                <div style="background:#f0fdf4; color:#2e7d32; padding:10px 14px; border-radius:6px; margin-bottom:15px; font-size:0.9rem;">
+                    ✅ @TempData["RegisterSuccess"]
+                </div>
+            }
             @if (TempData["RegisterError"] != null)
             {
                 <div style="background:#ffebee; color:#c62828; padding:10px 14px; border-radius:6px; margin-bottom:15px; font-size:0.9rem;">
@@ -213,7 +242,8 @@
                 </div>
             }
             <form id="registerForm" asp-controller="Account" asp-action="Register" method="post" autocomplete="off" novalidate>
-                <div style="margin-bottom:6px;">
+                <input type="hidden" name="returnUrl" value="" id="registerReturnUrl" />
+            <div style="margin-bottom:6px;">
                     <input type="text" name="firstName" id="regFirstName" placeholder="First Name" required autocomplete="off">
                     <span class="field-error" id="err-firstName"></span>
                 </div>
@@ -276,7 +306,10 @@
             </div>
         </div>
     </div>
-    @await Html.PartialAsync("_ChatWidget")
+   @if (currentPath != "/" && currentPath != "/home" && currentPath != "/home/index")
+    {
+        @await Html.PartialAsync("_ChatWidget")
+    }
     <script src="~/customer/js/site.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
@@ -307,9 +340,28 @@
                 }
                 return true;
             }
+
+            function checkLoginRequired(e, returnUrl) {
+                var isLoggedIn = @(Context.Session.GetString("UserEmail") != null ? "true" : "false");
+                if (!isLoggedIn) {
+                    e.preventDefault();
+                    const inp = document.getElementById('loginReturnUrl');
+                    if (inp) inp.value = returnUrl;
+                    const loginPopup = document.getElementById('loginPopup');
+                    const loginOverlay = document.getElementById('loginOverlay');
+                    if (loginPopup && loginOverlay) {
+                        loginPopup.classList.add('active');
+                        loginOverlay.classList.add('active');
+                    }
+                    return false;
+                }
+                return true;
+            }
+
             function closeCart() {
                 document.getElementById('cartSidebar')?.classList.remove('active');
                 document.getElementById('cartOverlay')?.classList.remove('active');
+                window.location.href = window.location.pathname;
             }
 
             function renderCart() {
@@ -415,9 +467,8 @@
                 }
                 if (typeof updateCartCount === 'function') updateCartCount();
             });
-
-            document.addEventListener("DOMContentLoaded", function () {
-                @if (TempData["RegisterError"] != null)
+document.addEventListener("DOMContentLoaded", function () {
+                @if (TempData["RegisterError"] != null || TempData["RegisterSuccess"] != null)
                 {
                         <text>
                             const registerSidebar = document.getElementById('registerSidebar');
@@ -455,6 +506,38 @@
         }
     } catch(e) {}
 }
+document.addEventListener("DOMContentLoaded", function () {
+    const newsletterForm = document.getElementById('newsletterForm');
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const emailInput = document.getElementById('newsletterEmail');
+            const msgDiv = document.getElementById('newsletterMsg');
+            const email = emailInput.value.trim();
+
+            if (!email) return;
+
+            const formData = new FormData();
+            formData.append('email', email);
+
+            try {
+                const res = await fetch('/Home/SubscribeNewsletter', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                msgDiv.textContent = data.message;
+                msgDiv.style.color = data.success ? '#c8f7d4' : '#ffd6d6';
+
+                if (data.success) emailInput.value = '';
+            } catch (err) {
+                msgDiv.textContent = 'Something went wrong. Please try again.';
+                msgDiv.style.color = '#ffd6d6';
+            }
+        });
+    }
+});
         loadChatUnreadCount();
         setInterval(loadChatUnreadCount, 10000);
     </script>

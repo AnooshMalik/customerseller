@@ -100,10 +100,10 @@ namespace customerseller.Controllers
 
             if (otp == savedOtp)
             {
-                string email = HttpContext.Session.GetString("ModEmailPending");   // ← pehle read karo
+                string email = HttpContext.Session.GetString("ModEmailPending");   
                 string role = (email.ToLower() == AdminEmail.ToLower()) ? "Admin" : "Moderator";
 
-                HttpContext.Session.Clear();                                       // ← ab clear karo
+                HttpContext.Session.Clear();                                      
                 HttpContext.Session.SetString("ModeratorEmail", email);
                 HttpContext.Session.SetString("ModeratorRole", role);
                 return RedirectToAction("Dashboard");
@@ -270,7 +270,7 @@ namespace customerseller.Controllers
                     VideoStatus = reader["VideoStatus"],
                     UploadedAt = reader["UploadedAt"],
 
-                    ProductCount = reader["ProductCount"],   // ✅ new
+                    ProductCount = reader["ProductCount"],   
                     ProductTitles = reader["ProductTitles"]
                 });
             }
@@ -291,13 +291,13 @@ namespace customerseller.Controllers
                 _context.Database.GetConnectionString());
             con.Open();
 
-            // SubCategoryVideos approve karo
+           
             var cmd = new Microsoft.Data.SqlClient.SqlCommand(
                 "UPDATE SubCategoryVideos SET VideoStatus = 'Approved' WHERE Id = @id", con);
             cmd.Parameters.AddWithValue("@id", videoId);
             cmd.ExecuteNonQuery();
 
-            // Us subcategory ke saare products ka VideoStatus bhi Approved karo
+            
             var subCmd = new Microsoft.Data.SqlClient.SqlCommand(
                 "SELECT SellerEmail, SubCategory FROM SubCategoryVideos WHERE Id = @id", con);
             subCmd.Parameters.AddWithValue("@id", videoId);
@@ -319,7 +319,7 @@ namespace customerseller.Controllers
             updateProducts.Parameters.AddWithValue("@sub", subCategory);
             updateProducts.ExecuteNonQuery();
 
-            // SellerShops mein bhi ModeratorStatus update karo
+            
             var updateShop = new Microsoft.Data.SqlClient.SqlCommand(
                 @"UPDATE SellerShops 
       SET ModeratorStatus = 'Approved', 
@@ -331,7 +331,7 @@ namespace customerseller.Controllers
             updateShop.Parameters.AddWithValue("@email", sellerEmail);
             updateShop.ExecuteNonQuery();
 
-            // Seller ko email bhejo
+           
             SendEmail(sellerEmail, "Making Video Approved — Artisan Valley",
                 $@"<div style='font-family:sans-serif; max-width:500px; margin:auto;'>
             <h2 style='color:#a64d79;'>Your Making Video is Approved! ✅</h2>
@@ -343,6 +343,41 @@ namespace customerseller.Controllers
 
             return Json(new { success = true });
         }
+
+        private void SyncShopModeratorStatus(Microsoft.Data.SqlClient.SqlConnection con, string sellerEmail)
+        {
+            var cmd = new Microsoft.Data.SqlClient.SqlCommand(
+                "SELECT VideoStatus FROM SubCategoryVideos WHERE SellerEmail = @email", con);
+            cmd.Parameters.AddWithValue("@email", sellerEmail);
+
+            var statuses = new List<string>();
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                    statuses.Add(reader["VideoStatus"].ToString());
+            }
+
+            string aggregateStatus;
+            if (statuses.Any(s => s == "Approved"))
+                aggregateStatus = "Approved";
+            else if (statuses.Count > 0 && statuses.All(s => s == "Rejected"))
+                aggregateStatus = "Rejected";
+            else
+                aggregateStatus = "Pending";
+
+            var updateShop = new Microsoft.Data.SqlClient.SqlCommand(
+                @"UPDATE SellerShops 
+          SET ModeratorStatus = @status,
+              ModeratorEmail = @modEmail,
+              ModeratorReviewedAt = @now
+          WHERE SellerEmail = @email", con);
+            updateShop.Parameters.AddWithValue("@status", aggregateStatus);
+            updateShop.Parameters.AddWithValue("@modEmail", HttpContext.Session.GetString("ModeratorEmail"));
+            updateShop.Parameters.AddWithValue("@now", DateTime.Now);
+            updateShop.Parameters.AddWithValue("@email", sellerEmail);
+            updateShop.ExecuteNonQuery();
+        }
+
         [HttpPost]
         public IActionResult Reject(int videoId, string reason)
         {
@@ -353,14 +388,12 @@ namespace customerseller.Controllers
                 _context.Database.GetConnectionString());
             con.Open();
 
-            // ✅ Reason properly save karo
             var cmd = new Microsoft.Data.SqlClient.SqlCommand(
                 "UPDATE SubCategoryVideos SET VideoStatus = 'Rejected', RejectionReason = @reason WHERE Id = @id", con);
-            cmd.Parameters.AddWithValue("@reason", reason ?? "No reason provided");  // Empty nahi hona chahiye
+            cmd.Parameters.AddWithValue("@reason", reason ?? "No reason provided");
             cmd.Parameters.AddWithValue("@id", videoId);
             cmd.ExecuteNonQuery();
 
-            // Details lo email ke liye
             var getCmd = new Microsoft.Data.SqlClient.SqlCommand(
                 "SELECT SellerEmail, SubCategory FROM SubCategoryVideos WHERE Id = @id", con);
             getCmd.Parameters.AddWithValue("@id", videoId);
@@ -373,7 +406,8 @@ namespace customerseller.Controllers
             }
             reader.Close();
 
-            // Seller ko email bhejo reason ke saath
+            SyncShopModeratorStatus(con, sellerEmail);
+
             try
             {
                 var message = new MimeKit.MimeMessage();
@@ -383,12 +417,12 @@ namespace customerseller.Controllers
                 message.Body = new MimeKit.TextPart("html")
                 {
                     Text = $@"
-            <div style='font-family:sans-serif; max-width:500px; margin:auto;'>
-                <h2 style='color:#dc2626;'>Making Video Rejected ❌</h2>
-                <p>Your making video for <strong>{subCategory}</strong> has been rejected.</p>
-                <p><strong>Reason:</strong> {reason ?? "No reason provided"}</p>
-                <p>Please upload a new video for this sub-category.</p>
-            </div>"
+<div style='font-family:sans-serif; max-width:500px; margin:auto;'>
+    <h2 style='color:#dc2626;'>Making Video Rejected ❌</h2>
+    <p>Your making video for <strong>{subCategory}</strong> has been rejected.</p>
+    <p><strong>Reason:</strong> {reason ?? "No reason provided"}</p>
+    <p>Please upload a new video for this sub-category.</p>
+</div>"
                 };
 
                 using var client = new MailKit.Net.Smtp.SmtpClient();
@@ -504,5 +538,75 @@ namespace customerseller.Controllers
             }
             catch { }
         }
+        [HttpGet]
+        public IActionResult PaymentApprovals()
+        {
+            if (HttpContext.Session.GetString("ModeratorEmail") == null)
+                return RedirectToAction("Login", "Moderator");
+
+            var pending = _context.PaymentSubmissions
+                .Where(p => p.Status == "Pending")
+                .OrderBy(p => p.SubmittedAt)
+                .ToList();
+
+            return View(pending);
+        }
+
+        [HttpPost]
+        public IActionResult ApprovePayment([FromBody] PaymentActionModel model)
+        {
+            var moderatorEmail = HttpContext.Session.GetString("ModeratorEmail");
+            if (moderatorEmail == null)
+                return Json(new { success = false, error = "Unauthorized" });
+
+            var submission = _context.PaymentSubmissions.Find(model.Id);
+            if (submission == null || submission.Status != "Pending")
+                return Json(new { success = false, error = "Submission not found or already reviewed." });
+
+            submission.Status = "Approved";
+            submission.ReviewedAt = DateTime.Now;
+            submission.ReviewedBy = moderatorEmail;
+
+            using var con = new Microsoft.Data.SqlClient.SqlConnection(_context.Database.GetConnectionString());
+            con.Open();
+            var cmd = new Microsoft.Data.SqlClient.SqlCommand(@"
+        UPDATE SellerShops 
+        SET IsPaid = 1, 
+            SubscriptionEnd = DATEADD(MONTH, 1, CASE WHEN SubscriptionEnd < GETDATE() THEN GETDATE() ELSE SubscriptionEnd END)
+        WHERE SellerEmail = @email", con);
+            cmd.Parameters.AddWithValue("@email", submission.SellerEmail);
+            cmd.ExecuteNonQuery();
+
+            _context.SaveChanges();
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public IActionResult RejectPayment([FromBody] PaymentActionModel model)
+        {
+            var moderatorEmail = HttpContext.Session.GetString("ModeratorEmail");
+            if (moderatorEmail == null)
+                return Json(new { success = false, error = "Unauthorized" });
+
+            var submission = _context.PaymentSubmissions.Find(model.Id);
+            if (submission == null || submission.Status != "Pending")
+                return Json(new { success = false, error = "Submission not found or already reviewed." });
+
+            submission.Status = "Rejected";
+            submission.RejectionReason = string.IsNullOrWhiteSpace(model.Reason) ? "No reason provided" : model.Reason;
+            submission.ReviewedAt = DateTime.Now;
+            submission.ReviewedBy = moderatorEmail;
+
+            _context.SaveChanges();
+            return Json(new { success = true });
+        }
+
+        public class PaymentActionModel
+        {
+            public int Id { get; set; }
+            public string? Reason { get; set; }
+        }
+
+
     }
 }

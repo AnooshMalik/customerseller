@@ -344,9 +344,9 @@
         document.getElementById('dropdownSelected').textContent = sub;
         document.getElementById('dropdownList').classList.remove('open');
 
-        // Clipboard mein copy kar do taake seller seedha Excel/video naam mein paste kar sake
+       
         navigator.clipboard.writeText(sub).then(() => {
-            // Chota sa visual feedback
+            
             const el = document.getElementById('dropdownSelected');
             const original = el.textContent;
             el.textContent = `"${sub}" copied!`;
@@ -389,7 +389,7 @@
 
             document.getElementById('spinner').style.display = 'none';
 
-            // Naya result card banayein (purane wale delete nahi honge)
+           
             const entry = document.createElement('div');
             entry.style.marginBottom = '14px';
 
@@ -405,8 +405,8 @@
 
     const box = document.getElementById('resultBox');
     box.style.display = 'block';
-    box.innerHTML = ""; // purane sab result hata do
-    box.appendChild(entry); // sirf naya result dikhao
+    box.innerHTML = ""; 
+    box.appendChild(entry); 
             resetUploadForm();
 
         } catch (e) {
@@ -418,13 +418,13 @@
     function resetUploadForm() {
         document.getElementById('dropdownSelected').textContent = 'View valid Sub-Category names';
 
-        // Excel file reset
+       
         const excelInput = document.getElementById('excelFile');
         excelInput.value = "";
         document.getElementById('excelUploadBox').classList.remove('has-file');
         document.getElementById('excelUploadText').textContent = 'Click to choose Excel file';
 
-        // Video files reset
+      
         const videoInput = document.getElementById('videoFiles');
         videoInput.value = "";
         document.getElementById('videoUploadBox').classList.remove('has-file');

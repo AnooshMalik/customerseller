@@ -21,12 +21,12 @@ namespace customerseller.Controllers
             string complaintType, string priority, string description,
             IFormFile? evidenceFile)
         {
-            // Ticket number generate karo
+            
             var ticket = "CMP-" + new Random().Next(1000, 9999).ToString();
 
             string? imageUrl = null;
 
-            // Evidence image save karo
+            
             if (evidenceFile != null && evidenceFile.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() +
@@ -61,7 +61,7 @@ namespace customerseller.Controllers
             _context.Complaints.Add(complaint);
             _context.SaveChanges();
 
-            // Admin ko email bhejo
+           
             SendEmail(
                 "artisanvalley.store@gmail.com",
                 $"New Complaint Received — {ticket}",
@@ -77,7 +77,7 @@ namespace customerseller.Controllers
                 </div>"
             );
 
-            // Customer ko confirmation email bhejo
+           
             if (!string.IsNullOrEmpty(customerEmail))
             {
                 SendEmail(
@@ -97,7 +97,7 @@ namespace customerseller.Controllers
             return Json(new { success = true, ticket = ticket });
         }
 
-        // Admin complaint forward kare seller ko
+        
         [HttpPost]
         public IActionResult ForwardToSeller(int complaintId, string adminNotes)
         {
@@ -112,8 +112,7 @@ namespace customerseller.Controllers
             complaint.UpdatedAt = DateTime.Now;
             _context.SaveChanges();
 
-            // Seller ko email bhejo
-            // Seller email Products table se dhundho
+            
             var sellerEmail = _context.SellerShops
                 .FirstOrDefault(s => s.ShopName.ToLower() ==
                                 complaint.SellerName.ToLower())?.SellerEmail;
@@ -138,7 +137,7 @@ namespace customerseller.Controllers
             return Json(new { success = true });
         }
 
-        // Seller complaint ka response de
+        
         [HttpPost]
         public async Task<IActionResult> SellerRespond(
             int complaintId, string response, IFormFile? proofImage)
@@ -171,7 +170,7 @@ namespace customerseller.Controllers
             complaint.UpdatedAt = DateTime.Now;
             _context.SaveChanges();
 
-            // Customer ko email bhejo
+           
             if (!string.IsNullOrEmpty(complaint.CustomerEmail))
             {
                 SendEmail(
@@ -190,7 +189,7 @@ namespace customerseller.Controllers
             return Json(new { success = true });
         }
 
-        // Customer confirm kare — resolved ya nahi
+       
         [HttpPost]
         public IActionResult CustomerConfirm(int complaintId, bool isResolved)
         {
@@ -214,7 +213,7 @@ namespace customerseller.Controllers
             return Json(new { success = true });
         }
 
-        // Admin fake mark kare
+       
         [HttpPost]
         public IActionResult MarkFake(int complaintId)
         {
@@ -232,7 +231,7 @@ namespace customerseller.Controllers
             return Json(new { success = true });
         }
 
-        // Admin resolve kare
+        
         [HttpPost]
         public IActionResult AdminResolve(int complaintId, string notes)
         {
@@ -248,7 +247,7 @@ namespace customerseller.Controllers
             complaint.UpdatedAt = DateTime.Now;
             _context.SaveChanges();
 
-            // Customer ko email
+           
             if (!string.IsNullOrEmpty(complaint.CustomerEmail))
             {
                 SendEmail(

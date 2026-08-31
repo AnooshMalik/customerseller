@@ -5,8 +5,8 @@ namespace customerseller.Models
     public class CartItem
     {
         public int Id { get; set; }
-        public string ProductId { get; set; } // Add this
-        public int DisplayId { get; set; }   // Add this
+        public string ProductId { get; set; } 
+        public int DisplayId { get; set; }   
         public string Title { get; set; } = string.Empty;
         [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }

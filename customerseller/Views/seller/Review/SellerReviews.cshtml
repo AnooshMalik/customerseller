@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<customerseller.Models.Review>
 @{
     Layout = "_DashboardLayout";
-    // Average rating ko dynamic calculate karne ke liye
+   
     var avgRating = Model != null && Model.Any() ? Model.Average(r => r.Rating).ToString("0.0") : "0.0";
 }
 <link href="~/seller/css/Dashboard.css" rel="stylesheet" />
@@ -220,7 +220,7 @@
         </div>
         <div class="rating-summary">
             <p class="summary-label">Average Rating</p>
-            @* Hardcoded 4.8 ki jagah ab dynamic value ayegi *@
+           
             <h2 class="summary-score">@avgRating <span class="star-icon">★</span></h2>
         </div>
     </header>

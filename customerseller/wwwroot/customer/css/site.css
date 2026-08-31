@@ -11,7 +11,6 @@ html {
     overflow-x: hidden;
 }
 
-/* 1. TOP BAR - SHOW KARO */
 
 .topbar {
     background: #a64d79;
@@ -205,35 +204,7 @@ html {
         opacity: 1;
     }
 
- /*3. CATEGORY BOXES - PERFECT SPACING ALL AROUND */
-/*.categories {
-    display: grid;
-    grid-template-columns: repeat(3, 200px);
-    gap: 80px 50px;
-    margin: 90px auto 60px auto;
-    justify-content: center;
-    padding: 0 40px;
-}
-
-.category-box {
-    border-radius: 14px;
-    min-height: 90px;
-    width: 190px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    box-shadow: 0 4px 16px rgba(40,30,30,0.12);
-    position: relative;
-    padding: 30px 10px 14px 10px;
-    text-decoration: none;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-*/
-/* Apni CSS file mein isay dhundo ya add karo */
-/* Line 173 ke kareeb */
+ 
 .categories {
     display: flex !important;
     justify-content: center;
@@ -241,19 +212,19 @@ html {
     gap: 25px;
     padding: 20px;
     width: 100%;
-    margin: 80px auto 40px auto; /* Isse slider aur cards mein fasla aayega */
+    margin: 80px auto 40px auto; 
     box-sizing: border-box;
 }
 
 .category-box {
     flex: 1;
-    min-width: 180px; /* Thora chota kiya taake fit aayein */
+    min-width: 180px; 
     max-width: 280px;
     position: relative;
     text-decoration: none;
     transition: transform 0.2s;
     border-radius: 14px;
-    height: 180px; /* Ek fix height di hai */
+    height: 180px; 
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -302,7 +273,6 @@ html {
     opacity: 0.95;
 }
 
-/* NEW: SHOP NOW BUTTON FOR CATEGORIES */
 .category-btn {
     background: #fff;
     color: inherit;
@@ -394,7 +364,7 @@ html {
     transform: scale(1.05);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
-/* ===== CATEGORY CAROUSEL ===== */
+
 .cat-carousel-wrapper-auto {
     overflow: hidden;
     width: 100%;
@@ -471,7 +441,7 @@ html {
 
 .cat-card-sub {
     font-size: 11px;
-    color: #666; /* #888 se change kiya */
+    color: #666; 
     line-height: 1.4;
 }
 .story-section-fixed {
@@ -563,8 +533,6 @@ html {
         box-shadow: 0 6px 16px rgba(0,0,0,0.2);
         color: #6d7a52;
     }
-
-/* 5. TRUST BADGES - WITH SECURE PAYMENT */
 .trust-badges {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -604,7 +572,7 @@ html {
     color: #333;
 }
 
-/* 6. BEST SELLER HEADING - EXTRA BOLD */
+
 .best-seller-heading {
     text-align: center;
     font-size: 2.8rem;
@@ -709,7 +677,6 @@ html {
     text-align: center;
 }
 
-/* NEW: PRODUCT RATING */
 .product-rating {
     font-size: 0.9rem;
     color: #ffc107;
@@ -730,7 +697,7 @@ html {
     text-align: center;
 }
 
-/* NEW: VIEW ALL PRODUCTS BUTTON */
+
 .view-all-btn {
     display: block;
     width: 220px;
@@ -753,7 +720,7 @@ html {
         box-shadow: 0 6px 18px rgba(166,77,121,0.3);
     }
 
-/* TESTIMONIALS SECTION */
+
 .testimonials-section {
     background: #f9f9f9;
     padding: 60px 20px;
@@ -877,14 +844,14 @@ html {
 }
 .footer-social {
     display: flex;
-    gap: 15px; /* Icons ke darmiyan gap */
+    gap: 15px; 
     margin-top: 15px;
     justify-content: flex-start;
 }
 
     .footer-social a {
         color: #fff;
-        font-size: 1.4rem; /* Icons thode bade aur saaf */
+        font-size: 1.4rem; 
         transition: transform 0.2s, opacity 0.2s;
         text-decoration: none;
     }
@@ -896,13 +863,13 @@ html {
         
         .footer-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Automatic adjustment */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
     max-width: 1300px;
     margin: 0 auto;
-    gap: 40px; /* Columns ke darmiyan space */
+    gap: 40px; 
     padding: 0 32px;
 }
-        /* SEARCH SIDEBAR */
+       
 .search-overlay {
     position: fixed;
     top: 0;
@@ -1038,7 +1005,7 @@ html {
     color: #999;
 }
 
-/* LOGIN FORM */
+
 .login-form {
     display: flex;
     flex-direction: column;
@@ -1093,7 +1060,7 @@ html {
             text-decoration: underline;
         }
 
-/* CART SIDEBAR */
+
 .cart-overlay {
     position: fixed;
     top: 0;
@@ -1304,7 +1271,7 @@ html {
     }
 }
 
-/* REGISTER SIDEBAR */
+
 .register-overlay {
     position: fixed;
     top: 0;
@@ -1409,7 +1376,7 @@ html {
     }
 }
 
-/* DROPDOWN MENUS - COMPLETE STYLING */
+
 .dropdown {
     position: relative;
     display: inline-block;
@@ -1524,7 +1491,6 @@ html {
         color: #a64d79;
     }
 
-/* ABOUT AND OTHER PAGES */
 .about-container {
     max-width: 900px;
     margin: 60px auto 0 auto;
@@ -1644,7 +1610,6 @@ html {
         color: #a64d79;
     }
 
-/* RESPONSIVE DESIGN */
 @media (max-width: 968px) {
     .story-content-wrapper {
         grid-template-columns: 2fr;
@@ -1825,12 +1790,12 @@ html {
         padding: 0 12px;
     }
 
-    /* About hide karo */
+    
     .infobar-left a:not(.dropbtn) {
         display: none;
     }
 
-    /* ARTISANS hide karo */
+   
     .infobar-center {
         display: none;
     }
@@ -1885,7 +1850,7 @@ html {
         }
 }
 
-/* ===== REVIEWS SECTION ===== */
+
 .reviews-section {
     max-width: 1100px;
     margin: 50px auto 40px;

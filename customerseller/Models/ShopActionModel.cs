@@ -7,4 +7,16 @@
         public string? Remarks { get; set; }
         public string? Reason { get; set; }
     }
+    public class ProductActionModel
+    {
+        public string Id { get; set; }
+        public string Reason { get; set; }
+    }
+    public class BlockUserModel
+    {
+        public int Id { get; set; }
+        public int? Days { get; set; }
+
+        public string Reason { get; set; }
+    }
 }

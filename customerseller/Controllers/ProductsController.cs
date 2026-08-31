@@ -1,4 +1,4 @@
-﻿using customerseller.Models; // Naye models ka namespace
+﻿using customerseller.Models; 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,26 +24,26 @@ namespace customerseller.Controllers
             _config = config;
         }
 
-        // ===== FABRIC SUB-CATEGORIES =====
+       
         public IActionResult FabricCushionCovers() => CategoryView("CushionCovers", "Cushion Covers");
         public IActionResult FabricKurtas() => CategoryView("PrintedKurtas", "Printed Kurtas");
         public IActionResult FabricDupattas() => CategoryView("TieDyeDupattas", "Tie-Dye Dupattas");
         public IActionResult FabricToteBags() => CategoryView("FabricToteBags", "Tote Bags");
 
-        // ===== WOOL SUB-CATEGORIES =====
+       
         public IActionResult WoolSweaters() => CategoryView("Sweaters", "Sweaters");
         public IActionResult WoolCrochetBags() => CategoryView("CrochetBags", "Crochet Bags");
         public IActionResult WoolStorageBaskets() => CategoryView("StorageBaskets", "Storage Baskets");
         public IActionResult WoolBeanies() => CategoryView("Beanies", "Beanies");
 
-        // ===== LEATHER SUB-CATEGORIES =====
+        
         public IActionResult LeatherHandbags() => CategoryView("LeatherHandbags", "Handbags");
         public IActionResult LeatherWallets() => CategoryView("Wallets", "Wallets");
         public IActionResult LeatherBelts() => CategoryView("Belts", "Belts");
         public IActionResult LeatherKeychains() => CategoryView("LeatherKeychains", "Keychains");
         public IActionResult LeatherJournals() => CategoryView("Journals", "Journals");
 
-        // ===== WOOD SUB-CATEGORIES =====
+        
         public IActionResult WoodPhotoFrames() => CategoryView("PhotoFrames", "Photo Frames");
         public IActionResult WoodNecklaces() => CategoryView("WoodNecklaces", "Necklaces");
         public IActionResult WoodToys() => CategoryView("WoodToys", "Toys");
@@ -51,42 +51,42 @@ namespace customerseller.Controllers
         public IActionResult WoodShowpieces() => CategoryView("WoodShowpieces", "Showpieces");
         public IActionResult WoodKeychains() => CategoryView("WoodKeychains", "Keychains");
 
-        // ===== CLAY SUB-CATEGORIES =====
+        
         public IActionResult ClayFlowerPots() => CategoryView("FlowerPots", "Flower Pots");
         public IActionResult ClayCoffeeMugs() => CategoryView("CoffeeMugs", "Coffee Mugs");
         public IActionResult ClayVases() => CategoryView("ClayVases", "Vases");
         public IActionResult ClayEarrings() => CategoryView("ClayEarrings", "Earrings");
         public IActionResult ClayFigurines() => CategoryView("ClayFigurines", "Figurines");
 
-        // ===== JEWELS SUB-CATEGORIES =====
+        
         public IActionResult JewelsNecklaces() => CategoryView("Necklaces", "Necklaces");
         public IActionResult JewelsBracelets() => CategoryView("Bracelets", "Bracelets");
         public IActionResult JewelsRings() => CategoryView("Rings", "Rings");
         public IActionResult JewelsBangles() => CategoryView("Bangles", "Bangles");
         public IActionResult JewelsEarrings() => CategoryView("JewelEarrings", "Earrings");
 
-        // ===== PAPER SUB-CATEGORIES =====
+       
         public IActionResult PaperGreetingCards() => CategoryView("GreetingCards", "Greeting Cards");
         public IActionResult PaperGiftBoxes() => CategoryView("GiftBoxes", "Gift Boxes");
         public IActionResult PaperFlowers() => CategoryView("PaperFlowers", "Paper Flowers");
         public IActionResult PaperShowpieces() => CategoryView("PaperShowpieces", "Showpieces");
         public IActionResult PaperScrapbooks() => CategoryView("Scrapbooks", "Scrapbooks");
 
-        // ===== JUTE SUB-CATEGORIES =====
+       
         public IActionResult JuteBags() => CategoryView("JuteBags", "Bags");
         public IActionResult JuteBaskets() => CategoryView("Baskets", "Baskets");
         public IActionResult JuteTrays() => CategoryView("Trays", "Trays");
         public IActionResult JuteDriedBouquets() => CategoryView("DriedBouquets", "Dried Bouquets");
         public IActionResult JutePaintings() => CategoryView("Paintings", "Paintings");
 
-        // ===== RESIN SUB-CATEGORIES =====
+        
         public IActionResult ResinCoasters() => CategoryView("Coasters", "Coasters");
         public IActionResult ResinEarrings() => CategoryView("ResinEarrings", "Earrings");
         public IActionResult ResinKeychains() => CategoryView("ResinKeychains", "Keychains");
         public IActionResult ResinWallArt() => CategoryView("WallArt", "Wall Art");
         public IActionResult ResinServingTrays() => CategoryView("ResinServingTrays", "Serving Trays");
 
-        // ===== METAL SUB-CATEGORIES =====
+        
         public IActionResult MetalEarrings() => CategoryView("MetalEarrings", "Earrings");
         public IActionResult MetalVases() => CategoryView("MetalVases", "Vases");
         public IActionResult MetalFigurines() => CategoryView("MetalFigurines", "Figurines");
@@ -117,7 +117,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-        // ===== WOOL & YARN =====
+       
         public IActionResult WoolYarn()
         {
             var products = _context.Products
@@ -129,7 +129,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-        // ===== LEATHER =====
+        
         public IActionResult Leather()
         {
             var products = _context.Products
@@ -142,7 +142,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-        // ===== WOOD =====
+        
         public IActionResult Wood()
         {
             var products = _context.Products
@@ -155,7 +155,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-        // ===== JEWELS =====
+       
         public IActionResult Jewels()
         {
             var products = _context.Products
@@ -168,7 +168,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-        // ===== PAPER & CARDS =====
+       
         public IActionResult PaperCards()
         {
             var products = _context.Products
@@ -181,7 +181,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-        // ===== JUTE & NATURAL =====
+     
         public IActionResult JuteNatural()
         {
             var products = _context.Products
@@ -193,8 +193,6 @@ namespace customerseller.Controllers
             ViewBag.CategoryTitle = "Jute & Natural";
             return View("CategoryPage", products);
         }
-
-        // ===== RESIN & EPOXY =====
         public IActionResult ResinEpoxy()
         {
             var products = _context.Products
@@ -223,7 +221,7 @@ namespace customerseller.Controllers
             var products = _context.Products
                 .Where(p => p.Category == category
                        && p.VideoStatus == "Approved"
-                       && p.IsAdminApproved == true) // ✅ Admin approved bhi check karo
+                       && p.IsAdminApproved == true) 
                 .ToList();
             ViewBag.CategoryTitle = title;
             return View("CategoryPage", products);
@@ -267,61 +265,61 @@ namespace customerseller.Controllers
 
             var categoryMap = new Dictionary<string, string>
     {
-        // Fabric & Textile
+       
         { "fabric", "FabricTextile" }, { "textile", "FabricTextile" },
         { "cushion", "FabricCushionCovers" }, { "cushion cover", "FabricCushionCovers" },
         { "kurta", "FabricKurtas" }, { "kurtas", "FabricKurtas" },
         { "dupatta", "FabricDupattas" }, { "dupattas", "FabricDupattas" },
         { "tote", "FabricToteBags" }, { "tote bag", "FabricToteBags" },
-        // Wool & Yarn
+       
         { "wool", "WoolYarn" }, { "yarn", "WoolYarn" },
         { "sweater", "WoolSweaters" }, { "sweaters", "WoolSweaters" },
         { "crochet", "WoolCrochetBags" }, { "crochet bag", "WoolCrochetBags" },
         { "storage basket", "WoolStorageBaskets" }, { "storage", "WoolStorageBaskets" },
         { "beanie", "WoolBeanies" }, { "beanies", "WoolBeanies" },
-        // Leather
+       
         { "leather", "Leather" },
         { "handbag", "LeatherHandbags" }, { "handbags", "LeatherHandbags" },
         { "wallet", "LeatherWallets" }, { "wallets", "LeatherWallets" },
         { "belt", "LeatherBelts" }, { "belts", "LeatherBelts" },
         { "keychain", "LeatherKeychains" }, { "keychains", "LeatherKeychains" },
         { "journal", "LeatherJournals" }, { "journals", "LeatherJournals" },
-        // Wood
+        
         { "wood", "Wood" },
         { "photo frame", "WoodPhotoFrames" }, { "frame", "WoodPhotoFrames" },
         { "toy", "WoodToys" }, { "toys", "WoodToys" },
         { "serving tray", "WoodServingTrays" }, { "tray", "WoodServingTrays" },
         { "showpiece", "WoodShowpieces" }, { "showpieces", "WoodShowpieces" },
-        // Clay & Pottery
+       
         { "clay", "ClayPottery" }, { "pottery", "ClayPottery" },
         { "flower pot", "ClayFlowerPots" }, { "pot", "ClayFlowerPots" },
         { "coffee mug", "ClayCoffeeMugs" }, { "mug", "ClayCoffeeMugs" },
         { "vase", "ClayVases" }, { "vases", "ClayVases" },
         { "figurine", "ClayFigurines" }, { "figurines", "ClayFigurines" },
-        // Jewels
+       
         { "jewel", "Jewels" }, { "jewelry", "Jewels" }, { "jewels", "Jewels" },
         { "necklace", "JewelsNecklaces" }, { "necklaces", "JewelsNecklaces" },
         { "bracelet", "JewelsBracelets" }, { "bracelets", "JewelsBracelets" },
         { "ring", "JewelsRings" }, { "rings", "JewelsRings" },
         { "bangle", "JewelsBangles" }, { "bangles", "JewelsBangles" },
         { "earring", "JewelsEarrings" }, { "earrings", "JewelsEarrings" },
-        // Paper & Cards
+     
         { "paper", "PaperCards" },
         { "greeting card", "PaperGreetingCards" }, { "card", "PaperGreetingCards" },
         { "gift box", "PaperGiftBoxes" }, { "gift", "PaperGiftBoxes" },
         { "paper flower", "PaperFlowers" },
         { "scrapbook", "PaperScrapbooks" },
-        // Jute & Natural
+       
         { "jute", "JuteNatural" }, { "natural", "JuteNatural" },
         { "bag", "JuteBags" }, { "bags", "JuteBags" },
         { "basket", "JuteBaskets" }, { "baskets", "JuteBaskets" },
         { "bouquet", "JuteDriedBouquets" },
         { "painting", "JutePaintings" }, { "paintings", "JutePaintings" },
-        // Resin & Epoxy
+       
         { "resin", "ResinEpoxy" }, { "epoxy", "ResinEpoxy" },
         { "coaster", "ResinCoasters" }, { "coasters", "ResinCoasters" },
         { "wall art", "ResinWallArt" }, { "wall hanging", "ResinWallArt" },
-        // Metal & Wire
+       
         { "metal", "MetalWire" }, { "wire", "MetalWire" },
         { "candle holder", "MetalCandleHolders" }, { "candle", "MetalCandleHolders" },
 
@@ -332,11 +330,11 @@ namespace customerseller.Controllers
 { "lakri", "Wood" }, { "lakdi", "Wood" },
     };
 
-            // Step 1: Exact match
+            
             if (categoryMap.ContainsKey(query))
                 return RedirectToAction(categoryMap[query]);
 
-            // Step 2: Partial match
+           
             foreach (var key in categoryMap.Keys)
             {
                 if (query.Contains(key) || key.Contains(query))
@@ -385,12 +383,12 @@ namespace customerseller.Controllers
         {
             var email = HttpContext.Session.GetString("UserEmail");
 
-            // Products fetch karo
+            
             var products = _context.Products
                 .Where(p => p.SellerEmail == email)
                 .ToList();
 
-            // Seller ki saari subcategories bhi bhejo
+           
             using var con = new Microsoft.Data.SqlClient.SqlConnection(
                 _context.Database.GetConnectionString());
             con.Open();
@@ -427,22 +425,22 @@ namespace customerseller.Controllers
         [HttpPost]
         public async Task<IActionResult> AddProduct(Product product, IFormFile ImageFile, IFormFile VideoFile)
         {
-            // Seller info session se lo
+           
             product.SellerEmail = HttpContext.Session.GetString("UserEmail");
             product.SellerName = HttpContext.Session.GetString("UserName");
             product.VideoStatus = "Pending";
             product.IsAdminApproved = false;
             product.Id = Guid.NewGuid().ToString();
 
-            // Image save karo
+           
             if (ImageFile != null && ImageFile.Length > 0)
             {
-                // Unique filename banao - spaces remove karo
+                
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
                 var imagePath = Path.Combine(Directory.GetCurrentDirectory(),
                     "wwwroot", "images", fileName);
 
-                // Folder exist karo
+               
                 Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images"));
 
                 using var imageStream = new FileStream(imagePath, FileMode.Create);
@@ -450,7 +448,7 @@ namespace customerseller.Controllers
                 product.ImageUrl = "/images/" + fileName;
             }
 
-            // Video save karo
+           
             if (VideoFile != null && VideoFile.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(VideoFile.FileName);
@@ -463,7 +461,7 @@ namespace customerseller.Controllers
                 await VideoFile.CopyToAsync(videoStream);
                 product.VideoUrl = "/videos/" + fileName;
 
-                // SubCategoryVideos mein bhi save karo
+               
                 using var con2 = new Microsoft.Data.SqlClient.SqlConnection(
                     _context.Database.GetConnectionString());
                 con2.Open();
@@ -484,7 +482,7 @@ namespace customerseller.Controllers
                     insertCmd.ExecuteNonQuery();
                 }
             }
-            // Duplicate check: same seller, same title, price — pichle 30 second ke andar
+            
             var recentDuplicate = _context.Products.FirstOrDefault(p =>
                 p.SellerEmail == product.SellerEmail &&
                 p.Title == product.Title &&
@@ -510,7 +508,7 @@ namespace customerseller.Controllers
 
         }
 
-        // Check karo subcategory ki video hai ya nahi
+        
         public IActionResult CheckSubCategoryVideo(string subCategory)
         {
             var email = HttpContext.Session.GetString("UserEmail");
@@ -601,7 +599,6 @@ namespace customerseller.Controllers
                 .FirstOrDefault(p => p.Id == id && p.SellerEmail == email);
             if (product == null) return NotFound();
 
-            // Seller ki categories fetch karo
             using var con = new Microsoft.Data.SqlClient.SqlConnection(
                 _context.Database.GetConnectionString());
             con.Open();
@@ -677,7 +674,7 @@ namespace customerseller.Controllers
                 return RedirectToAction("UploadSubCategoryVideo", new { subcategory = subcategory });
             }
 
-            // Video save karo
+           
             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(videoFile.FileName);
             var videoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "videos", fileName);
             Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "videos"));
@@ -687,7 +684,7 @@ namespace customerseller.Controllers
                 await videoFile.CopyToAsync(stream);
             }
 
-            // SubCategoryVideos mein update karo
+            
             using var con = new Microsoft.Data.SqlClient.SqlConnection(
                 _context.Database.GetConnectionString());
             con.Open();
@@ -699,7 +696,7 @@ namespace customerseller.Controllers
             cmd.Parameters.AddWithValue("@sub", subcategory);
             cmd.ExecuteNonQuery();
 
-            // Products table bhi reset karo
+            
             var resetProducts = new Microsoft.Data.SqlClient.SqlCommand(
                 @"UPDATE Products 
       SET VideoStatus = 'Pending', 
@@ -724,14 +721,14 @@ namespace customerseller.Controllers
             if (product == null)
                 return RedirectToAction("SellerProduct");
 
-            // Product details update karo
+            
             product.Title = model.Title;
             product.Description = model.Description;
             product.Price = model.Price;
             product.Category = model.Category;
             product.Stock = model.Stock;
 
-            // Naya image agar upload hua to use karo
+           
             if (newImage != null && newImage.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(newImage.FileName);
@@ -746,7 +743,7 @@ namespace customerseller.Controllers
                 product.ImageUrl = "/images/" + fileName;
             }
 
-            // ✅ Admin approval reset karo
+            
             product.IsAdminApproved = false;
             product.AdminRejectionReason = null;
 
@@ -768,7 +765,7 @@ namespace customerseller.Controllers
         {
             var email = HttpContext.Session.GetString("UserEmail");
 
-            // Seller ki allowed subcategories (jo usne shop banate waqt select ki thi)
+           
             using var con = new Microsoft.Data.SqlClient.SqlConnection(
                 _context.Database.GetConnectionString());
             con.Open();
@@ -778,7 +775,7 @@ namespace customerseller.Controllers
             var result = cmd.ExecuteScalar()?.ToString() ?? "";
             var sellerSubCats = result.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
 
-            // Main Category -> seller ki approved SubCategories (sirf non-empty groups)
+           
             var grouped = CategoryMap.MainToSub
                 .Select(kv => new
                 {
@@ -845,7 +842,7 @@ namespace customerseller.Controllers
             ws.Cell(2, 6).Value = "S, M, L";
             ws.Cell(2, 7).Value = "This row is just an example, delete it";
 
-            // Dusri sheet: dropdown ka source (valid subcategories)
+           
             var ws2 = wb.Worksheets.Add("ValidSubCategories");
             ws2.Cell(1, 1).Value = "SubCategory Code";
             ws2.Cell(1, 1).Style.Font.Bold = true;
@@ -858,7 +855,7 @@ namespace customerseller.Controllers
             ws2.Column(1).Width = 30;
             ws2.Visibility = ClosedXML.Excel.XLWorksheetVisibility.VeryHidden;
 
-            // Column D (SubCategory) pe dropdown lagao
+          
             var dataRange = ws.Range("D2:D500");
             var validationSourceRange = $"ValidSubCategories!$A$2:$A${sellerSubCats.Count + 1}";
             dataRange.SetDataValidation().List(validationSourceRange, true);
@@ -872,9 +869,6 @@ namespace customerseller.Controllers
                 "BulkUploadTemplate.xlsx");
         }
 
-        // ---------------------------------------------------------------------------
-        // 3) EXCEL + VIDEOS UPLOAD KARO — actual processing
-        // ---------------------------------------------------------------------------
         [HttpPost]
         public async Task<IActionResult> BulkUpload(IFormFile excelFile, List<IFormFile> videoFiles)
         {
@@ -884,7 +878,7 @@ namespace customerseller.Controllers
             if (excelFile == null || excelFile.Length == 0)
                 return Json(new { success = false, message = "Excel file select karein." });
 
-            // Seller ki allowed subcategories
+           
             using var con = new Microsoft.Data.SqlClient.SqlConnection(
                 _context.Database.GetConnectionString());
             con.Open();
@@ -912,7 +906,7 @@ namespace customerseller.Controllers
 
             var errors = new List<string>();
             var toInsert = new List<Product>();
-            var subCatsHandledThisBatch = new HashSet<string>(); // taake ek subcategory ka video sirf 1 dafa insert ho
+            var subCatsHandledThisBatch = new HashSet<string>(); 
 
             using var excelStream = excelFile.OpenReadStream();
             using var wb = new ClosedXML.Excel.XLWorkbook(excelStream);
@@ -936,9 +930,9 @@ namespace customerseller.Controllers
             for (int row = 2; row <= lastRow; row++)
             {
                 var title = ws.Cell(row, 1).GetString().Trim();
-                if (string.IsNullOrWhiteSpace(title)) continue; // khaali row skip
+                if (string.IsNullOrWhiteSpace(title)) continue; 
 
-                if (title.StartsWith("Example:")) continue; // template ki example row skip
+                if (title.StartsWith("Example:")) continue; 
 
                 var priceCell = ws.Cell(row, 2);
                 var stockCell = ws.Cell(row, 3);
@@ -947,7 +941,7 @@ namespace customerseller.Controllers
                 var sizes = ws.Cell(row, 6).GetString().Trim();
                 var description = ws.Cell(row, 7).GetString().Trim();
 
-                // ---- Validation ----
+                
                 if (!decimal.TryParse(priceCell.GetString(), out var price) || price <= 0)
                 {
                     errors.Add($"Row {row}: Price is invalid.");
@@ -966,14 +960,13 @@ namespace customerseller.Controllers
                     errors.Add($"Row {row}: '{subCategory}' is not a valid SubCategory for your shop.");
                     continue;
                 }
-                subCategory = matchedSubCat; // ✅ ab aage jo bhi ho, correct/canonical naam use hoga
+                subCategory = matchedSubCat; 
                 if (!picturesByRow.ContainsKey(row))
                 {
                     errors.Add($"Row {row}: No picture was inserted in the Image column.");
                     continue;
                 }
 
-                // ---- Video check: kya is subcategory ka video already hai? ----
                 var checkCmd = new Microsoft.Data.SqlClient.SqlCommand(
                     "SELECT COUNT(*) FROM SubCategoryVideos WHERE SellerEmail = @email AND SubCategory = @sub", con);
                 checkCmd.Parameters.AddWithValue("@email", email);
@@ -990,7 +983,7 @@ namespace customerseller.Controllers
                         continue;
                     }
 
-                    // Video save karo
+                   
                     var vFileName = Guid.NewGuid().ToString() + Path.GetExtension(matchedVideo.FileName);
                     var vPath = Path.Combine(videosDir, vFileName);
                     using (var vStream = new FileStream(vPath, FileMode.Create))

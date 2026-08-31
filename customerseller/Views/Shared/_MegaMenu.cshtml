@@ -9,7 +9,7 @@
       <div class="mega-panel">
         <div class="mega-grid">
  
-          <!-- 1. Fabric & Textile -->
+         
           <div class="mega-col">
             <h4 class="mega-heading">Fabric &amp; Textile</h4>
             <ul>
@@ -20,7 +20,7 @@
             </ul>
           </div>
  
-          <!-- 2. Wool & Yarn -->
+          
           <div class="mega-col">
             <h4 class="mega-heading">Wool &amp; Yarn</h4>
             <ul>
@@ -31,7 +31,7 @@
             </ul>
           </div>
  
-          <!-- 3. Leather -->
+         
           <div class="mega-col">
             <h4 class="mega-heading">Leather</h4>
             <ul>
@@ -43,7 +43,7 @@
             </ul>
           </div>
  
-          <!-- 4. Wood -->
+         
           <div class="mega-col">
             <h4 class="mega-heading">Wood</h4>
             <ul>
@@ -56,7 +56,7 @@
             </ul>
           </div>
  
-          <!-- 5. Clay & Pottery -->
+         
           <div class="mega-col">
             <h4 class="mega-heading">Clay &amp; Pottery</h4>
             <ul>
@@ -68,7 +68,7 @@
             </ul>
           </div>
  
-          <!-- 6. Beads & Jewels -->
+         
           <div class="mega-col">
             <h4 class="mega-heading"> Jewels</h4>
             <ul>
@@ -80,7 +80,7 @@
             </ul>
           </div>
  
-          <!-- 7. Paper & Cards -->
+         
           <div class="mega-col">
             <h4 class="mega-heading">Paper &amp; Cards</h4>
             <ul>
@@ -92,7 +92,7 @@
             </ul>
           </div>
  
-          <!-- 8. Jute & Natural -->
+         
           <div class="mega-col">
             <h4 class="mega-heading">Jute &amp; Natural</h4>
             <ul>
@@ -104,7 +104,7 @@
             </ul>
           </div>
  
-          <!-- 9. Resin & Epoxy -->
+
           <div class="mega-col">
             <h4 class="mega-heading">Resin &amp; Epoxy</h4>
             <ul>
@@ -116,7 +116,7 @@
             </ul>
           </div>
  
-          <!-- 10. Metal & Wire -->
+         
           <div class="mega-col" style="border-right:none;">
             <h4 class="mega-heading">Metal &amp; Wire</h4>
             <ul>
@@ -152,7 +152,7 @@
     border-bottom: 2px solid #a64d79;
     box-shadow: 0 6px 20px rgba(0,0,0,0.08);
  
-    /* ✅ HEIGHT FIX — sirf content jitni height, puri screen nahi */
+   
     height: auto !important;
     max-height: none !important;
     overflow: visible !important;
@@ -162,25 +162,25 @@
  
 .mega-grid {
   display: grid;
-  /* ✅ FIX 2: Last column clip nahi hoga */
+ 
   grid-template-columns: repeat(10, minmax(0, 1fr));
   padding: 10px 20px 14px;
   gap: 0;
   width: 100%;
-  box-sizing: border-box;  /* ✅ padding andar rahegi */
+  box-sizing: border-box;  
   height: auto;
   align-items: start;
-  overflow: visible;       /* ✅ koi clip nahi */
+  overflow: visible;       
 }
 
  
   .mega-col {
   padding: 0 8px;
   border-right: 1px solid #f0f0f0;
-  min-width: 0;            /* ✅ FIX 3: overflow rokta hai */
+  min-width: 0;           
   height: auto;
   align-self: start;
-  overflow: hidden;        /* ✅ text bahar nahi jayega */
+  overflow: hidden;       
 }
   .mega-col:first-child { padding-left: 0; }
   .mega-col:last-child  { padding-right: 0; border-right: none; }
@@ -231,7 +231,7 @@
     box-shadow: none !important;
   }
 
-  /* ✅ FIXES - Neeche add karo, kuch delete mat karo */
+  
 .mega-panel .mega-link {
   display: block !important;
   font-size: 0.72rem !important;
@@ -271,7 +271,7 @@ body.menu-open {
 }
  
   body.menu-open { overflow: hidden; }
-    /* ===== MOBILE RESPONSIVE FIX FOR MEGA MENU ===== */
+    
     @@media (max-width: 768px) {
         .mega-panel {
             max-height: 75vh !important;
@@ -316,7 +316,7 @@ body.menu-open {
   megaItem.addEventListener('mouseenter', () => {
     clearTimeout(hideTimer);
  
-    // ✅ Navbar ke neeche bilkul sahi position
+   
     const navbarEl = megaItem.closest('header') || megaItem.closest('nav');
     if (navbarEl) {
       const rect = navbarEl.getBoundingClientRect();
@@ -325,7 +325,7 @@ body.menu-open {
       megaPanel.style.left   = '0';
       megaPanel.style.right  = '0';
       megaPanel.style.width  = '100%';
-      megaPanel.style.height = 'auto';        // ✅ height auto rakhein
+      megaPanel.style.height = 'auto';       
     }
  
     megaPanel.classList.add('active');

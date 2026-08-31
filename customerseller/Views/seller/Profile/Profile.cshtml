@@ -1,7 +1,7 @@
 ﻿@model customerseller.Models.UserProfile
 @{
     Layout = "_Dashboardlayout";
-    // Agar FullName null ho toh "User" dikhaye, warna pehla harf
+    
     var initial = !string.IsNullOrEmpty(Model?.FullName) ? Model.FullName.Substring(0, 1).ToUpper() : "U";
 }
 <link href="~/dashboard.css" rel="stylesheet" />
@@ -178,7 +178,6 @@
         text-decoration: none;
     }
 
-    /* Modal */
     .modal-overlay {
         display: none;
         position: fixed;
@@ -395,7 +394,7 @@
                 </div>
             </div>
 
-            <!-- Categories alag section mein -->
+          
             <div style="background:#f5f3ff; border-radius:12px; padding:16px 20px; border:1px solid #ede9fe; margin-bottom:22px;">
                 <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#8b5cf6; margin-bottom:10px;">
                     Categories
@@ -431,7 +430,7 @@
     </div>
 </div>
 
-@* Edit Modal Section *@
+
 <div id="editModal" class="modal-overlay">
     <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
         <div class="modal-header">
@@ -465,7 +464,7 @@
                 <input type="text" asp-for="Phone" class="form-input" placeholder="e.g. 923001234567">
             </div>
 
-            <!-- ===== Categories & Subcategories Section ===== -->
+         
             <div class="form-group">
                 <label><i class="fas fa-tags"></i> Categories &amp; Subcategories</label>
                 <p style="font-size:0.75rem; color:#6b7280; margin:-4px 0 10px;">
@@ -482,7 +481,7 @@
 
                 <input type="hidden" asp-for="Categories" id="categoriesInput" />
             </div>
-            <!-- ===== End Categories Section ===== -->
+
 
             <div class="modal-footer">
                 <button type="button" class="cancel-btn" onclick="closeModal()">Discard</button>
@@ -500,7 +499,7 @@
     function closeModal() {
         document.getElementById('editModal').classList.remove('active');
     }
-    // Same map as AddProduct page — keep in sync if you add new categories there
+   
     const subCategoryMap = {
         'FabricTextile': { label: '🧵 Fabric & Textile', subs: [
             { val: 'CushionCovers', label: 'Cushion Covers' },
@@ -583,7 +582,7 @@
         ]}
     };
 
-    // Seller ki already selected subcategories (Model.Categories se aayi hui)
+  
     let selectedSubs = new Set(
         "@Html.Raw(Model?.Categories ?? "")".split(',').map(s => s.trim()).filter(s => s.length > 0)
     );
@@ -661,7 +660,6 @@
         document.getElementById('categoriesInput').value = Array.from(selectedSubs).join(',');
     }
 
-    // Initial render
     syncHiddenInput();
     renderMainTabs();
     renderPreview();

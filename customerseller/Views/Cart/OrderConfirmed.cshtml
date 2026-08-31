@@ -175,7 +175,6 @@
     }
 </style>
 
-<!-- COMPLAINT MODAL -->
 <div class="modal-overlay" id="complaintModal">
   <div class="modal-box">
     <div class="modal-header">
@@ -259,7 +258,7 @@
   </div>
 </div>
 
-<!-- PAGE CONTENT -->
+
 <div class="confirmation-container">
     <div class="success-icon">✓</div>
     <h1>Order Confirmed!</h1>
@@ -290,17 +289,26 @@
             <div><strong>Total Amount:</strong> Rs. @total.ToString("N0")</div>
         </div>
     }
+    else
+{
+    <div style="padding: 30px 20px; background:#f9f9f9; border-radius:8px; margin: 20px 0; text-align:center;">
+        <p style="color:#888; font-size:1rem; margin:0;">No order placed yet.</p>
+    </div>
+}
+        <div id="orderHistoryContainer"></div>
 
-    <div id="orderHistoryContainer"></div>
-    <button onclick="goToTracking()" class="btn-track">
-        🔍 Track Your Order
-    </button>
+    @if (Model != null)
+    {
+        <button onclick="goToTracking()" class="btn-track">
+            🔍 Track Your Order
+        </button>
 
-    <a href="/Cart/Complaint?orderId=@orderId&amount=@total.ToString("N0")"
-       class="btn-track"
-       style="background:#fff; color:#c0392b; border:2px solid #e74c3c; margin-top:10px; display:block; text-align:center; text-decoration:none; padding:15px; border-radius:8px; font-weight:bold;">
-        🚩 File a Complaint
-    </a>
+        <a href="/Cart/Complaint?orderId=@orderId&amount=@total.ToString("N0")"
+           class="btn-track"
+           style="background:#fff; color:#c0392b; border:2px solid #e74c3c; margin-top:10px; display:block; text-align:center; text-decoration:none; padding:15px; border-radius:8px; font-weight:bold;">
+            🚩 File a Complaint
+        </a>
+    }
 </div>
 
 <script>
@@ -431,7 +439,7 @@ async function submitComplaint() {
         return;
     }
 
-    // Priority get karo
+    
     const activePrio = document.querySelector('.p-btn.active');
     const priority = activePrio ? activePrio.textContent.trim().replace(/[^a-zA-Z]/g, '') : 'Medium';
 

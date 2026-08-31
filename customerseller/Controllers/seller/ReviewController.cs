@@ -16,7 +16,6 @@ namespace customerseller.Controllers.seller
             _conn = config.GetConnectionString("DefaultConnection")!;
         }
 
-        // ==================== CUSTOMER SIDE ACTIONS ====================
         [HttpPost]
         public IActionResult Submit(Review review)
         {
@@ -24,7 +23,7 @@ namespace customerseller.Controllers.seller
             {
                 con.Open();
 
-                // Pehle product se SellerEmail nikalo
+               
                 var sellerCmd = new SqlCommand(
                     "SELECT SellerEmail FROM Products WHERE Id = @pid", con);
                 sellerCmd.Parameters.AddWithValue("@pid", review.ProductId ?? "");

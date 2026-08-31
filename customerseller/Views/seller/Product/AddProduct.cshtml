@@ -207,22 +207,30 @@
                 <input type="text" name="sizes" placeholder="e.g. S, M, L, XL" />
             </div>
             <div class="form-group">
-                <label>Color (optional)</label>
-                <select name="Color">
-                    <option value="">-- Select Color --</option>
-                    <option value="red">Red</option>
-                    <option value="orange">Orange</option>
-                    <option value="yellow">Yellow</option>
-                    <option value="green">Green</option>
-                    <option value="blue">Blue</option>
-                    <option value="purple">Purple</option>
-                    <option value="pink">Pink</option>
-                    <option value="brown">Brown</option>
-                    <option value="grey">Grey</option>
-                    <option value="black">Black</option>
-                    <option value="white">White</option>
-                    <option value="beige">Beige</option>
-                </select>
+                <label>Color (optional — select all that apply)</label>
+                <div id="colorCheckGrid" style="display:flex; flex-wrap:wrap; gap:10px; padding:10px; border:1.5px solid #e0e0e0; border-radius:10px; background:#fafafa;">
+                    @{
+                        var colorOptions = new (string Name, string Hex)[]
+                        {
+                ("Red", "#dc2626"), ("Orange", "#f97316"), ("Yellow", "#eab308"),
+                ("Green", "#16a34a"), ("Blue", "#2563eb"), ("Purple", "#7c3aed"),
+                ("Pink", "#ec4899"), ("Brown", "#8B4513"), ("Grey", "#808080"),
+                ("Black", "#1a1a1a"), ("White", "#ffffff"), ("Beige", "#e8dcc8"),
+                ("Cream", "#fdf6e3"), ("Peach", "#ffcba4"), ("Gold", "#d4af37"),
+                ("Silver", "#c0c0c0"), ("Navy", "#1e3a8a"), ("Maroon", "#7f1d1d"),
+                ("Tan", "#D2691E"), ("Walnut Brown", "#5D4037")
+                        };
+                    }
+                    @foreach (var c in colorOptions)
+                    {
+                        <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.82rem; color:#333; background:#fff; padding:6px 10px; border-radius:8px; border:1px solid #eee;">
+                            <input type="checkbox" class="colorCheckbox" value="@c.Name" onchange="updateColorField()" />
+                            <span style="width:16px; height:16px; border-radius:50%; background:@c.Hex; border:1px solid #ccc; display:inline-block;"></span>
+                            @c.Name
+                        </label>
+                    }
+                </div>
+                <input type="hidden" name="Color" id="ColorHidden" />
             </div>
         </div>
 
@@ -241,7 +249,7 @@
                 <img id="imgPreview" class="preview-img" style="max-height:120px; border-radius:8px; margin-top:10px; display:none;">
             </div>
         </div>
-        <!-- Video Section — conditionally shown -->
+       
         <div id="videoSection" class="form-group">
             <label>Making Video <span class="required">*</span></label>
             <div id="videoStatusMsg"></div>
@@ -387,7 +395,7 @@
 
         videoSection.style.display = 'block';
 
-        // Check karo video already uploaded hai ya nahi
+
         const res = await fetch('/Products/CheckSubCategoryVideo?subCategory=' + subCat);
         const data = await res.json();
 
@@ -410,7 +418,10 @@
             videoFileInput.setAttribute('required', 'required');
         }
     }
-
+    function updateColorField() {
+    const checked = Array.from(document.querySelectorAll('.colorCheckbox:checked')).map(cb => cb.value);
+    document.getElementById('ColorHidden').value = checked.join(', ');
+}
         function previewImage(input) {
         const preview = document.getElementById('imgPreview');
         const icon = document.getElementById('imageIcon');
@@ -440,7 +451,7 @@
         const videoUploadBox = document.getElementById('videoUploadBox');
         const videoFile = document.getElementById('videoFile');
 
-        // Agar video section visible hai aur upload box dikh raha hai
+       
         if (videoSection.style.display === 'block' &&
             videoUploadBox.style.display !== 'none') {
 
@@ -460,7 +471,7 @@
     async function saveAndAddMore() {
     const form = document.getElementById('productForm');
     
-    // Basic validation
+    
     const title = form.querySelector('input[name="Title"]').value.trim();
     const price = form.querySelector('input[name="Price"]').value.trim();
     const stock = form.querySelector('input[name="Stock"]').value.trim();
@@ -473,7 +484,7 @@
     if (!subCat) { alert('Please select sub category!'); return; }
     if (!imageFile) { alert('Please upload product image!'); return; }
 
-// Video check
+
 const videoSection = document.getElementById('videoSection');
 const videoUploadBox = document.getElementById('videoUploadBox');
 const videoFile = document.getElementById('videoFile');
@@ -504,13 +515,13 @@ if (videoSection.style.display === 'block' &&
         });
 
         if (res.ok || res.redirected) {
-            // Form reset
+           
             form.reset();
             document.getElementById('imgPreview').style.display = 'none';
             document.getElementById('videoSection').style.display = 'none';
             document.getElementById('subCategory').innerHTML = '<option value="">-- Select Main Category First --</option>';
             
-            // Toast show karo
+
             const toast = document.getElementById('toastMsg');
             toast.style.display = 'block';
             setTimeout(() => toast.style.display = 'none', 3000);
@@ -522,23 +533,22 @@ if (videoSection.style.display === 'block' &&
     btn.innerHTML = '<i class="fa-solid fa-plus"></i> Add More Product';
     btn.disabled = false;
 }
-    // Page load pe seller ki categories fetch karo
+   
 document.addEventListener('DOMContentLoaded', async function() {
     const res = await fetch('/Products/GetSellerCategories');
     const data = await res.json();
     
     if (data.categories && data.categories.length > 0) {
-        // Main category dropdown mein sirf seller ki categories dikhao
+        
         const mainCatSelect = document.getElementById('mainCategory');
         const allOptions = mainCatSelect.querySelectorAll('option');
         
         allOptions.forEach(opt => {
-            if (opt.value === '') return; // placeholder rakho
-            // Check karo koi bhi seller ki subcategory is main category se match karti hai
+            if (opt.value === '') return; 
             const subCats = subCategoryMap[opt.value] || [];
             const hasMatch = subCats.some(sc => data.categories.includes(sc.val));
             if (!hasMatch) {
-                opt.style.display = 'none'; // hide karo jo seller ki nahi
+                opt.style.display = 'none'; 
             }
         });
     }

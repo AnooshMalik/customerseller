@@ -745,9 +745,7 @@
                 cwLoadConversations();
                 cwConvId = null;
             };
-
-            // ---- Unified bot conversation (Khaadi-style) ----
-            function cwBotBox() {
+ function cwBotBox() {
                 return document.getElementById('cwBotMessages');
             }
 
@@ -872,8 +870,7 @@
                 }, 250);
             }
 
-            // Free text typed into the persistent bot input bar
-            window.cwBotSend = function() {
+             window.cwBotSend = function() {
                 const input = document.getElementById('cwBotInput');
                 const text = input.value.trim();
                 if (!text) return;
@@ -884,7 +881,6 @@
                 }, 300);
             };
 
-            // ---- Seller selection (for real chats) ----
             window.cwOpenSellerSelect = async function() {
                 document.getElementById('cwNewChatModal').classList.add('show');
                 const res = await fetch('/Chat/GetChatPartners');
@@ -926,7 +922,6 @@
             window.cwLoadConversations = async function() {
                 const res = await fetch('/Chat/GetConversations');
                 let data = await res.json();
-                // Customers should never see Moderator conversations in this widget
                 data = data.filter(c => c.otherRole !== 'Moderator');
                 const list = document.getElementById('cwConvList');
                 if (!data.length) {
@@ -965,8 +960,7 @@
                 const box = document.getElementById('cwMessages');
                 box.innerHTML = messages.map(cwBubble).join('');
                 box.scrollTop = box.scrollHeight;
-                // Only show "Seen" if the server confirms the other person already read it
-                cwUpdateSeenIndicatorFromData();
+                 cwUpdateSeenIndicatorFromData();
             };
 
             function cwBubble(m) {
@@ -976,7 +970,6 @@
                                         </div>`;
             }
 
-            // Used right after loading messages from the server - trusts the real isRead flag
             function cwUpdateSeenIndicatorFromData() {
                 document.querySelectorAll('#cwMessages .cw-seen-tag').forEach(el => el.remove());
                 const mine = document.querySelectorAll('#cwMessages .cw-bubble[data-mine="true"]');
@@ -987,8 +980,7 @@
                 }
             }
 
-            // Used when a live "MessagesSeen" event confirms the other person just read it
-            function cwMarkLastMineSeenNow() {
+             function cwMarkLastMineSeenNow() {
                 document.querySelectorAll('#cwMessages .cw-seen-tag').forEach(el => el.remove());
                 const mine = document.querySelectorAll('#cwMessages .cw-bubble[data-mine="true"]');
                 if (mine.length) {
@@ -1018,7 +1010,6 @@
                     if (msg.conversationId === cwConvId) {
                         const box = document.getElementById('cwMessages');
                         const isMine = msg.senderEmail === cwCurrentEmail;
-                        // Remove any old "Seen" tag - a brand new message hasn't been seen yet
                         document.querySelectorAll('#cwMessages .cw-seen-tag').forEach(el => el.remove());
                         box.insertAdjacentHTML('beforeend', cwBubble({ ...msg, isMine, isRead: false }));
                         box.scrollTop = box.scrollHeight;
@@ -1031,7 +1022,6 @@
                     cwLoadUnread();
                 });
                 cwConnection.on('MessagesSeen', (data) => {
-                    // Fires only when the OTHER person actually opened the chat and read it
                     if (data.conversationId === cwConvId && data.seenBy !== cwCurrentEmail) {
                         cwMarkLastMineSeenNow();
                     }
@@ -1041,11 +1031,9 @@
             }
 
             async function cwLoadUnread() {
-                // Unread badge disabled - kept as no-op in case it's needed again later
-            }
+                 }
 
-            // Support for the "open param" coming from product pages - jumps straight to My Chats
-            document.addEventListener('DOMContentLoaded', function() {
+               document.addEventListener('DOMContentLoaded', function() {
                 const params = new URLSearchParams(window.location.search);
                 const openId = params.get('openChat');
                 if (openId && cwCurrentEmail) {

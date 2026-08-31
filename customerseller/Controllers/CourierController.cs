@@ -15,7 +15,7 @@ namespace customerseller.Controllers
             _context = context;
         }
 
-        // ─── LOGIN ───────────────────────────────────────────────
+       
         [HttpGet]
         public IActionResult Login()
         {
@@ -256,7 +256,7 @@ namespace customerseller.Controllers
             return RedirectToAction("Login");
         }
 
-        // ─── DASHBOARD ───────────────────────────────────────────
+       
         [HttpGet]
         public IActionResult Dashboard()
         {
@@ -291,7 +291,7 @@ namespace customerseller.Controllers
             order.Status = "Shipped";
             order.LastUpdatedAt = DateTime.Now;
 
-            // TrackingTimeline update karo
+            
             var shippedStep = order.TrackingTimeline?.FirstOrDefault(s => s.Status == "Shipped");
             if (shippedStep != null)
             {
@@ -322,7 +322,7 @@ namespace customerseller.Controllers
             order.PaymentNotReceivedReason = paymentReceived ? null : reason;
             order.Status = paymentReceived ? "Delivered" : "Delivered - Payment Issue";
 
-            // TrackingTimeline update karo
+           
             var outForDelivery = order.TrackingTimeline?.FirstOrDefault(s => s.Status == "Out for Delivery");
             if (outForDelivery != null)
             {
@@ -341,7 +341,7 @@ namespace customerseller.Controllers
 
             _context.SaveChanges();
 
-            // Email notification
+           
             try
             {
                 var statusMsg = paymentReceived

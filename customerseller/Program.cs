@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using customerseller.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
-
 builder.Services.AddControllersWithViews();
+
 builder.Services.AddSignalR();
 builder.Services.AddAntiforgery(options => {
     options.HeaderName = "X-CSRF-TOKEN";

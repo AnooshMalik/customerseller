@@ -18,11 +18,10 @@ function trackMyOrder(orderId) {
     area.style.display = 'block';
     trackId.textContent = orderId;
 
-    // Sab steps reset karo
+    
     document.getElementById('step-placed').classList.remove('active');
     document.getElementById('step-shipped').classList.remove('active');
     document.getElementById('step-delivered').classList.remove('active');
 
-    // Default — Placed active karo
     document.getElementById('step-placed').classList.add('active');
 }

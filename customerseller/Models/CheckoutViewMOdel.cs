@@ -4,12 +4,12 @@ namespace customerseller.Models
 {
     public class CheckoutViewModel
     {
-        // Contact Information
+       
         [Required(ErrorMessage = "Mobile number is required")]
         [RegularExpression(@"^03\d{9}$", ErrorMessage = "Please enter a valid mobile number")]
         public string Email { get; set; }
 
-        // Delivery Information
+        
         public string Country { get; set; } = "Pakistan";
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -19,10 +19,10 @@ namespace customerseller.Models
         public string? PostalCode { get; set; }
         public bool SaveInformation { get; set; }
 
-        // Payment Information
+        
         public string PaymentMethod { get; set; } = "COD";
 
-        // Cart Summary
+        
         public List<CartItem> CartItems { get; set; } = new List<CartItem>();
         public decimal Subtotal { get; set; }
         public decimal ShippingCost { get; set; }

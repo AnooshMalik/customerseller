@@ -259,16 +259,16 @@
     <h1 class="cart-page-title">Shopping Cart</h1>
 
     <div class="cart-content-wrapper">
-        <!-- Cart Items -->
+       
         <div class="cart-items-section" id="cartItemsPage">
-            <!-- Items will be loaded here by JavaScript -->
+
         </div>
 
-        <!-- Cart Summary -->
+       
         <div class="cart-summary-section">
             <h2 class="summary-title">Order Summary</h2>
             <div id="cartSummaryPage">
-                <!-- Summary will be loaded here by JavaScript -->
+               
             </div>
         </div>
     </div>
@@ -311,7 +311,7 @@
 
             itemsDiv.innerHTML = html;
             summaryDiv.innerHTML = '<div class="summary-row"><span>Subtotal:</span><span>Rs.' + subtotal + '</span></div>'
-                + '<div class="summary-row"><span>Shipping:</span><span style="color:green">FREE</span></div>'
+                + '<div class="summary-row"><span>Shipping:</span><span style="color:#888; font-size:0.85rem;">Calculated at checkout</span></div>'
                 + '<div class="summary-row total"><span>Total:</span><span>Rs.' + subtotal + '</span></div>'
                 + '<button class="checkout-btn-page" onclick="location.href=\'/Cart/Checkout\'">Proceed to Checkout</button>'
                 + '<a href="/" class="continue-shopping">Continue Shopping</a>';

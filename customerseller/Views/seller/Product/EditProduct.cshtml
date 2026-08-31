@@ -168,7 +168,6 @@
             </div>
             <div class="form-group">
                 <label>Sizes (optional)</label>
-                @* FIX: was @Model.sizes — C# properties are case-sensitive, correct is @Model.Sizes *@
                 <input type="text" name="Sizes" value="@Model.Sizes" placeholder="e.g. S, M, L, XL" />
             </div>
         </div>
@@ -224,7 +223,6 @@
     </form>
 </div>
 
-@* FIX: script moved OUTSIDE the form div and @@ replaced with plain @ inside script tags *@
 <script>
     var subCategoryMap = {
         'FabricTextile': [
@@ -309,8 +307,6 @@
     };
 
     var currentSubCat = '@Model.Category';
-
-    @* FIX: Html.Raw with JsonSerializer is fine here — this is a Razor comment, not inside @{} block *@
     var sellerCats = @Html.Raw(
                 System.Text.Json.JsonSerializer.Serialize(
                         ViewBag.SellerCategories ?? new System.Collections.Generic.List<string>()

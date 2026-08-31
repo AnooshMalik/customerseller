@@ -20,7 +20,7 @@ namespace customerseller.Controllers
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Login", "Account");
 
-            // Seller ka shop name nikalo
+           
             var shop = _context.SellerShops.FirstOrDefault(s => s.SellerEmail == email);
             string sellerName = shop?.ShopName ?? "";
 
@@ -78,7 +78,6 @@ namespace customerseller.Controllers
             complaint.UpdatedAt = DateTime.Now;
             _context.SaveChanges();
 
-            // Admin ko notify karo
             SendEmail(
                 "artisanvalley.store@gmail.com",
                 $"Seller Responded — {complaint.TicketNumber}",

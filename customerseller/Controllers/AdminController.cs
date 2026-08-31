@@ -18,11 +18,11 @@ namespace customerseller.Controllers
             _context = context;
         }
 
-        // GET: Admin Login Page
+        
         [HttpGet]
         public IActionResult Login()
         {
-            // Agar already logged in hai
+            
             if (HttpContext.Session.GetString("AdminEmail") != null)
                 return RedirectToAction("Dashboard");
             return View();
@@ -77,7 +77,7 @@ namespace customerseller.Controllers
             TempData["AdminError"] = "Invalid email or password.";
             return View();
         }
-        // GET: OTP Page
+      
         [HttpGet]
         public IActionResult Otp()
         {
@@ -86,7 +86,7 @@ namespace customerseller.Controllers
             return View();
         }
 
-        // POST: OTP Verify
+        
         [HttpPost]
         public IActionResult Otp(string otp)
         {
@@ -109,11 +109,11 @@ namespace customerseller.Controllers
             if (otp == savedOtp)
             {
                 HttpContext.Session.Clear();
-                // OTP sahi — Admin session set karo
+               
                 HttpContext.Session.SetString("AdminEmail", "artisanvalley.store@gmail.com");
                 HttpContext.Session.SetString("AdminRole", "Admin");
 
-                // OTP clear karo
+                
                 HttpContext.Session.Remove("AdminOtp");
                 HttpContext.Session.Remove("AdminOtpExpiry");
                 HttpContext.Session.Remove("AdminEmailPending");
@@ -124,7 +124,7 @@ namespace customerseller.Controllers
             TempData["OtpError"] = "Invalid OTP. Please try again.";
             return View();
         }
-        // POST: Resend OTP
+       
         [HttpPost]
         public IActionResult ResendOtp()
         {
@@ -168,7 +168,7 @@ namespace customerseller.Controllers
 
             return Json(new { success = true });
         }
-        // GET: Dashboard
+        
         [HttpGet]
         public IActionResult Dashboard()
         {
@@ -265,7 +265,7 @@ namespace customerseller.Controllers
             return RedirectToAction("Login");
         }
 
-        // GET: Pending Products
+        
         public IActionResult GetPendingProducts()
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
@@ -303,7 +303,7 @@ namespace customerseller.Controllers
             return Json(products);
         }
 
-        // POST: Approve Product
+       
         [HttpPost]
         public IActionResult ApproveProduct(string id)
         {
@@ -324,7 +324,7 @@ namespace customerseller.Controllers
             return Json(new { success = true });
         }
 
-        // POST: Reject Product
+       
         [HttpPost]
         public IActionResult RejectProduct(string id, string reason)
         {
@@ -345,7 +345,7 @@ namespace customerseller.Controllers
             return Json(new { success = true });
         }
 
-        // GET: Stats
+        
         public IActionResult GetStats()
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
@@ -361,7 +361,7 @@ namespace customerseller.Controllers
             return Json(stats);
         }
 
-        // GET: All Users
+        
         public IActionResult GetUsers()
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
@@ -379,7 +379,7 @@ namespace customerseller.Controllers
             return Json(users);
         }
 
-        // GET: All Sellers
+       
         public IActionResult GetSellers()
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
@@ -397,7 +397,7 @@ namespace customerseller.Controllers
             return Json(sellers);
         }
 
-        // GET: All Products
+        
         public IActionResult GetProducts()
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
@@ -413,8 +413,6 @@ namespace customerseller.Controllers
             return Json(products);
         }
 
-        // GET: All Orders
-        // GET: All Orders
         public IActionResult GetOrders()
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
@@ -430,10 +428,8 @@ namespace customerseller.Controllers
     }).ToList();
             return Json(orders);
         }
-
-        // POST: Block User
         [HttpPost]
-        public IActionResult BlockUser([FromBody] ShopActionModel model)
+        public IActionResult BlockUser([FromBody] BlockUserModel model)
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
                 return Json(new { error = "Unauthorized" });
@@ -441,26 +437,49 @@ namespace customerseller.Controllers
             var user = _context.Users.Find(model.Id);
             if (user == null) return Json(new { error = "User not found" });
 
-            _context.Users.Remove(user);
+            user.IsBlocked = true;
+            user.BlockReason = model.Reason;
+
+            if (model.Days.HasValue && model.Days.Value > 0)
+                user.BlockExpiry = DateTime.Now.AddDays(model.Days.Value);
+            else
+                user.BlockExpiry = null;
+
             _context.SaveChanges();
             return Json(new { success = true });
         }
 
-        // POST: Remove Product
         [HttpPost]
-        public IActionResult RemoveProduct([FromBody] ShopActionModel model)
+        public IActionResult UnblockUser([FromBody] BlockUserModel model)
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
                 return Json(new { error = "Unauthorized" });
 
-            var product = _context.Products.FirstOrDefault(p => p.Id == model.Id.ToString());
+            var user = _context.Users.Find(model.Id);
+            if (user == null) return Json(new { error = "User not found" });
+
+            user.IsBlocked = false;
+            user.BlockExpiry = null;
+            user.BlockReason = null;
+            _context.SaveChanges();
+            return Json(new { success = true });
+        }
+        [HttpPost]
+        public IActionResult RemoveProduct([FromBody] ProductActionModel model)
+        {
+            if (HttpContext.Session.GetString("AdminEmail") == null)
+                return Json(new { error = "Unauthorized" });
+
+            if (string.IsNullOrEmpty(model?.Id))
+                return Json(new { error = "Invalid product id" });
+
+            var product = _context.Products.FirstOrDefault(p => p.Id == model.Id);
             if (product == null) return Json(new { error = "Product not found" });
 
             _context.Products.Remove(product);
             _context.SaveChanges();
             return Json(new { success = true });
         }
-
 
         [HttpGet]
         public IActionResult ForgotPassword()
@@ -543,7 +562,7 @@ namespace customerseller.Controllers
                 return RedirectToAction("Login");
             }
 
-            admin.Password = newPassword; // plain text — same as current system
+            admin.Password = newPassword; 
             admin.ResetToken = null;
             admin.ResetTokenExpiry = null;
             _context.SaveChanges();
@@ -570,13 +589,10 @@ namespace customerseller.Controllers
             var shop = _context.SellerShops.Find(model.Id);
             if (shop == null) return Json(new { error = "Not found" });
 
-            // ✅ NAYA CHECK: Moderator approve kiye bina admin approve nahi kar sakta
-            if (shop.ModeratorStatus != "Approved")
-            {
-                return Json(new { error = "Cannot approve — waiting for Moderator approval first." });
-            }
-
             shop.IsApproved = true;
+            shop.AdminStatus = "Approved";
+            shop.ApprovedAt = DateTime.Now;
+            _context.SaveChanges();
             shop.AdminStatus = "Approved";
             shop.ApprovedAt = DateTime.Now;
             _context.SaveChanges();
@@ -646,7 +662,7 @@ namespace customerseller.Controllers
                 return RedirectToAction("Login");
 
             var sellers = _context.Users
-                .Where(u => u.Role == "Seller")
+                .Where(u => u.Role == "Seller" || u.IsSeller)
                 .ToList();
 
             var shops = _context.SellerShops.ToList();
@@ -657,7 +673,6 @@ namespace customerseller.Controllers
 
             return View(sellers);
         }
-
         public IActionResult VideoReviews()
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
@@ -678,17 +693,24 @@ namespace customerseller.Controllers
             return View();
         }
 
-
         public IActionResult Products()
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
                 return RedirectToAction("Login");
 
+            
+            var rejectedSubs = _context.SubCategoryVideos
+                .Where(v => v.VideoStatus == "Rejected")
+                .Select(v => v.SellerEmail + "|" + v.SubCategory)
+                .ToHashSet();
+
             var products = _context.Products
                 .OrderByDescending(p => p.ReviewedAt)
+                .ToList()
+                .Where(p => !rejectedSubs.Contains(p.SellerEmail + "|" + p.Category))
                 .ToList();
 
-            // Har product ke SellerEmail + Category ki subcategory video dhoondo
+           
             var subVideos = _context.SubCategoryVideos.ToList();
 
             var videoMap = subVideos
@@ -703,7 +725,6 @@ namespace customerseller.Controllers
             ViewBag.Rejected = products.Count(p => p.IsAdminApproved == false && p.AdminRejectionReason != null);
             return View(products);
         }
-
         public IActionResult Orders()
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
@@ -797,14 +818,14 @@ namespace customerseller.Controllers
                 _context.Database.GetConnectionString());
             con.Open();
 
-            // SubCategoryVideos load karo
+           
             var subVideos = _context.SubCategoryVideos
                 .Where(v => v.SellerEmail == shop.SellerEmail)
                 .ToList();
 
             ViewBag.SubVideos = subVideos;
 
-            // ✅ SIRF APPROVED VIDEOS WALE PRODUCTS LOAD KARO
+           
             var productsCmd = new Microsoft.Data.SqlClient.SqlCommand(
                 @"SELECT p.* FROM Products p
           INNER JOIN SubCategoryVideos sv ON p.SellerEmail = sv.SellerEmail 
@@ -863,7 +884,7 @@ namespace customerseller.Controllers
             var shop = _context.SellerShops.Find(model.ShopId);
             if (shop == null) return Json(new { error = "Not found" });
 
-            // Rejected subcategories update karo
+           
             var rejectedList = string.IsNullOrEmpty(shop.RejectedSubCategories)
                 ? new List<string>()
                 : shop.RejectedSubCategories.Split(',').ToList();
@@ -882,7 +903,7 @@ namespace customerseller.Controllers
             shop.SubCategoryRejectionReasons = string.Join("|", reasonList);
             _context.SaveChanges();
 
-            // Seller ko email bhejo
+           
             try
             {
                 var message = new MimeMessage();
@@ -898,6 +919,7 @@ namespace customerseller.Controllers
                 <p>Please login and re-upload the video for this subcategory.</p>
             </div>"
                 };
+
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
                 client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");

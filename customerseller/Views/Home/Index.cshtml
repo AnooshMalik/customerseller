@@ -3,11 +3,11 @@
     ViewData["Title"] = "Home";
 }
 
-<!-- Banner Slider -->
+
 <div class="banner-slider">
    <div class="slides">
-    <div class="slide"><img src="~/customer/images/banner1.jpeg" alt="Slide 1" fetchpriority="high" loading="eager"></div>
-    <div class="slide"><img src="~/customer/images/banner2.jpeg" alt="Slide 2" loading="lazy"></div>
+    <div class="slide"><img src="~/customer/images/banner2.jpeg" alt="Slide 1" fetchpriority="high" loading="eager"></div>
+    <div class="slide"><img src="~/customer/images/banner1.jpeg" alt="Slide 2" loading="lazy"></div>
     <div class="slide"><img src="~/customer/images/banner3.jpg" alt="Slide 3" loading="lazy"></div>
 </div>
     <span class="prev"></span>
@@ -19,13 +19,12 @@
     </div>
 </div>
 
-<!-- Categories Section - WITH SHOP NOW BUTTONS -->
-<!-- Category Carousel -->
+
 
     <div class="cat-carousel-wrapper-auto">
         <div class="cat-carousel-track">
 
-            <!-- Card 1: Fabric & Textile -->
+            
             <a asp-controller="Products" asp-action="FabricTextile" class="cat-card-slide">
                 <div class="cat-icon-circle">
                     <i class="fa-solid fa-shirt"></i>
@@ -34,7 +33,7 @@
                 <div class="cat-card-sub">Kurtas, Dupattas, Totes</div>
             </a>
 
-            <!-- Card 2: Wool & Yarn -->
+           
             <a asp-controller="Products" asp-action="WoolYarn" class="cat-card-slide">
                 <div class="cat-icon-circle">
                     <i class="fa-solid fa-wind"></i>
@@ -43,7 +42,7 @@
                 <div class="cat-card-sub">Sweaters, Beanies, Baskets</div>
             </a>
 
-            <!-- Card 3: Leather -->
+           
             <a asp-controller="Products" asp-action="Leather" class="cat-card-slide">
                 <div class="cat-icon-circle">
                     <i class="fa-solid fa-briefcase"></i>
@@ -52,7 +51,7 @@
                 <div class="cat-card-sub">Bags, Wallets, Belts</div>
             </a>
 
-            <!-- Card 4: Wood -->
+            
             <a asp-controller="Products" asp-action="Wood" class="cat-card-slide">
                 <div class="cat-icon-circle">
                     <i class="fa-solid fa-tree"></i>
@@ -61,7 +60,7 @@
                 <div class="cat-card-sub">Frames, Trays, Toys</div>
             </a>
 
-            <!-- Card 5: Clay & Pottery -->
+            
             <a asp-controller="Products" asp-action="ClayPottery" class="cat-card-slide">
                 <div class="cat-icon-circle">
                     <i class="fa-solid fa-jar"></i>
@@ -70,7 +69,7 @@
                 <div class="cat-card-sub">Pots, Mugs, Vases</div>
             </a>
 
-            <!-- Card 6: Jewels -->
+            
             <a asp-controller="Products" asp-action="Jewels" class="cat-card-slide">
                 <div class="cat-icon-circle">
                     <i class="fa-solid fa-gem"></i>
@@ -79,7 +78,6 @@
                 <div class="cat-card-sub">Rings, Earrings, Bangles</div>
             </a>
 
-            <!-- Card 7: Paper & Cards -->
             <a asp-controller="Products" asp-action="PaperCards" class="cat-card-slide">
                 <div class="cat-icon-circle">
                     <i class="fa-solid fa-envelope-open-text"></i>
@@ -88,7 +86,7 @@
                 <div class="cat-card-sub">Gift Boxes, Scrapbooks</div>
             </a>
 
-            <!-- Card 8: Jute & Natural -->
+           
             <a asp-controller="Products" asp-action="JuteNatural" class="cat-card-slide">
                 <div class="cat-icon-circle">
                     <i class="fa-solid fa-leaf"></i>
@@ -97,7 +95,7 @@
                 <div class="cat-card-sub">Bags, Baskets, Bouquets</div>
             </a>
 
-            <!-- Card 9: Resin & Epoxy -->
+            
             <a asp-controller="Products" asp-action="ResinEpoxy" class="cat-card-slide">
                 <div class="cat-icon-circle">
                     <i class="fa-solid fa-droplet"></i>
@@ -106,7 +104,7 @@
                 <div class="cat-card-sub">Coasters, Wall Art</div>
             </a>
 
-            <!-- Card 10: Metal & Wire -->
+           
             <a asp-controller="Products" asp-action="MetalWire" class="cat-card-slide">
                 <div class="cat-icon-circle">
                     <i class="fa-solid fa-wrench"></i>
@@ -115,7 +113,7 @@
                 <div class="cat-card-sub">Earrings, Vases, Candles</div>
             </a>
 
-            <!-- Duplicate for infinite loop -->
+           
             <a asp-controller="Products" asp-action="FabricTextile" class="cat-card-slide">
                 <div class="cat-icon-circle"><i class="fa-solid fa-shirt"></i></div>
                 <div class="cat-card-name">Fabric &amp; Textile</div>
@@ -170,15 +168,15 @@
         </div>
     </div>
 
-<!-- Story Section -->
+
 <section class="story-section-fixed">
     <div class="story-content-wrapper">
-        <!-- IMAGE LEFT -->
+       
         <div class="story-visual">
             <img src="~/customer/images/st.jpg" alt="Artisan crafting handmade products" loading="lazy">
         </div>
 
-        <!-- TEXT RIGHT -->
+       
         <div class="story-details">
             <span class="story-subtitle">Our Story</span>
             <h2 class="story-main-heading">Every Piece Tells a Story</h2>
@@ -188,13 +186,13 @@
             <p class="story-info">
                 When you choose handmade, you're supporting artists, preserving craftsmanship, and bringing home something truly special.
             </p>
-            <!-- CTA Button - LINK TO STORY PAGE -->
+            
             <a asp-controller="Home" asp-action="Story" class="story-cta-btn">Read Our Full Story</a>
         </div>
     </div>
 </section>
 
-<!-- Trust Badges Section - WITH IMPROVED TEXT -->
+
 <div class="trust-badges">
     <div class="trust-badge-item">
         <i class="fa-solid fa-hand-holding-heart trust-badge-icon"></i>
@@ -216,14 +214,14 @@
     </div>
 </div>
 
-<!-- Best Seller Section -->
+
 <h2 class="best-seller-heading" id="best-sellers">Best Sellers</h2>
 
 <div class="product-carousel-wrapper">
     <div class="product-carousel-track">
     @{
         var productIndex = 0;
-        // Different ratings for each product
+        
         var ratings = new[] {
         "★★★★★|4.9",
         "★★★★★|4.8",
@@ -362,7 +360,7 @@
                 .then(product => {
                     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-                    // Already hai to qty badhao
+                    
                     let existing = cart.find(i => i.id === productId);
                     if (existing) {
                         existing.qty = (existing.qty || 1) + 1;
@@ -377,7 +375,7 @@
                     }
 
                     localStorage.setItem('cart', JSON.stringify(cart));
-                    openCart(); // Cart sidebar kholo
+                    openCart(); 
                     updateCartCount();
                 });
         }

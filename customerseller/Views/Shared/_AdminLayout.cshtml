@@ -46,7 +46,7 @@
                 bottom: 0;
                 z-index: 1000;
                 overflow-y: auto;
-                transition: transform 0.28s ease; /* NAYA */
+                transition: transform 0.28s ease; 
             }
 
             .sidebar-content {
@@ -85,7 +85,7 @@
                     border-radius: 20px;
                 }
 
-            /* nav sections */
+           
             .nav-section-label {
                 font-size: 0.62rem;
                 font-weight: 700;
@@ -127,7 +127,7 @@
                     flex-shrink: 0;
                 }
 
-                /* notification badge on nav */
+               
                 nav a .nav-badge {
                     margin-left: auto;
                     background: var(--badge-bg);
@@ -140,7 +140,7 @@
                     text-align: center;
                 }
 
-            /* divider */
+          
             .nav-divider {
                 margin: 8px 20px;
                 border: none;
@@ -156,7 +156,7 @@
                     color: #ff8080 !important;
                 }
 
-            /* bottom courier link */
+           
             .sidebar-footer {
                 margin-top: auto;
                 padding: 12px 20px;
@@ -201,7 +201,7 @@
                 border-radius: 16px;
                 padding: 32px;
                 width: 380px;
-                max-width: 90vw; /* NAYA */
+                max-width: 90vw; 
                 text-align: center;
                 border: 1px solid #ddd6fe;
             }
@@ -263,7 +263,7 @@
                 align-items: center;
                 justify-content: center;
             }
-            /* ── MOBILE TOPBAR (hamburger) ── */
+           
             #mobileTopbar {
                 display: none;
                 position: fixed;
@@ -367,7 +367,7 @@
     </style>
 </head>
 <body>
-    <!-- MOBILE TOPBAR WITH HAMBURGER -->
+   
     <div id="mobileTopbar">
         <h2>Artisan<span>Valley</span></h2>
         <button id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menu">
@@ -375,7 +375,7 @@
         </button>
     </div>
 
-    <!-- OVERLAY -->
+   
     <div id="sidebarOverlay" onclick="closeSidebar()"></div>
     <aside id="sidebar">
         <div class="sidebar-content">
@@ -386,7 +386,7 @@
             </div>
 
             <nav>
-                <!-- OVERVIEW -->
+                
                 <div class="nav-section-label">Overview</div>
 
                 <div class="nav-active">
@@ -395,7 +395,7 @@
                     </a>
                 </div>
 
-                <!-- SELLER MANAGEMENT -->
+                
                 <div class="nav-section-label">Sellers</div>
 
                 <a asp-controller="Admin" asp-action="ShopRequests">
@@ -413,7 +413,7 @@
                     <span class="nav-badge" id="productCount">0</span>
                 </a>
 
-                <!-- ORDERS & FINANCE -->
+                
                 <div class="nav-section-label">Finance</div>
 
                 <a asp-controller="Admin" asp-action="Orders">
@@ -429,7 +429,7 @@
                     <span class="nav-badge" id="complaintCount">0</span>
                 </a>
 
-                <!-- SYSTEM -->
+               
                <a asp-controller="Chat" asp-action="Messages">
     <i class="fas fa-comment-dots"></i> Messages
     <span class="nav-badge" id="chatUnreadCount">0</span>
@@ -447,7 +447,7 @@
         </div>
     </aside>
 
-    <!-- LOGOUT POPUP -->
+   
     <div id="logoutPopup" style="display:none; position:fixed; inset:0; background:rgba(26,10,46,0.6); z-index:99999; align-items:center; justify-content:center;">
         <div class="logout-modal">
             <div class="logout-icon-wrap">
@@ -493,7 +493,7 @@
         }
         });
         });
-        // Active nav link highlight
+        
         (function () {
         var path = window.location.pathname.toLowerCase();
         document.querySelectorAll('nav a').forEach(function (link) {

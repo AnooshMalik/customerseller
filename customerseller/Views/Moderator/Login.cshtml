@@ -156,6 +156,8 @@
                     padding: 40px 20px;
                 }
             }
+            input:focus { border-color: #a64d79; }
+.pw-wrapper input { margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -184,11 +186,16 @@
         placeholder="" 
         autocomplete="off" 
         required>
-           <label class="field-label">Password</label>
-                <input type="password" name="password"
-                       placeholder="........."
-                       autocomplete="new-password"
-                       required>
+         <label class="field-label">Password</label>
+                <div style="position:relative;">
+                    <input type="password" name="password" id="modPassword"
+                           placeholder="........."
+                           autocomplete="new-password"
+                           required style="padding-right:44px;">
+                    <span onclick="toggleModPassword()" style="position:absolute; right:14px; top:14px; cursor:pointer; color:#999; font-size:1rem;">
+                        <i class="fa-solid fa-eye" id="modPasswordIcon"></i>
+                    </span>
+                </div>
 
                 <div style="text-align:right; margin-top:-16px; margin-bottom:20px;">
                     <a href="javascript:void(0)" onclick="openForgotModal()" style="color:#a64d79; font-size:0.82rem; text-decoration:none;">Forgot Password?</a>
@@ -201,11 +208,11 @@
             <div class="back-link">
                 <a href="/">← Back to Website</a>
             </div>
-            <div class="footer-text">© 2025 Artisan Valley. All rights reserved.</div>
+            <div class="footer-text">© 2026 Artisan Valley. All rights reserved.</div>
         </div>
     </div>
 
-    <!-- Forgot Password Modal -->
+    
     <div class="modal-overlay" id="forgotModal">
         <div class="modal-box">
             <div class="modal-header">
@@ -305,6 +312,19 @@
                 }
                 msgBox.style.display = 'block';
             }
+            function toggleModPassword() {
+    const pwd = document.getElementById('modPassword');
+    const icon = document.getElementById('modPasswordIcon');
+    if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        pwd.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
     </script>
 </body>
 </html>

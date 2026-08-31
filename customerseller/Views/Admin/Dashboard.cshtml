@@ -365,7 +365,7 @@
         color: #c62828;
     }
 
-    /* Reject Reason Modal */
+    
     .reject-modal-box {
         background: #fff;
         border-radius: 16px;
@@ -518,9 +518,6 @@
         }
     </div>
 
-   
-
-<!-- Confirm Modal -->
 <div class="modal-overlay" id="confirmModal">
     <div class="modal-box">
         <div class="modal-icon" id="confirmIcon"></div>
@@ -533,7 +530,7 @@
     </div>
 </div>
 
-<!-- Reject Reason Modal -->
+
 <div class="modal-overlay" id="rejectModal">
     <div class="reject-modal-box">
         <h3>✏️ Enter Rejection Reason</h3>
@@ -545,7 +542,7 @@
     </div>
 </div>
 
-<!-- Result Modal -->
+
 <div class="modal-overlay" id="resultModal">
     <div class="modal-box">
         <div class="modal-icon" id="resultIcon"></div>
@@ -558,7 +555,7 @@
 </div>
 
 <script>
-    // ── Modal Helpers ──
+   
     function showConfirm(icon, title, msg, onConfirm) {
         document.getElementById('confirmIcon').textContent = icon;
         document.getElementById('confirmTitle').textContent = title;
@@ -588,7 +585,7 @@
     }
     function closeResultModal() { document.getElementById('resultModal').classList.remove('show'); }
 
-    // ── Shops ──
+   
     async function loadPendingShops() {
         const res = await fetch('/Admin/GetPendingShops');
         const shops = await res.json();
@@ -645,7 +642,7 @@
         });
     }
 
-    // ── Products ──
+    
     async function loadPendingProducts() {
         const res = await fetch('/Admin/GetPendingProducts');
         const products = await res.json();

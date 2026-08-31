@@ -237,7 +237,7 @@
             background: #d97706;
         }
 
-    /* Modal */
+   
     .modal-overlay {
         display: none;
         position: fixed;
@@ -450,22 +450,20 @@
     else
     {
         <div style="overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch;">
-        <table id="productsTable">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Seller</th>
-                    <th>Price</th>
-                    <th>Video</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
 
-                    <table id="productsTable">
-                       
-                        <thead>
-            </thead>
-            <tbody>
+            <table id="productsTable">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Seller</th>
+                        <th>Price</th>
+                        <th>Video</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+            
                 @foreach (var p in Model)
                 {
                     <tr data-status="@(p.IsAdminApproved ? "Approved" : (p.AdminRejectionReason != null ? "Rejected" : "Pending"))">
@@ -525,7 +523,7 @@
                                                 <i class="fas fa-times"></i> Reject
                                             </button>
                                         }
-                                        else if (p.IsAdminApproved)
+                                        else
                                         {
                                             <button class="btn-remove" onclick="showRemove('@p.Id', this)">
                                                 <i class="fas fa-trash"></i> Remove
@@ -539,7 +537,7 @@
        </div>
     }
 </div>
-<!-- Modal -->
+
 <div class="modal-overlay" id="actionModal">
     <div class="modal-box">
         <div class="micon" id="mIcon"></div>

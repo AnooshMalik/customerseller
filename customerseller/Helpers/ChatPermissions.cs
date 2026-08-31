@@ -2,8 +2,7 @@
 
 namespace customerseller.Helpers
 {
-    // Decide karta hai ke kaun kis role se chat kar sakta hai.
-    // Confirmed pairs: Customer-Seller, Seller-Admin, Admin-Moderator, Seller-Moderator
+    
     public static class ChatPermissions
     {
         private static readonly HashSet<(string, string)> AllowedPairs = new()
@@ -23,7 +22,6 @@ namespace customerseller.Helpers
             return AllowedPairs.Contains((role1, role2));
         }
 
-        // Diye gaye role ke liye, wo saare roles wapas karta hai jinse chat ho sakti hai
         public static List<string> GetAllowedRolesFor(string role)
         {
             var result = new List<string>();

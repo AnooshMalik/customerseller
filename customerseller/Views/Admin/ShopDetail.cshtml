@@ -249,7 +249,7 @@
         <i class="fas fa-arrow-left"></i> Back to Shop Requests
     </a>
 
-    <!-- Shop Info -->
+   
     <div class="detail-card">
         <h2><i class="fas fa-store" style="color:#a64d79;"></i> @Model.ShopName</h2>
         <div class="meta">@Model.OwnerName · @Model.SellerEmail</div>
@@ -287,8 +287,14 @@
         </div>
         @if (Model.AdminStatus != "Approved" && Model.AdminStatus != "Rejected")
         {
-            @if (Model.ModeratorStatus == "Approved")
+            @if (Model.ModeratorStatus == "Approved" || Model.ModeratorStatus == "Rejected")
             {
+                @if (Model.ModeratorStatus == "Rejected")
+                {
+                    <div style="margin-top:16px; background:#fef2f2; border:1.5px solid #fecaca; padding:12px 16px; border-radius:8px; font-size:0.85rem; color:#991b1b;">
+                        <i class="fas fa-exclamation-triangle"></i> Moderator ne kuch subcategories reject ki hain. Admin final decision le sakta hai.
+                    </div>
+                }
                 <div style="margin-top:16px; display:flex; gap:10px;">
                     <button class="btn-sub-approve" onclick="confirmApproveShop('@Model.Id')">
                         <i class="fas fa-check"></i> Approve Shop
@@ -301,19 +307,12 @@
             else
             {
                 <div style="margin-top:16px; background:#fffbeb; border:1.5px solid #fef3c7; padding:12px 16px; border-radius:8px; font-size:0.85rem; color:#92400e;">
-                    <i class="fas fa-clock"></i> Waiting for Moderator approval before Admin can approve this shop.
+                    <i class="fas fa-clock"></i> Waiting for Moderator approval.
                 </div>
             }
         }
-        @if (!string.IsNullOrEmpty(Model.ModeratorComments))
-        {
-            <div style="background:#f5f3ff; border-left:3px solid #a64d79; padding:12px 16px; border-radius:8px; font-size:0.85rem; color:#1e1033;">
-                <strong style="color:#a64d79;">Moderator Comments:</strong> @Model.ModeratorComments
-            </div>
-        }
-    </div>
 
-    <!-- Subcategories -->
+
     <div class="detail-card">
         <div class="section-title"><i class="fas fa-tags"></i> Subcategory Status</div>
         <div class="sub-grid">
@@ -371,7 +370,7 @@
         </div>
     </div>
 
-    <!-- Video -->
+
     @if (!string.IsNullOrEmpty(Model.VideoPath))
     {
         <div class="detail-card">
@@ -384,7 +383,7 @@
     }
 </div>
 
-<!-- Modal -->
+
 <div class="modal-overlay" id="modal">
     <div class="modal-box" style="position:relative;">
         <button id="modalCloseX" onclick="closeModalNoUpdate()"
@@ -426,7 +425,7 @@
         var cancelBtn = document.getElementById('modalCancelBtn');
         var closeX = document.getElementById('modalCloseX');
 
-        closeX.style.display = 'none'; // default hidden
+        closeX.style.display = 'none'; 
 
         if (mode === 'reject') {
             inputWrap.style.display = 'block';
@@ -447,12 +446,12 @@
             inputWrap.style.display = 'none';
             cancelBtn.style.display = 'none';
             okBtn.textContent = 'OK';
-            closeX.style.display = 'block'; // success popup pe X dikhao
+            closeX.style.display = 'block'; 
             pendingMode = 'done';
         }
     }
 
-    // X button click — modal band karo, reload MAT karo
+    
     function closeModalNoUpdate() {
         document.getElementById('modal').classList.remove('show');
         pendingMode = null;
@@ -504,12 +503,12 @@
             .catch(err => showModal('❌', 'Error', 'Request failed: ' + err.message, 'done', null, null));
     }
 
-    // Step 1: Confirm popup dikhata hai — abhi database update nahi hota
+   
     function confirmApproveShop(shopId) {
         showModal('⚠️', 'Approve Shop?', 'Are you sure you want to approve this shop?', 'confirm-approve', shopId, null);
     }
 
-    // Step 2: Sirf "Yes, Approve" click karne pe ye call hota hai
+   
     function doApproveShop(shopId) {
         fetch('/Admin/AdminApproveShop', {
             method: 'POST',

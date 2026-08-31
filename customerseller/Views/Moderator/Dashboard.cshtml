@@ -140,6 +140,13 @@
                     flex-direction: column;
                 }
             }
+            #confirmModal .reject-box {
+    width: 340px;
+    padding: 26px 24px;
+}
+#confirmModal #confirmModalIcon { font-size: 2rem; margin-bottom: 8px; }
+#confirmModal #confirmModalTitle { font-size: 1.05rem; }
+#confirmModal #confirmModalMsg { font-size: 0.82rem; }
     </style>
 </head>
 <body>
@@ -159,12 +166,11 @@
             <i class="fa-solid fa-circle-xmark"></i> Rejected
         </a>
 
-        <a class="nav-item" href="/Chat/Messages" style="position:relative;">
-            <i class="fa-solid fa-comment-dots"></i> Messages
-            <span id="chatUnreadBadge" style="display:none; margin-left:auto; background:#dc2626; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.72rem;">0</span>
+        <a class="nav-item" href="/Moderator/PaymentApprovals">
+            <i class="fa-solid fa-money-check-dollar"></i> Payment Approvals
         </a>
         <div class="sidebar-bottom">
-            <a href="/Moderator/Logout" class="logout-item">
+            <a href="javascript:void(0)" class="logout-item" onclick="confirmLogout()">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </a>
         </div>
@@ -194,7 +200,7 @@
             </div>
         </div>
 
-        <!-- Pending -->
+       
         <div class="section active" id="sec-pending">
             @if (pendingVideos != null && pendingVideos.Count > 0)
             {
@@ -259,14 +265,14 @@
             }
         </div>
 
-        <!-- Approved -->
+       
         <div class="section" id="sec-approved">
             <div id="approvedList">
                 <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading...</p></div>
             </div>
         </div>
 
-        <!-- Rejected -->
+       
         <div class="section" id="sec-rejected">
             <div id="rejectedList">
                 <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading...</p></div>
@@ -274,7 +280,7 @@
         </div>
     </div>
 
-    <!-- Reject Modal -->
+    
     <div class="reject-modal" id="rejectModal">
         <div class="reject-box">
             <h3><i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i> Reject Video</h3>
@@ -294,7 +300,7 @@
             </div>
         </div>
     </div>
-        <!-- Confirm Modal -->
+        
         <div class="reject-modal" id="confirmModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999; align-items:center; justify-content:center;">
             <div class="reject-box" style="text-align:center;">
                 <div style="font-size:2.5rem; margin-bottom:12px;" id="confirmModalIcon"></div>
@@ -325,7 +331,7 @@
                         badge.style.display = 'inline-block';
                     }
                 });
-// Page load pe approved/rejected preload karo
+
 loadHistory('Approved', 'approvedList');
 loadHistory('Rejected', 'rejectedList');
 
@@ -371,6 +377,11 @@ loadHistory('Rejected', 'rejectedList');
             function closeConfirmModal() {
                 document.getElementById('confirmModal').style.display = 'none';
             }
+function confirmLogout() {
+    showConfirmModal(' ', 'Logout?', 'Are you sure you want to logout?', () => {
+        window.location.href = '/Moderator/Logout';
+    });
+}
 
             async function approveVideo(videoId) {
                 showConfirmModal('✅', 'Approve Video?',
@@ -409,14 +420,14 @@ loadHistory('Rejected', 'rejectedList');
     
     const finalReason = (custom && custom.trim()) ? custom.trim() : reason;
     
-    console.log('Sending reason:', finalReason); // Debug
+    console.log('Sending reason:', finalReason); 
     
     const res = await fetch('/Moderator/Reject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `videoId=${videoId}&reason=${encodeURIComponent(finalReason)}`
     });
-    
+   
     const data = await res.json();
     if (data.success) {
         closeRejectModal();

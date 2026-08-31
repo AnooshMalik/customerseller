@@ -455,46 +455,97 @@
 
             <div class="pd-price">Rs.@Model.Price</div>
             <div class="pd-divider"></div>
-            @{
+        @{
+                var bothVariant = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+{
+    "PrintedKurtas", "Sweaters", "Belts"
+};
+var sizeOnlyVariant = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+{
+    "Rings", "Bangles"
+};
+var noVariant = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+{
+    "LeatherKeychains", "WoodKeychains", "ResinKeychains", "Journals", "WoodToys",
+    "GreetingCards", "GiftBoxes", "Scrapbooks", "Paintings"
+};
+                var subCat = Model.SubCategory ?? "";
 
-                bool isFootwear = Model.Title != null &&
-                                (Model.Title.Contains("Shoes") ||
-                                Model.Title.Contains("Boots") ||
-                                Model.Title.Contains("Men") ||
-                                Model.Title.Contains("Sandals") ||
-                                Model.Title.Contains("Khussa") ||
-                                Model.Title.Contains("Sneakers") ||
-                                Model.Title.Contains("Slides") ||
-                                Model.Title.Contains("Loafers") ||
-                                Model.Title.Contains("slippers") ||
-                                Model.Title.Contains("Slides") ||
-                                Model.Title.Contains("Flats") ||
-                                Model.Title.Contains("Heels") ||
-                                Model.Title.Contains("Women"));
+                bool wantsSize = bothVariant.Contains(subCat) || sizeOnlyVariant.Contains(subCat);
+                bool wantsColor = !noVariant.Contains(subCat) && !sizeOnlyVariant.Contains(subCat);
+
+                var sizeList = wantsSize && !string.IsNullOrWhiteSpace(Model.Sizes)
+                    ? Model.Sizes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    : Array.Empty<string>();
+
+                var colorList = wantsColor && !string.IsNullOrWhiteSpace(Model.Color)
+                    ? Model.Color.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    : Array.Empty<string>();
+@functions {
+    string GetFallbackColor(string name)
+    {
+        
+        var lower = name.ToLower();
+
+        if (lower.Contains("peach")) return "#ffcba4";
+        if (lower.Contains("coral")) return "#ff7f50";
+        if (lower.Contains("lilac")) return "#c8a2c8";
+        if (lower.Contains("mint")) return "#98ff98";
+        if (lower.Contains("salmon")) return "#fa8072";
+        if (lower.Contains("khaki")) return "#c3b091";
+        if (lower.Contains("plum")) return "#8e4585";
+        if (lower.Contains("mauve")) return "#e0b0ff";
+        if (lower.Contains("taupe")) return "#8b8589";
+        if (lower.Contains("sand")) return "#c2b280";
+        if (lower.Contains("wine")) return "#722f37";
+        if (lower.Contains("olive")) return "#556b2f";
+
+        int hash = 0;
+        foreach (char c in name) hash = c + ((hash << 5) - hash);
+        int r = (hash & 0xFF0000) >> 16;
+        int g = (hash & 0x00FF00) >> 8;
+        int b = hash & 0x0000FF;
+
+        
+        r = (r + 255) / 2;
+        g = (g + 255) / 2;
+        b = (b + 255) / 2;
+
+        return $"#{r:X2}{g:X2}{b:X2}";
+    }
+}
+                var colorMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+{
+    { "Brown", "#8B4513" }, { "Light Brown", "#C68642" }, { "Dark Brown", "#5C4033" },
+    { "Walnut Brown", "#5D4037" }, { "Walnut", "#5D4037" }, { "Mahogany", "#4A2C2A" },
+    { "Chestnut", "#954535" }, { "Chocolate", "#3d2314" }, { "Espresso", "#3c2415" },
+    { "Black", "#1a1a1a" }, { "Tan", "#D2691E" }, { "Burgundy", "#800020" },
+    { "White", "#ffffff" }, { "Off White", "#f5f0e6" }, { "Ivory", "#fffff0" },
+    { "Red", "#dc2626" }, { "Blue", "#2563eb" }, { "Light Blue", "#93c5fd" },
+    { "Sky Blue", "#87ceeb" }, { "Teal", "#0d9488" }, { "Turquoise", "#14b8a6" },
+    { "Green", "#16a34a" }, { "Olive", "#556b2f" }, { "Sage Green", "#9caf88" },
+    { "Pink", "#ec4899" }, { "Rose Gold", "#b76e79" }, { "Blush", "#f7cac9" },
+    { "Gold", "#d4af37" }, { "Silver", "#c0c0c0" }, { "Bronze", "#cd7f32" },
+    { "Copper", "#b87333" }, { "Grey", "#808080" }, { "Charcoal", "#36454f" },
+    { "Beige", "#e8dcc8" }, { "Yellow", "#eab308" }, { "Purple", "#7c3aed" },
+    { "Lavender", "#c4a1e8" }, { "Orange", "#f97316" }, { "Rust", "#b7410e" },
+    { "Maroon", "#7f1d1d" }, { "Wine", "#722f37" }, { "Navy", "#1e3a8a" },
+    { "Cream", "#fdf6e3" }, { "Mustard", "#c99a2e" }, { "Terracotta", "#e2725b" },
+    { "Natural Wood", "#c19a6b" }, { "Multicolor", "#a64d79" }
+};
             }
 
-            @if (isFootwear)
-            {
-                <p class="pd-label">Color: <strong id="pd-color-name" style="color:#333;">Brown</strong></p>
-                <div class="pd-colors">
-                    <div class="pd-color on" style="background:#8B4513;" onclick="pdColor(this,'Brown')"></div>
-                    <div class="pd-color" style="background:#1a1a1a;" onclick="pdColor(this,'Black')"></div>
-                    <div class="pd-color" style="background:#D2691E;" onclick="pdColor(this,'Tan')"></div>
-                    <div class="pd-color" style="background:#800020;" onclick="pdColor(this,'Burgundy')"></div>
-                </div>
-
-                <p class="pd-label">Size: <strong id="pd-size-name" style="color:#333;">Select size</strong></p>
-                <div class="pd-sizes">
-                    <button type="button" class="pd-size" onclick="pdSize(this,'36')">36</button>
-                    <button type="button" class="pd-size" onclick="pdSize(this,'37')">37</button>
-                    <button type="button" class="pd-size" onclick="pdSize(this,'38')">38</button>
-                    <button type="button" class="pd-size" onclick="pdSize(this,'39')">39</button>
-                    <button type="button" class="pd-size" onclick="pdSize(this,'40')">40</button>
-                </div>
-                <div class="pd-divider"></div>
-            }
-
-            <div class="pd-divider"></div>
+           @if (sizeList.Length > 0)
+{
+    <p class="pd-label">Size: <strong id="pd-size-name" style="color:#333;">Select size</strong></p>
+    <div class="pd-sizes">
+        @foreach (var sz in sizeList)
+        {
+            <button type="button" class="pd-size" onclick="pdSize(this,'@sz')">@sz</button>
+        }
+    </div>
+    <div class="pd-divider"></div>
+}            <div class="pd-divider"></div>
 
             <p class="pd-label">Quantity</p>
             <div class="pd-qty">
@@ -648,11 +699,7 @@
             el.innerText = newVal;
         }
 
-        function pdColor(el, name) {
-            document.querySelectorAll('.pd-color').forEach(c => c.classList.remove('on'));
-            el.classList.add('on');
-            document.getElementById('pd-color-name').innerText = name;
-        }
+       
 
         function pdSize(el, size) {
             document.querySelectorAll('.pd-size').forEach(s => s.classList.remove('on'));

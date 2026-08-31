@@ -16,16 +16,16 @@
         public int? ApprovedBy { get; set; }
         public DateTime? ApprovedAt { get; set; }
 
-        // Video
+        
         public string? VideoPath { get; set; }
 
-        // Moderator fields
+        
         public string? ModeratorStatus { get; set; } = "Pending";
         public string? ModeratorComments { get; set; }
         public string? ModeratorEmail { get; set; }
         public DateTime? ModeratorReviewedAt { get; set; }
 
-        // Admin fields
+       
         public string? AdminStatus { get; set; } = "Pending";
         public string? RejectionReason { get; set; }
         public string? SellerAddress { get; set; }

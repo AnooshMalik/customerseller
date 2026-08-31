@@ -56,7 +56,7 @@ namespace SELLERMVC.Controllers
             }
             reader.Close();
 
-            // Rejected subcategories nikalo
+           
             var rejectedAlerts = new List<object>();
 
             var modRejectedCmd = new Microsoft.Data.SqlClient.SqlCommand(
@@ -130,7 +130,7 @@ namespace SELLERMVC.Controllers
             prodReader.Close();
 
             ViewBag.RejectedProducts = rejectedProducts;
-            // ✅ STEP 1 — YAHAN TAK ADD KARO
+           
 
             ViewBag.RejectedAlerts = rejectedAlerts;
 
@@ -140,7 +140,7 @@ namespace SELLERMVC.Controllers
 
             HttpContext.Session.SetString("ShopName", shopName);
 
-            // Seller orders fetch karo
+           
             var sellerOrders = new List<SellerOrderItem>();
             var ordersCmd = new Microsoft.Data.SqlClient.SqlCommand(@"
     SELECT o.OrderId, o.FirstName, o.LastName, o.Status, o.OrderDate,
@@ -172,14 +172,14 @@ namespace SELLERMVC.Controllers
                 SellerName = HttpContext.Session.GetString("UserName") ?? "",
                 ShopName = shopName,
                 AccountStatus = categories,
-                NetRevenue = sellerOrders.Sum(o => o.Price * o.Quantity),  // 0 ki jagah
+                NetRevenue = sellerOrders.Sum(o => o.Price * o.Quantity),  
                 RevenueGrowth = 0,
-                TotalOrders = sellerOrders.Count,  // 0 ki jagah
-                PendingOrders = sellerOrders.Count(o => o.Status == "Processing"),  // 0 ki jagah
+                TotalOrders = sellerOrders.Count,  
+                PendingOrders = sellerOrders.Count(o => o.Status == "Processing"),  
                 Rating = 0.0,
                 LiveVisitors = 0,
                 RecentSales = new List<SaleActivity>(),
-                SellerOrders = sellerOrders  // YEH NAYA ADD KARO
+                SellerOrders = sellerOrders  
             };
 
             return View("~/Views/Seller/Dashboard/Dashboard.cshtml", dashboardData);

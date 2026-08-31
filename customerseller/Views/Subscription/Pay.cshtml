@@ -1,0 +1,174 @@
+﻿@{
+    Layout = "~/Views/Shared/_DashboardLayout.cshtml";
+    var lastSubmission = ViewBag.LastSubmission as customerseller.Models.PaymentSubmission;
+    bool isActive = ViewBag.IsActive ?? false;
+    DateTime? subEnd = ViewBag.SubscriptionEnd;
+}
+
+<div style="padding:32px; max-width:600px;">
+    <h2 style="font-size:1.4rem; font-weight:700; color:#1e1033; margin-bottom:6px;">Subscription Payment</h2>
+    <p style="color:#6b7280; font-size:0.9rem; margin-bottom:24px;">Submit your payment details below. Our team will verify and activate your subscription within 24 hours.</p>
+
+    @if (isActive)
+    {
+        <div style="background:#f0fdf4; border:1.5px solid #a5d6a7; border-radius:12px; padding:20px 24px; display:flex; align-items:center; gap:14px;">
+            <i class="fas fa-check-circle" style="color:#059669; font-size:1.8rem;"></i>
+            <div>
+                <div style="font-weight:700; color:#065f46; font-size:1rem;">Already paid for this month!</div>
+                <div style="font-size:0.85rem; color:#166534; margin-top:2px;">
+                    Your subscription is active until @subEnd.Value.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture).
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @if (TempData["PaymentSuccess"] != null)
+        {
+            <div style="background:#f0fdf4; color:#2e7d32; padding:12px 16px; border-radius:8px; margin-bottom:18px; font-size:0.9rem;">
+                ✅ @TempData["PaymentSuccess"]
+            </div>
+        }
+        @if (TempData["PaymentError"] != null)
+        {
+            <div style="background:#ffebee; color:#c62828; padding:12px 16px; border-radius:8px; margin-bottom:18px; font-size:0.9rem;">
+                ⚠️ @TempData["PaymentError"]
+            </div>
+        }
+
+        @if (lastSubmission != null && lastSubmission.Status == "Pending")
+        {
+            <div style="background:#fff3cd; color:#856404; padding:14px 18px; border-radius:10px; margin-bottom:20px; font-size:0.88rem;">
+                <i class="fas fa-clock"></i> Your last payment (TID: <strong>@lastSubmission.TransactionId</strong>) is under review.
+            </div>
+        }
+        else if (lastSubmission != null && lastSubmission.Status == "Rejected")
+        {
+            <div style="background:#ffebee; color:#c62828; padding:14px 18px; border-radius:10px; margin-bottom:20px; font-size:0.88rem;">
+                <i class="fas fa-times-circle"></i> Your last submission was rejected. Reason: @lastSubmission.RejectionReason
+            </div>
+        }
+
+        <div style="background:#fdf0f6; border:1px solid #f3d4e3; border-radius:12px; padding:18px 20px; margin-bottom:24px;">
+            <h4 style="font-size:0.95rem; font-weight:700; color:#a64d79; margin-bottom:10px;">Payment Details</h4>
+            <p style="font-size:0.88rem; color:#374151; margin:4px 0;">JazzCash / Easypaisa: <strong>0300-1234567</strong></p>
+            <p style="font-size:0.88rem; color:#374151; margin:4px 0;">Account Title: <strong>Artisan Valley</strong></p>
+            <p style="font-size:0.85rem; color:#6b7280; margin-top:8px;">Amount: Rs. 1,000/month</p>
+        </div>
+
+        <form asp-controller="Subscription" asp-action="SubmitPayment" method="post" enctype="multipart/form-data" onsubmit="return validatePaymentForm()">
+
+            <div style="margin-bottom:14px;">
+                <label style="font-size:0.85rem; font-weight:600; color:#374151; display:block; margin-bottom:6px;">Payment Method</label>
+                <select name="paymentMethod" id="paymentMethod"
+                        style="width:100%; padding:10px 14px; border:1.5px solid #ede9fe; border-radius:8px; font-size:0.88rem;">
+                    <option value="JazzCash">JazzCash</option>
+                    <option value="Easypaisa">Easypaisa</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom:14px;">
+                <label style="font-size:0.85rem; font-weight:600; color:#374151; display:block; margin-bottom:6px;">Amount</label>
+                <div style="width:100%; padding:10px 14px; border:1.5px solid #ede9fe; border-radius:8px; font-size:0.88rem; background:#f9fafb; color:#374151;">
+                    Rs. 1,000 (fixed monthly fee)
+                </div>
+            </div>
+
+            <div style="margin-bottom:14px;">
+                <label style="font-size:0.85rem; font-weight:600; color:#374151; display:block; margin-bottom:6px;">Transaction ID</label>
+                <input type="text" name="transactionId" id="transactionId" required
+                       maxlength="11" inputmode="numeric"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11)"
+                       placeholder="11-digit numeric ID from your receipt"
+                       style="width:100%; padding:10px 14px; border:1.5px solid #ede9fe; border-radius:8px; font-size:0.88rem;" />
+                <span id="err-transactionId" style="color:#dc2626; font-size:0.78rem; display:none;">Transaction ID must be exactly 11 digits.</span>
+            </div>
+
+            <div style="margin-bottom:14px;">
+                <label style="font-size:0.85rem; font-weight:600; color:#374151; display:block; margin-bottom:6px;">Your Sender Number</label>
+                <input type="text" name="senderNumber" id="senderNumber" required
+                       maxlength="11" inputmode="numeric"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,11)"
+                       placeholder="03XXXXXXXXX"
+                       style="width:100%; padding:10px 14px; border:1.5px solid #ede9fe; border-radius:8px; font-size:0.88rem;" />
+                <span id="err-senderNumber" style="color:#dc2626; font-size:0.78rem; display:none;">Format must be 03XXXXXXXXX (11 digits).</span>
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <label style="font-size:0.85rem; font-weight:600; color:#374151; display:block; margin-bottom:6px;">Payment Screenshot</label>
+                <div style="position:relative;">
+                    <input type="file" name="screenshot" id="screenshot" required accept="image/jpeg,image/png,image/webp"
+                           style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; z-index:2;"
+                           onchange="updateFileLabel(this)" />
+                    <div id="fileUploadBox" style="border:2px dashed #ede9fe; border-radius:10px; padding:20px; text-align:center; background:#fdf9ff; transition:border-color 0.2s;">
+                        <i class="fas fa-cloud-upload-alt" style="font-size:1.6rem; color:#a64d79; margin-bottom:8px; display:block;"></i>
+                        <div id="fileLabel" style="font-size:0.85rem; color:#374151; font-weight:600;">Click to upload screenshot</div>
+                        <div style="font-size:0.75rem; color:#9ca3af; margin-top:2px;">JPG, PNG, or WEBP — max 5MB</div>
+                    </div>
+                </div>
+                <span id="err-screenshot" style="color:#dc2626; font-size:0.78rem; display:none;">Please upload a screenshot (JPG/PNG/WEBP, max 5MB).</span>
+            </div>
+
+            <button type="submit"
+                    style="background:#a64d79; color:#fff; border:none; padding:11px 28px; border-radius:8px; font-weight:600; font-size:0.9rem; cursor:pointer;">
+                Submit Payment
+            </button>
+        </form>
+
+        <script>
+                function updateFileLabel(input) {
+                    const label = document.getElementById('fileLabel');
+                    const box = document.getElementById('fileUploadBox');
+                    if (input.files && input.files.length > 0) {
+                        label.textContent = '✓ ' + input.files[0].name;
+                        box.style.borderColor = '#059669';
+                        box.style.background = '#f0fdf4';
+                    } else {
+                        label.textContent = 'Click to upload screenshot';
+                        box.style.borderColor = '#ede9fe';
+                        box.style.background = '#fdf9ff';
+                    }
+                }
+
+                function validatePaymentForm() {
+                    let valid = true;
+
+                    const tid = document.getElementById('transactionId').value.trim();
+                    const tidError = document.getElementById('err-transactionId');
+                    if (!/^[0-9]{11}$/.test(tid)) {
+                        tidError.style.display = 'block';
+                        valid = false;
+                    } else {
+                        tidError.style.display = 'none';
+                    }
+
+                    const sender = document.getElementById('senderNumber').value.trim();
+                    const senderError = document.getElementById('err-senderNumber');
+                    if (!/^03[0-9]{9}$/.test(sender)) {
+                        senderError.style.display = 'block';
+                        valid = false;
+                    } else {
+                        senderError.style.display = 'none';
+                    }
+
+                    const fileInput = document.getElementById('screenshot');
+                    const fileError = document.getElementById('err-screenshot');
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                        fileError.style.display = 'block';
+                        valid = false;
+                    } else {
+                        const file = fileInput.files[0];
+                        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                        if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+                            fileError.style.display = 'block';
+                            valid = false;
+                        } else {
+                            fileError.style.display = 'none';
+                        }
+                    }
+
+                    return valid;
+                }
+        </script>
+    }
+</div>

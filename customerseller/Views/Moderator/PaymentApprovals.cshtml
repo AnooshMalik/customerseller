@@ -1,0 +1,465 @@
+﻿@model List<customerseller.Models.PaymentSubmission>
+@{
+    ViewData["Title"] = "Payment Approvals";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Approvals - Artisan Valley</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                background: #f5f3ff;
+                display: flex;
+            }
+
+            .sidebar {
+                width: 260px;
+                background: #a64d79;
+                height: 100vh;
+                position: fixed;
+                left: 0;
+                top: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .sidebar-logo {
+                padding: 25px 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                text-align: center;
+            }
+
+                .sidebar-logo img {
+                    height: 55px;
+                }
+
+                .sidebar-logo p {
+                    color: rgba(255,255,255,0.5);
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    margin-top: 8px;
+                    letter-spacing: 3px;
+                    text-transform: uppercase;
+                }
+
+            .nav-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 20px;
+                color: rgba(255,255,255,0.6);
+                text-decoration: none;
+                font-size: 0.88rem;
+                transition: all 0.2s;
+                cursor: pointer;
+                border-left: 3px solid transparent;
+            }
+
+                .nav-item:hover, .nav-item.active {
+                    background: rgba(255,255,255,0.08);
+                    color: #fff;
+                    border-left-color: #fff;
+                }
+
+                .nav-item i {
+                    width: 18px;
+                }
+
+            .sidebar-bottom {
+                margin-top: auto;
+                padding: 15px 0;
+                border-top: 1px solid rgba(255,255,255,0.08);
+            }
+
+            .logout-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 20px;
+                color: #ff6b6b;
+                text-decoration: none;
+                font-size: 0.88rem;
+            }
+
+            .main {
+                margin-left: 260px;
+                padding: 30px 40px;
+                min-height: 100vh;
+                max-width: 1100px;
+                width: calc(100% - 260px);
+            }
+
+            .topbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 28px;
+            }
+
+                .topbar h1 {
+                    font-size: 1.5rem;
+                    color: #1a1a2e;
+                    font-weight: 700;
+                }
+
+                .topbar p {
+                    color: #888;
+                    font-size: 0.85rem;
+                    margin-top: 3px;
+                }
+
+            .mod-badge {
+                background: #a64d79;
+                color: #fff;
+                padding: 8px 18px;
+                border-radius: 20px;
+                font-size: 0.82rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 7px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                background: #fff;
+                border-radius: 14px;
+                overflow: hidden;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            }
+
+            thead {
+                background: #f5f3ff;
+            }
+
+            th {
+                padding: 13px 18px;
+                text-align: left;
+                font-size: 0.75rem;
+                font-weight: 700;
+                color: #6b7280;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+            }
+
+            td {
+                padding: 14px 18px;
+                font-size: 0.87rem;
+                color: #1a1a2e;
+                border-top: 1px solid #f3f4f6;
+            }
+
+            tr:hover td {
+                background: #fdf9ff;
+            }
+
+            .btn-approve {
+                background: #10b981;
+                color: #fff;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 8px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                cursor: pointer;
+                margin-right: 6px;
+            }
+
+            .btn-reject {
+                background: #fff;
+                color: #ef4444;
+                border: 1.5px solid #ef4444;
+                padding: 8px 16px;
+                border-radius: 8px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .empty-state {
+                text-align: center;
+                padding: 60px;
+                color: #9ca3af;
+                background: #fff;
+                border-radius: 14px;
+            }
+
+                .empty-state i {
+                    font-size: 3rem;
+                    color: #ddd;
+                    margin-bottom: 15px;
+                    display: block;
+                }
+
+            .table-scroll {
+                overflow-x: auto;
+            }
+
+            .reject-modal {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 9999;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .reject-modal.show {
+                    display: flex;
+                }
+
+            .reject-box {
+                background: #fff;
+                border-radius: 16px;
+                padding: 28px;
+                width: 380px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            }
+
+                .reject-box h3 {
+                    font-size: 1.05rem;
+                    color: #1a1a2e;
+                    margin-bottom: 16px;
+                }
+
+                .reject-box textarea {
+                    width: 100%;
+                    padding: 10px 12px;
+                    border: 1.5px solid #e0e0e0;
+                    border-radius: 10px;
+                    font-size: 0.88rem;
+                    outline: none;
+                    margin-bottom: 16px;
+                    font-family: inherit;
+                    height: 80px;
+                    resize: none;
+                }
+
+            .reject-btns {
+                display: flex;
+                gap: 10px;
+            }
+
+            .btn-confirm-reject {
+                flex: 1;
+                padding: 11px;
+                background: #ef4444;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .btn-cancel-reject {
+                flex: 1;
+                padding: 11px;
+                background: #f1f5f9;
+                color: #555;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            @@media (max-width: 768px) {
+                .sidebar {
+                    width: 100%;
+                    height: auto;
+                    position: relative;
+                }
+
+                .main {
+                    margin-left: 0;
+                    width: 100%;
+                    max-width: 100%;
+                    padding: 20px 15px;
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="/customer/images/logoo.png" alt="Artisan Valley">
+            <p>Moderator Panel</p>
+        </div>
+        <a class="nav-item" href="/Moderator/Dashboard">
+            <i class="fa-solid fa-clock"></i> Pending Queue
+        </a>
+        <a class="nav-item active" href="/Moderator/PaymentApprovals">
+            <i class="fa-solid fa-money-check-dollar"></i> Payment Approvals
+        </a>
+        <a class="nav-item" href="/Chat/Messages" style="position:relative;">
+            <i class="fa-solid fa-comment-dots"></i> Messages
+            <span id="chatUnreadBadge" style="display:none; margin-left:auto; background:#dc2626; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.72rem;">0</span>
+        </a>
+        <div class="sidebar-bottom">
+            <a href="javascript:void(0)" class="logout-item" onclick="window.location.href='/Moderator/Logout'">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="topbar">
+            <div>
+                <h1>Payment Approvals</h1>
+                <p>Verify seller subscription payments against your JazzCash / Easypaisa transaction history</p>
+            </div>
+            <div class="mod-badge"><i class="fa-solid fa-money-check-dollar"></i> @Model.Count Pending</div>
+        </div>
+        <div style="background:#fff7ed; border:1.5px solid #fed7aa; border-radius:12px; padding:14px 20px; margin-bottom:20px; display:flex; align-items:flex-start; gap:12px;">
+            <i class="fas fa-shield-halved" style="color:#c2410c; font-size:1.1rem; margin-top:2px;"></i>
+            <div style="font-size:0.85rem; color:#7c2d12;">
+                <strong>Before approving:</strong> Open your own JazzCash / Easypaisa app and search this exact Transaction ID in your account history. Confirm the <strong>amount, sender number, and TID</strong> all match the submitted screenshot. The system does not verify transactions automatically — approval is final and restores the seller's dashboard access immediately.
+            </div>
+        </div>
+        @if (!Model.Any())
+        {
+            <div class="empty-state">
+                <i class="fa-solid fa-circle-check"></i>
+                <p>No pending payments to review.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-scroll">
+                <table id="paymentsTable">
+                    <thead>
+                        <tr>
+                            <th>Seller Email</th>
+                            <th>Method</th>
+                            <th>Transaction ID</th>
+                            <th>Amount</th>
+                            <th>Sender Number</th>
+                            <th>Receipt</th>
+                            <th>Submitted</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model)
+                        {
+                            <tr id="row-@p.Id">
+                                <td>@p.SellerEmail</td>
+                                <td>@p.PaymentMethod</td>
+                                <td><strong>@p.TransactionId</strong></td>
+                                <td>Rs. @p.Amount.ToString("N0")</td>
+                                <td>@p.SenderNumber</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(p.ScreenshotPath))
+                                    {
+                                        <a href="@p.ScreenshotPath" target="_blank" style="color:#a64d79; font-weight:600;">View</a>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:#9ca3af;">—</span>
+                                    }
+                                </td>
+                                <td>@p.SubmittedAt.ToString("dd MMM yyyy, hh:mm tt", System.Globalization.CultureInfo.InvariantCulture)</td>
+                                <td>
+                                    <button class="btn-approve" onclick="approvePayment(@p.Id)">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                    <button class="btn-reject" onclick="openRejectModal(@p.Id)">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <div class="reject-modal" id="rejectModal">
+        <div class="reject-box">
+            <h3><i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i> Reject Payment</h3>
+            <textarea id="rejectReason" placeholder="Enter reason for rejection..."></textarea>
+            <div class="reject-btns">
+                <button class="btn-cancel-reject" onclick="closeRejectModal()">Cancel</button>
+                <button class="btn-confirm-reject" onclick="confirmReject()">Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            fetch('/Chat/GetUnreadCount')
+                .then(r => r.json())
+                .then(d => {
+                    const badge = document.getElementById('chatUnreadBadge');
+                    if (d.count > 0) {
+                        badge.textContent = d.count;
+                        badge.style.display = 'inline-block';
+                    }
+                });
+
+            var rejectingId = null;
+
+            function approvePayment(id) {
+                fetch('/Moderator/ApprovePayment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: id })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('row-' + id).remove();
+                        } else {
+                            alert(data.error || 'Something went wrong.');
+                        }
+                    });
+            }
+
+            function openRejectModal(id) {
+                rejectingId = id;
+                document.getElementById('rejectModal').classList.add('show');
+            }
+
+            function closeRejectModal() {
+                document.getElementById('rejectModal').classList.remove('show');
+                document.getElementById('rejectReason').value = '';
+                rejectingId = null;
+            }
+
+            function confirmReject() {
+                var reason = document.getElementById('rejectReason').value.trim();
+                if (!reason) {
+                    document.getElementById('rejectReason').style.border = '1.5px solid #dc2626';
+                    return;
+                }
+
+                fetch('/Moderator/RejectPayment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: rejectingId, reason: reason })
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('row-' + rejectingId).remove();
+                            closeRejectModal();
+                        } else {
+                            alert(data.error || 'Something went wrong.');
+                        }
+                    });
+            }
+    </script>
+</body>
+</html>

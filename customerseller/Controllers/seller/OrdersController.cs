@@ -28,14 +28,13 @@ namespace customerseller.Controllers.seller
                 .Select(p => p.Id)
                 .ToList();
 
-            // Orders ke saath Items bhi load karo
             var orders = _context.Orders
                 .Include(o => o.Items)
                 .Where(o => o.Items != null && o.Items.Any(i => sellerProductIds.Contains(i.ProductId)))
                 .OrderByDescending(o => o.OrderDate)
                 .ToList();
 
-            // Har order mein seller ke products ki info set karo
+           
             foreach (var order in orders)
             {
                 var sellerItem = order.Items?.FirstOrDefault(i => sellerProductIds.Contains(i.ProductId));
@@ -44,7 +43,7 @@ namespace customerseller.Controllers.seller
                     order.ProductName = sellerItem.Title;
                     order.Price = sellerItem.Price * sellerItem.Quantity;
                 }
-                // CustomerName set karo
+               
                 if (string.IsNullOrEmpty(order.CustomerName))
                     order.CustomerName = (order.FirstName + " " + order.LastName).Trim();
 
@@ -90,7 +89,7 @@ namespace customerseller.Controllers.seller
 
             _context.SaveChanges();
 
-            // Customer ko email bhejo
+           
             try
             {
                 var message = new MimeMessage();
@@ -126,9 +125,6 @@ namespace customerseller.Controllers.seller
                 Console.WriteLine("Email error: " + emailEx.Message);
             }
 
-            // WhatsApp message generate karo
-
-            // WhatsApp message generate karo
             var subtotal = order.Total - (order.DeliveryFee ?? 0);
             var whatsappMsg = $@"Assalam o Alaikum! 🎉
 Your order is on its way!

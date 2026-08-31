@@ -4,7 +4,18 @@
 
 <main class="contact-container">
     <h1>Contact Us</h1>
-
+    @if (TempData["ContactSuccess"] != null)
+{
+    <div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:12px 16px; margin-bottom:20px; color:#2e7d32;">
+        @TempData["ContactSuccess"]
+    </div>
+}
+@if (TempData["ContactError"] != null)
+{
+    <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:8px; padding:12px 16px; margin-bottom:20px; color:#c62828;">
+        @TempData["ContactError"]
+    </div>
+}
     <section>
         <p>
             If you have any questions, suggestions, or need support regarding our handmade products,

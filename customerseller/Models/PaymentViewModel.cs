@@ -7,7 +7,7 @@ namespace customerseller.Models
         public string OrderId { get; set; }
         public string CustomerName { get; set; }
         public decimal Amount { get; set; }
-        public string Status { get; set; } // "Collected" or "In-Transit"
+        public string Status { get; set; } 
     }
 
     public class PaymentViewModel

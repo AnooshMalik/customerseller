@@ -1,5 +1,4 @@
-﻿/* ===================== CART SYSTEM - GLOBAL ===================== */
-var cart = JSON.parse(localStorage.getItem("cart")) || [];
+﻿var cart = JSON.parse(localStorage.getItem("cart")) || [];
 
 function saveCart() {
     localStorage.setItem("cart", JSON.stringify(cart));
@@ -116,8 +115,6 @@ document.addEventListener("click", function (e) {
     openCart();
 });
 
-/* ===================== SEARCH ===================== */
-/* ===================== SEARCH ===================== */
 document.addEventListener("DOMContentLoaded", function () {
     var searchInput = document.getElementById("searchInput");
     var searchBtn = document.getElementById("searchBtn");
@@ -126,21 +123,21 @@ document.addEventListener("DOMContentLoaded", function () {
     var searchResults = document.getElementById("searchResults");
 
     var searchData = [
-        // Fabric & Textile
+        
         { name: "Fabric & Textile", url: "/Products/FabricTextile", category: "Category" },
         { name: "Cushion Covers", url: "/Products/FabricCushionCovers", category: "Fabric & Textile" },
         { name: "Printed Kurtas", url: "/Products/FabricKurtas", category: "Fabric & Textile" },
         { name: "Tie-Dye Dupattas", url: "/Products/FabricDupattas", category: "Fabric & Textile" },
         { name: "Tote Bags", url: "/Products/FabricToteBags", category: "Fabric & Textile" },
 
-        // Wool & Yarn
+       
         { name: "Wool & Yarn", url: "/Products/WoolYarn", category: "Category" },
         { name: "Sweaters", url: "/Products/WoolSweaters", category: "Wool & Yarn" },
         { name: "Crochet Bags", url: "/Products/WoolCrochetBags", category: "Wool & Yarn" },
         { name: "Storage Baskets", url: "/Products/WoolStorageBaskets", category: "Wool & Yarn" },
         { name: "Beanies", url: "/Products/WoolBeanies", category: "Wool & Yarn" },
 
-        // Leather
+       
         { name: "Leather", url: "/Products/Leather", category: "Category" },
         { name: "Leather Handbags", url: "/Products/LeatherHandbags", category: "Leather" },
         { name: "Wallets", url: "/Products/LeatherWallets", category: "Leather" },
@@ -148,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Leather Keychains", url: "/Products/LeatherKeychains", category: "Leather" },
         { name: "Journals", url: "/Products/LeatherJournals", category: "Leather" },
 
-        // Wood
+       
         { name: "Wood", url: "/Products/Wood", category: "Category" },
         { name: "Photo Frames", url: "/Products/WoodPhotoFrames", category: "Wood" },
         { name: "Wood Necklaces", url: "/Products/WoodNecklaces", category: "Wood" },
@@ -157,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Wood Showpieces", url: "/Products/WoodShowpieces", category: "Wood" },
         { name: "Wood Keychains", url: "/Products/WoodKeychains", category: "Wood" },
 
-        // Clay & Pottery
+      
         { name: "Clay & Pottery", url: "/Products/ClayPottery", category: "Category" },
         { name: "Flower Pots", url: "/Products/ClayFlowerPots", category: "Clay & Pottery" },
         { name: "Coffee Mugs", url: "/Products/ClayCoffeeMugs", category: "Clay & Pottery" },
@@ -165,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Clay Earrings", url: "/Products/ClayEarrings", category: "Clay & Pottery" },
         { name: "Clay Figurines", url: "/Products/ClayFigurines", category: "Clay & Pottery" },
 
-        // Jewels
+        
         { name: "Jewels", url: "/Products/Jewels", category: "Category" },
         { name: "Necklaces", url: "/Products/JewelsNecklaces", category: "Jewels" },
         { name: "Bracelets", url: "/Products/JewelsBracelets", category: "Jewels" },
@@ -173,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Bangles", url: "/Products/JewelsBangles", category: "Jewels" },
         { name: "Earrings", url: "/Products/JewelsEarrings", category: "Jewels" },
 
-        // Paper & Cards
+        
         { name: "Paper & Cards", url: "/Products/PaperCards", category: "Category" },
         { name: "Greeting Cards", url: "/Products/PaperGreetingCards", category: "Paper & Cards" },
         { name: "Gift Boxes", url: "/Products/PaperGiftBoxes", category: "Paper & Cards" },
@@ -181,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Paper Showpieces", url: "/Products/PaperShowpieces", category: "Paper & Cards" },
         { name: "Scrapbooks", url: "/Products/PaperScrapbooks", category: "Paper & Cards" },
 
-        // Jute & Natural
+       
         { name: "Jute & Natural", url: "/Products/JuteNatural", category: "Category" },
         { name: "Jute Bags", url: "/Products/JuteBags", category: "Jute & Natural" },
         { name: "Baskets", url: "/Products/JuteBaskets", category: "Jute & Natural" },
@@ -189,7 +186,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Dried Bouquets", url: "/Products/JuteDriedBouquets", category: "Jute & Natural" },
         { name: "Paintings", url: "/Products/JutePaintings", category: "Jute & Natural" },
 
-        // Resin & Epoxy
+        
         { name: "Resin & Epoxy", url: "/Products/ResinEpoxy", category: "Category" },
         { name: "Coasters", url: "/Products/ResinCoasters", category: "Resin & Epoxy" },
         { name: "Resin Earrings", url: "/Products/ResinEarrings", category: "Resin & Epoxy" },
@@ -197,7 +194,7 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Wall Art", url: "/Products/ResinWallArt", category: "Resin & Epoxy" },
         { name: "Resin Serving Trays", url: "/Products/ResinServingTrays", category: "Resin & Epoxy" },
 
-        // Metal & Wire
+        
         { name: "Metal & Wire", url: "/Products/MetalWire", category: "Category" },
         { name: "Metal Earrings", url: "/Products/MetalEarrings", category: "Metal & Wire" },
         { name: "Vases", url: "/Products/MetalVases", category: "Metal & Wire" },
@@ -233,7 +230,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 suggestions.style.display = "block";
             } else {
-                // General search — controller pe bhejo
+               
                 var li = document.createElement("li");
                 li.innerHTML = '<i class="fa-solid fa-magnifying-glass" style="margin-right:8px;color:#a64d79;"></i> Search "<strong>' + query + '</strong>" in all products';
                 li.style.padding = "12px 15px";
@@ -263,10 +260,10 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             if (matches.length === 1) {
-                // Seedha us category pe
+               
                 window.location.href = matches[0].url;
             } else if (matches.length > 1) {
-                // Multiple category matches — list dikhao
+               
                 var resultsHtml = '<div style="margin-top:20px;"><h3 style="font-size:1.1rem;margin-bottom:15px;">Results:</h3>';
                 matches.forEach(function (match) {
                     resultsHtml += '<a href="' + match.url + '" style="display:block;padding:12px 15px;margin-bottom:8px;background:#f9f9f9;border-radius:6px;text-decoration:none;color:#333;">' +
@@ -279,13 +276,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     searchResults.style.display = "block";
                 }
             } else {
-                // Koi category match nahi — general product search
+               
                 window.location.href = "/Products/Search?query=" + encodeURIComponent(query);
             }
         }
     }
 });
-/* ===================== SEARCH SIDEBAR ===================== */
+
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("searchIcon")?.addEventListener("click", function (e) {
         e.preventDefault();
@@ -307,7 +304,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-/* ===================== SHOP DROPDOWN ===================== */
+
 document.addEventListener("DOMContentLoaded", function () {
     var shopDropBtn = document.getElementById("shopDropBtn");
     var shopDropdownMenu = document.getElementById("shopDropdownMenu");
@@ -332,7 +329,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
-/* ===================== LOGIN / REGISTER / RECOVER ===================== */
+
 document.addEventListener("DOMContentLoaded", function () {
 
     function showSidebar(overlayId, sidebarId) {
@@ -356,14 +353,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("closeLoginPopup")?.addEventListener("click", function () {
         hideSidebar("loginOverlay", "loginPopup");
+        window.location.href = window.location.pathname;
     });
 
     document.getElementById("createAccountLink")?.addEventListener("click", function (e) {
         e.preventDefault();
+        var regReturnInput = document.getElementById('registerReturnUrl');
+        if (regReturnInput) regReturnInput.value = window.location.pathname;
         hideSidebar("loginOverlay", "loginPopup");
         showSidebar("registerOverlay", "registerSidebar");
     });
-
     document.getElementById("backToLogin")?.addEventListener("click", function (e) {
         e.preventDefault();
         hideSidebar("registerOverlay", "registerSidebar");
@@ -395,7 +394,7 @@ document.addEventListener("DOMContentLoaded", function () {
         showSidebar("loginOverlay", "loginPopup");
     }
 
-    // Footer links
+    
     document.getElementById("footerLoginLink")?.addEventListener("click", function (e) {
         e.preventDefault();
         showSidebar("loginOverlay", "loginPopup");
@@ -403,6 +402,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("footerRegisterLink")?.addEventListener("click", function (e) {
         e.preventDefault();
+        var regReturnInput = document.getElementById('registerReturnUrl');
+        if (regReturnInput) regReturnInput.value = window.location.pathname;
         showSidebar("registerOverlay", "registerSidebar");
     });
 
@@ -411,7 +412,7 @@ document.addEventListener("DOMContentLoaded", function () {
         openCart();
     });
 
-    // Cart icon
+    
     document.getElementById("cartIcon")?.addEventListener("click", function (e) {
         e.preventDefault();
         openCart();
@@ -435,11 +436,11 @@ document.addEventListener("DOMContentLoaded", function () {
         window.location.href = "/Cart/Checkout";
     });
 
-    // Render cart on page load
+    
     renderCart();
 });
 
-/* ===================== ORDER TRACKING ===================== */
+
 document.addEventListener('DOMContentLoaded', function () {
     var trackModal = document.getElementById('trackingModal');
     var trackBtn = document.getElementById('trackOrderBtn');

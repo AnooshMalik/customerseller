@@ -83,12 +83,12 @@ namespace customerseller.Controllers
                 {
 
                     OrderId = orderId,
-                    CustomerName = (model.FirstName + " " + model.LastName).Trim(), // YEH ADD KARO
+                    CustomerName = (model.FirstName + " " + model.LastName).Trim(), 
                     Email = HttpContext.Session.GetString("UserEmail") ?? model.Email,
                   
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    CustomerPhone = Request.Form["Email"].ToString(),  // ✅ YAHI RAKHNI HAI
+                    CustomerPhone = Request.Form["Email"].ToString(),  
 
                     Address = model.Address,
                     City = model.City ?? "Rawalpindi",
@@ -131,7 +131,6 @@ namespace customerseller.Controllers
                     return Json(new { success = false, message = "DB Error: " + dbEx.Message + " | Inner: " + inner });
                 }
 
-                // Email
                 try
                 {
                     string itemsList = string.Join("", order.Items.Select(i =>
@@ -158,7 +157,7 @@ namespace customerseller.Controllers
                 }
                 catch (Exception emailEx)
                 {
-                    // Email fail hone par order cancel nahi hoga
+                   
                     Console.WriteLine("Email error: " + emailEx.Message);
                 }
 
@@ -252,7 +251,7 @@ namespace customerseller.Controllers
 
                 if (order != null)
                 {
-                    // Null safety
+                    
                     order.Items ??= new List<CartItem>();
                     order.TrackingTimeline ??= new List<TrackingStep>();
                     return View(order);
@@ -365,8 +364,19 @@ namespace customerseller.Controllers
         [HttpGet]
         public IActionResult Complaint(string? orderId, string? amount)
         {
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Index", "Home", new { returnUrl = "/Cart/Complaint" });
+            }
+
+            var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
+
             ViewBag.OrderId = orderId ?? "";
             ViewBag.Amount = amount ?? "";
+            ViewBag.CustomerName = user != null ? $"{user.FirstName} {user.LastName}".Trim() : "";
+            ViewBag.CustomerEmail = userEmail;
+
             return View();
         }
     }

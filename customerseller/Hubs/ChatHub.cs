@@ -106,9 +106,7 @@ namespace customerseller.Hubs
                     conversation.LastMessageAt = System.DateTime.Now;
                     _context.SaveChanges();
 
-                    // Sirf customer (jisne message shuru kiya) ko live bubble dikhao.
-                    // Seller ki apni open chat mein ye khud-ba-khud nahi aana chahiye,
-                    // isliye poore "conv_" group ki jagah sirf customer ke personal group ko bhejte hain.
+                   
                     await Clients.Group(senderEmail).SendAsync("ReceiveMessage", new
                     {
                         id = autoReply.Id,

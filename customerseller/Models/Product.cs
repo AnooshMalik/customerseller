@@ -23,7 +23,6 @@ namespace customerseller.Models
         public string? Sizes { get; set; }
         public string? Category { get; set; }
 
-        // ← NEW: subcategory within the main category
         public string? SubCategory { get; set; }
 
         public string? DisplayId { get; set; }
@@ -44,7 +43,7 @@ namespace customerseller.Models
         public string? Color { get; set; }
         public string? AdminRejectionReason { get; set; }
 
-        // ← NEW: approval status shown in table ("Approved" / "Pending" / "Rejected")
+       
         public string? Status { get; set; } = "Pending";
     }
 }

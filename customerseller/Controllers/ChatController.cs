@@ -27,8 +27,7 @@ namespace customerseller.Controllers
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Index", "Home");
 
-            // Poori page ko browser cache karne se roko — warna dusre tab/session
-            // mein purani role wali cached HTML dikh sakti hai
+           
             Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
             Response.Headers["Pragma"] = "no-cache";
             Response.Headers["Expires"] = "0";
@@ -45,7 +44,7 @@ namespace customerseller.Controllers
             var (email, role) = GetCurrentUser();
             if (string.IsNullOrEmpty(email)) return Json(new List<object>());
 
-            // Sirf current logged-in email ki apni conversations (already secure)
+            
             var conversations = _context.Conversations
                 .Where(c => c.User1Email == email || c.User2Email == email)
                 .OrderByDescending(c => c.LastMessageAt)
@@ -56,19 +55,16 @@ namespace customerseller.Controllers
                 var otherEmail = c.User1Email == email ? c.User2Email : c.User1Email;
                 var otherRole = c.User1Email == email ? c.User2Role : c.User1Role;
 
-                // Safety net: agar yeh pairing current ChatPermissions rules ke hisab se
-                // allowed nahi hai (role change ho gaya ya purani/stale row hai, ya koi
-                // stray Customer-Admin row hai), to yeh conversation kisi ko mat dikhao —
-                // Admin ko bhi nahi. Admin sirf Seller/Courier/Moderator se chat kar sakta hai.
+                
                 if (!ChatPermissions.IsAllowed(role, otherRole))
                     return null;
 
-                // Is user ne kab chat clear ki thi (agar ki hai to)
+               
                 var clearedAt = c.User1Email == email ? c.User1ClearedAt : c.User2ClearedAt;
 
                 var otherName = GetDisplayName(otherEmail, otherRole);
 
-                // Clear ke baad ke messages hi consider karo
+               
                 var messagesQuery = _context.Messages.Where(m => m.ConversationId == c.Id);
                 if (clearedAt.HasValue)
                     messagesQuery = messagesQuery.Where(m => m.SentAt > clearedAt.Value);
@@ -77,7 +73,7 @@ namespace customerseller.Controllers
                     .OrderByDescending(m => m.SentAt)
                     .FirstOrDefault();
 
-                // Agar clear kiya tha aur uske baad koi naya message nahi aaya, to chat list mein mat dikhao
+               
                 if (clearedAt.HasValue && lastMsg == null)
                     return null;
 
@@ -105,8 +101,6 @@ namespace customerseller.Controllers
         {
             var (email, role) = GetCurrentUser();
 
-            // Admin: completely independent path, does not depend on ChatPermissions at all.
-            // Always shows Sellers, Couriers (Riders), and Moderators.
             if (role == "Admin")
             {
                 var adminResult = new List<object>();
@@ -135,7 +129,7 @@ namespace customerseller.Controllers
             var allowedRoles = ChatPermissions.GetAllowedRolesFor(role) ?? new List<string>();
             var result = new List<object>();
 
-            // Users table se (Customer, Seller) — Admin ke liye Customer show mat karo
+           
             var users = _context.Users
                 .Where(u => allowedRoles.Contains(u.Role) && u.Email != email && u.Role != "Customer")
                 .ToList();
@@ -146,20 +140,20 @@ namespace customerseller.Controllers
                 name = GetDisplayName(u.Email, u.Role)
             }));
 
-            // Courier
+            
             if (allowedRoles.Contains("Courier"))
             {
                 var couriers = _context.CourierCompanies.Where(c => c.Email != email).ToList();
                 result.AddRange(couriers.Select(c => new { email = c.Email, role = "Courier", name = c.CompanyName }));
             }
 
-            // Admin (fixed single account)
+          
             if (allowedRoles.Contains("Admin") && email != "artisanvalley.store@gmail.com")
             {
                 result.Add(new { email = "artisanvalley.store@gmail.com", role = "Admin", name = "Admin Support" });
             }
 
-            // Moderator — duplicates hatao (distinct by email)
+            
             if (allowedRoles.Contains("Moderator"))
             {
                 var mods = _context.ModeratorSettings
@@ -184,7 +178,7 @@ namespace customerseller.Controllers
             if (conversation.User1Email != email && conversation.User2Email != email)
                 return Forbid();
 
-            // Is user ne kab chat clear ki thi (agar ki hai to)
+            
             var clearedAt = conversation.User1Email == email
                 ? conversation.User1ClearedAt
                 : conversation.User2ClearedAt;
@@ -204,7 +198,7 @@ namespace customerseller.Controllers
             {
                 _context.SaveChanges();
 
-                // Doosre banda (jo sender tha) ko real-time bata do ke uske messages "seen" ho gaye
+                
                 await _hubContext.Clients.Group("conv_" + conversationId).SendAsync("MessagesSeen", new
                 {
                     conversationId,
@@ -248,7 +242,7 @@ namespace customerseller.Controllers
 
             if (existing != null)
             {
-                // Keep the conversation but remember the most recent product being discussed
+                
                 if (!string.IsNullOrEmpty(productId))
                 {
                     existing.RelatedProductId = productId;
@@ -274,7 +268,7 @@ namespace customerseller.Controllers
             }
             catch (Microsoft.EntityFrameworkCore.DbUpdateException)
             {
-                // Duplicate hit — kisi aur request/tab ne pehle hi conversation bana di ho sakti hai
+                
                 _context.Entry(conversation).State = Microsoft.EntityFrameworkCore.EntityState.Detached;
 
                 var raceExisting = _context.Conversations.FirstOrDefault(c =>
@@ -361,9 +355,6 @@ namespace customerseller.Controllers
             return Json(new { success = true });
         }
 
-        // Sirf current user ke liye chat clear kar deta hai (WhatsApp jaisa).
-        // Messages delete nahi hote, dusra banda phir bhi dekh sakta hai.
-        // Naya message aane par chat list mein dobara aa jayegi.
         [HttpPost]
         public IActionResult ClearChat(int conversationId)
         {

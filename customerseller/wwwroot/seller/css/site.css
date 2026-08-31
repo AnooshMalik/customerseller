@@ -116,7 +116,7 @@ body {
         background-color: rgba(255,100,120,0.15) !important;
     }
 
-/* Main */
+
 main {
     margin-left: var(--sidebar-width);
     flex: 1;
@@ -125,7 +125,6 @@ main {
     background: var(--bg-page);
 }
 
-/* Stats Grid */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -260,7 +259,6 @@ main {
     }
 }
 
-/* Activity Box */
 .activity-box {
     background: #fff;
     border-radius: 14px;
@@ -330,7 +328,7 @@ main {
     color: var(--accent-color);
     font-weight: 600;
 }
-/* ===== PRODUCTS PAGE ===== */
+
 .btn-add {
     background: #7c3aed;
     color: #fff;
@@ -457,7 +455,7 @@ tr:hover td {
             background: #fff;
         }
 
-/* Page Header */
+
 .header h1 {
     font-size: 1.5rem !important;
     font-weight: 700 !important;
@@ -469,7 +467,7 @@ tr:hover td {
     font-size: 0.85rem !important;
     margin-top: 3px !important;
 }
-/* ===== ORDERS PAGE ===== */
+
 .order-card {
     background: #fff;
     border-radius: 14px;
@@ -531,7 +529,7 @@ tr:hover td {
         color: #fff;
     }
 
-/* ===== TRACKING STEPPER ===== */
+
 .tracking-section {
     background: #fff;
     border-radius: 14px;
@@ -595,7 +593,7 @@ tr:hover td {
 .step-item.active h4 {
     color: #a64d79;
 }
-/* ===== REVIEWS PAGE ===== */
+
 .reviews-container {
     max-width: 800px;
 }
