@@ -1,4 +1,4 @@
-using customerseller.Models; // Namespace sahi kar diya aapke project ke mutabik
+using customerseller.Models; 
 using Microsoft.EntityFrameworkCore;
 using customerseller.Hubs;
 
@@ -13,7 +13,7 @@ builder.Services.AddAntiforgery(options => {
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Session fix - 30 din tak rahegi
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromDays(30);
@@ -58,7 +58,7 @@ app.Use(async (context, next) =>
             var roleCookie = context.Request.Cookies["UserRole"];
             context.Session.SetString("UserRole", roleCookie ?? "Customer");
 
-            // ShopName bhi restore karo
+           
             var shopCookie = context.Request.Cookies["ShopName"];
             if (!string.IsNullOrEmpty(shopCookie))
                 context.Session.SetString("ShopName", shopCookie);

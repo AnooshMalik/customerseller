@@ -2,7 +2,7 @@
   <ul style="list-style:none; margin:0; padding:0; display:flex; gap:28px; align-items:center;">
  
     <li style="position:static;" class="mega-item">
-      <a href="javascript:void(0)" class="mega-nav-link" style="font-size:1rem; font-weight:600; color:#222; text-decoration:none; display:inline-flex; align-items:center; gap:5px; cursor:pointer; outline:none !important; -webkit-tap-highlight-color:transparent; border:none;">
+            <a href="#" class="mega-nav-link" style="font-size:1rem; font-weight:600; color:#222; text-decoration:none; display:inline-flex; align-items:center; gap:5px; cursor:pointer; outline:none !important; -webkit-tap-highlight-color:transparent; border:none;">
         Shop <i class="fa-solid fa-chevron-down" style="font-size:0.65rem; pointer-events:none;"></i>
       </a>
  
@@ -266,10 +266,12 @@
   align-self: start !important;
 }
 
-body.menu-open {
-  overflow: auto !important;
-}
- 
+    html.menu-open,
+    body.menu-open {
+        overflow: hidden !important;
+        height: 100% !important;
+    }
+
   body.menu-open { overflow: hidden; }
     
     @@media (max-width: 768px) {
@@ -316,11 +318,10 @@ body.menu-open {
   megaItem.addEventListener('mouseenter', () => {
     clearTimeout(hideTimer);
  
-   
-    const navbarEl = megaItem.closest('header') || megaItem.closest('nav');
+       const navbarEl = document.querySelector('.infobar');
     if (navbarEl) {
       const rect = navbarEl.getBoundingClientRect();
-      megaPanel.style.top    = rect.bottom + 'px';
+            megaPanel.style.top = (rect.bottom - 2) + 'px';   
       megaPanel.style.position = 'fixed';
       megaPanel.style.left   = '0';
       megaPanel.style.right  = '0';
@@ -359,4 +360,55 @@ body.menu-open {
       document.body.classList.remove('menu-open');
     }
   });
+      megaItem.addEventListener('mouseenter', () => {
+      clearTimeout(hideTimer);
+
+      const navbarEl = megaItem.closest('header') || megaItem.closest('nav');
+      if (navbarEl) {
+        const rect = navbarEl.getBoundingClientRect();
+        megaPanel.style.top    = rect.bottom + 'px';
+        megaPanel.style.position = 'fixed';
+        megaPanel.style.left   = '0';
+        megaPanel.style.right  = '0';
+        megaPanel.style.width  = '100%';
+        megaPanel.style.height = 'auto';
+      }
+
+      megaPanel.classList.add('active');
+      document.body.classList.add('menu-open');
+      document.documentElement.classList.add('menu-open');   
+    });
+
+    megaItem.addEventListener('mouseleave', () => {
+      hideTimer = setTimeout(() => {
+        megaPanel.classList.remove('active');
+        document.body.classList.remove('menu-open');
+        document.documentElement.classList.remove('menu-open');   
+      }, 150);
+    });
+
+    megaPanel.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+    megaPanel.addEventListener('mouseleave', () => {
+      hideTimer = setTimeout(() => {
+        megaPanel.classList.remove('active');
+        document.body.classList.remove('menu-open');
+        document.documentElement.classList.remove('menu-open');   
+      }, 150);
+    });
+
+    megaNavLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      megaPanel.classList.toggle('active');
+      const isActive = megaPanel.classList.contains('active');
+      document.body.classList.toggle('menu-open', isActive);
+      document.documentElement.classList.toggle('menu-open', isActive);   
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!megaItem.contains(e.target)) {
+        megaPanel.classList.remove('active');
+        document.body.classList.remove('menu-open');
+        document.documentElement.classList.remove('menu-open');   
+      }
+    });
 </script>

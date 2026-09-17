@@ -2,6 +2,11 @@
 @{
     ViewData["Title"] = "Payment Approvals";
     Layout = null;
+
+    var allShops = ViewBag.AllShops as List<customerseller.Models.SellerShop> ?? new List<customerseller.Models.SellerShop>();
+    int paidCount = allShops.Count(s => s.IsPaid && s.SubscriptionEnd.HasValue && s.SubscriptionEnd.Value >= DateTime.Now);
+    int trialCount = allShops.Count(s => !s.IsPaid && s.SubscriptionEnd.HasValue && s.SubscriptionEnd.Value >= DateTime.Now);
+    int expiredCount = allShops.Count(s => !s.SubscriptionEnd.HasValue || s.SubscriptionEnd.Value < DateTime.Now);
 }
 <!DOCTYPE html>
 <html>
@@ -21,8 +26,10 @@
                 font-family: 'Segoe UI', sans-serif;
                 background: #f5f3ff;
                 display: flex;
+                color: #1a1a2e;
             }
 
+            /* Sidebar */
             .sidebar {
                 width: 260px;
                 background: #a64d79;
@@ -92,77 +99,203 @@
                 font-size: 0.88rem;
             }
 
+            /* Main */
             .main {
                 margin-left: 260px;
-                padding: 30px 40px;
+                padding: 32px 44px 60px;
                 min-height: 100vh;
-                max-width: 1100px;
+                max-width: 1180px;
                 width: calc(100% - 260px);
             }
 
             .topbar {
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
+                align-items: flex-start;
                 margin-bottom: 28px;
+                gap: 16px;
+                flex-wrap: wrap;
             }
 
                 .topbar h1 {
-                    font-size: 1.5rem;
+                    font-size: 1.55rem;
                     color: #1a1a2e;
-                    font-weight: 700;
+                    font-weight: 800;
+                    letter-spacing: -0.02em;
                 }
 
                 .topbar p {
-                    color: #888;
-                    font-size: 0.85rem;
-                    margin-top: 3px;
+                    color: #8b8b9a;
+                    font-size: 0.87rem;
+                    margin-top: 4px;
                 }
 
             .mod-badge {
                 background: #a64d79;
                 color: #fff;
-                padding: 8px 18px;
-                border-radius: 20px;
+                padding: 9px 20px;
+                border-radius: 24px;
                 font-size: 0.82rem;
-                font-weight: 600;
+                font-weight: 700;
                 display: flex;
                 align-items: center;
-                gap: 7px;
+                gap: 8px;
+                white-space: nowrap;
+                box-shadow: 0 4px 14px rgba(166,77,121,0.28);
             }
 
+            /* Stat summary cards */
+            .stat-cards {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 16px;
+                margin-bottom: 28px;
+            }
+
+            .stat-card {
+                background: #fff;
+                border-radius: 14px;
+                padding: 18px 20px;
+                box-shadow: 0 2px 12px rgba(23,10,40,0.05);
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                border: 1px solid #f0edf7;
+            }
+
+                .stat-card .icon-circle {
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.05rem;
+                    flex-shrink: 0;
+                }
+
+                .stat-card .num {
+                    font-size: 1.35rem;
+                    font-weight: 800;
+                    line-height: 1;
+                }
+
+                .stat-card .label {
+                    font-size: 0.74rem;
+                    color: #9a95a8;
+                    font-weight: 600;
+                    margin-top: 4px;
+                    letter-spacing: 0.2px;
+                }
+
+            .icon-pending {
+                background: #fef3e2;
+                color: #d97706;
+            }
+
+            .icon-active {
+                background: #e5f9ee;
+                color: #059669;
+            }
+
+            .icon-expired {
+                background: #fff2e0;
+                color: #ea8c00;
+            }
+
+            .icon-unpaid {
+                background: #fdeaea;
+                color: #dc2626;
+            }
+
+            /* Notice */
+            .notice-box {
+                background: #fff8ec;
+                border: 1px solid #fbe4b7;
+                border-radius: 14px;
+                padding: 16px 20px;
+                margin-bottom: 24px;
+                display: flex;
+                align-items: flex-start;
+                gap: 14px;
+            }
+
+                .notice-box i {
+                    color: #c2410c;
+                    font-size: 1.1rem;
+                    margin-top: 2px;
+                }
+
+                .notice-box div {
+                    font-size: 0.85rem;
+                    color: #7c4a1e;
+                    line-height: 1.5;
+                }
+
+            /* Section headers */
+            .section-heading {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                font-size: 1.08rem;
+                font-weight: 800;
+                color: #1a1a2e;
+                margin-bottom: 16px;
+            }
+
+                .section-heading i {
+                    color: #a64d79;
+                    font-size: 1rem;
+                }
+
+            .card-panel {
+                background: #fff;
+                border-radius: 16px;
+                box-shadow: 0 2px 14px rgba(23,10,40,0.05);
+                border: 1px solid #f0edf7;
+                overflow: hidden;
+                margin-bottom: 40px;
+            }
+
+            /* Table */
             table {
                 width: 100%;
                 border-collapse: collapse;
-                background: #fff;
-                border-radius: 14px;
-                overflow: hidden;
-                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
             }
 
             thead {
-                background: #f5f3ff;
+                background: #faf8ff;
             }
 
             th {
-                padding: 13px 18px;
+                padding: 14px 20px;
                 text-align: left;
-                font-size: 0.75rem;
-                font-weight: 700;
-                color: #6b7280;
+                font-size: 0.72rem;
+                font-weight: 800;
+                color: #8b8b9a;
                 text-transform: uppercase;
-                letter-spacing: 0.8px;
+                letter-spacing: 0.9px;
+                border-bottom: 1px solid #f0edf7;
             }
 
             td {
-                padding: 14px 18px;
+                padding: 15px 20px;
                 font-size: 0.87rem;
                 color: #1a1a2e;
-                border-top: 1px solid #f3f4f6;
+                border-top: 1px solid #f5f3fa;
             }
 
-            tr:hover td {
-                background: #fdf9ff;
+            tbody tr:hover td {
+                background: #fbf9ff;
+            }
+
+            .cell-strong {
+                font-weight: 700;
+            }
+
+            .cell-muted {
+                color: #8b8b9a;
+                font-size: 0.82rem;
             }
 
             .btn-approve {
@@ -172,46 +305,102 @@
                 padding: 8px 16px;
                 border-radius: 8px;
                 font-size: 0.8rem;
-                font-weight: 600;
+                font-weight: 700;
                 cursor: pointer;
                 margin-right: 6px;
+                transition: opacity 0.15s;
             }
+
+                .btn-approve:hover {
+                    opacity: 0.88;
+                }
 
             .btn-reject {
                 background: #fff;
                 color: #ef4444;
-                border: 1.5px solid #ef4444;
+                border: 1.5px solid #f3c6c6;
                 padding: 8px 16px;
                 border-radius: 8px;
                 font-size: 0.8rem;
-                font-weight: 600;
+                font-weight: 700;
                 cursor: pointer;
+                transition: all 0.15s;
             }
+
+                .btn-reject:hover {
+                    background: #fef2f2;
+                    border-color: #ef4444;
+                }
+
+            .link-view {
+                color: #a64d79;
+                font-weight: 700;
+                text-decoration: none;
+                font-size: 0.83rem;
+            }
+
+                .link-view:hover {
+                    text-decoration: underline;
+                }
 
             .empty-state {
                 text-align: center;
-                padding: 60px;
+                padding: 60px 30px;
                 color: #9ca3af;
-                background: #fff;
-                border-radius: 14px;
             }
 
                 .empty-state i {
-                    font-size: 3rem;
-                    color: #ddd;
-                    margin-bottom: 15px;
+                    font-size: 2.6rem;
+                    color: #d9d3ea;
+                    margin-bottom: 14px;
                     display: block;
+                }
+
+                .empty-state p {
+                    font-size: 0.92rem;
+                    font-weight: 500;
                 }
 
             .table-scroll {
                 overflow-x: auto;
             }
 
+            /* Status pill */
+            .status-pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 0.78rem;
+                font-weight: 700;
+            }
+
+            .status-active {
+                background: #e5f9ee;
+                color: #059669;
+            }
+
+            .status-expired {
+                background: #fff2e0;
+                color: #c2660a;
+            }
+
+            .status-unpaid {
+                background: #fdeaea;
+                color: #dc2626;
+            }
+
+            .status-trial {
+                background: #fef3e2;
+                color: #d97706;
+            }
+
             .reject-modal {
                 display: none;
                 position: fixed;
                 inset: 0;
-                background: rgba(0,0,0,0.5);
+                background: rgba(20,10,30,0.5);
                 z-index: 9999;
                 align-items: center;
                 justify-content: center;
@@ -223,30 +412,38 @@
 
             .reject-box {
                 background: #fff;
-                border-radius: 16px;
-                padding: 28px;
-                width: 380px;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+                border-radius: 18px;
+                padding: 30px;
+                width: 400px;
+                box-shadow: 0 24px 70px rgba(0,0,0,0.25);
             }
 
                 .reject-box h3 {
-                    font-size: 1.05rem;
+                    font-size: 1.08rem;
                     color: #1a1a2e;
-                    margin-bottom: 16px;
+                    margin-bottom: 18px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
                 }
 
                 .reject-box textarea {
                     width: 100%;
-                    padding: 10px 12px;
-                    border: 1.5px solid #e0e0e0;
+                    padding: 12px 14px;
+                    border: 1.5px solid #e5e0ee;
                     border-radius: 10px;
                     font-size: 0.88rem;
                     outline: none;
-                    margin-bottom: 16px;
+                    margin-bottom: 18px;
                     font-family: inherit;
-                    height: 80px;
+                    height: 90px;
                     resize: none;
+                    transition: border-color 0.15s;
                 }
+
+                    .reject-box textarea:focus {
+                        border-color: #a64d79;
+                    }
 
             .reject-btns {
                 display: flex;
@@ -255,38 +452,116 @@
 
             .btn-confirm-reject {
                 flex: 1;
-                padding: 11px;
+                padding: 12px;
                 background: #ef4444;
                 color: #fff;
                 border: none;
-                border-radius: 8px;
-                font-weight: 600;
+                border-radius: 10px;
+                font-weight: 700;
                 cursor: pointer;
             }
 
             .btn-cancel-reject {
                 flex: 1;
-                padding: 11px;
-                background: #f1f5f9;
+                padding: 12px;
+                background: #f3f1f8;
                 color: #555;
                 border: none;
-                border-radius: 8px;
-                font-weight: 600;
+                border-radius: 10px;
+                font-weight: 700;
                 cursor: pointer;
             }
 
+            @@media (max-width: 900px) {
+                .stat-cards {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
+            /* ===== MOBILE RESPONSIVE (top icon bar instead of squished sidebar) ===== */
             @@media (max-width: 768px) {
+                body {
+                    flex-direction: column;
+                }
+
                 .sidebar {
                     width: 100%;
                     height: auto;
                     position: relative;
+                    flex-direction: row;
+                    align-items: center;
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+
+                .sidebar-logo {
+                    display: none;
+                }
+
+                .nav-item {
+                    flex: 1 0 auto;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 4px;
+                    padding: 10px 8px;
+                    font-size: 0.62rem;
+                    text-align: center;
+                    white-space: nowrap;
+                    border-left: none;
+                    border-bottom: 3px solid transparent;
+                }
+
+                    .nav-item i {
+                        width: auto;
+                        font-size: 1rem;
+                    }
+
+                    .nav-item:hover, .nav-item.active {
+                        border-left: none;
+                        border-bottom-color: #fff;
+                    }
+
+                #chatUnreadBadge {
+                    position: absolute;
+                    top: 4px;
+                    right: 6px;
+                    margin-left: 0 !important;
+                }
+
+                .sidebar-bottom {
+                    margin-top: 0;
+                    padding: 0;
+                    border-top: none;
+                    flex: 0 0 auto;
+                }
+
+                .logout-item {
+                    flex-direction: column;
+                    gap: 4px;
+                    padding: 10px 12px;
+                    font-size: 0.62rem;
+                    white-space: nowrap;
                 }
 
                 .main {
                     margin-left: 0;
                     width: 100%;
                     max-width: 100%;
-                    padding: 20px 15px;
+                    padding: 20px 16px 40px;
+                }
+
+                .topbar h1 {
+                    font-size: 1.25rem;
+                }
+
+                .stat-cards {
+                    grid-template-columns: 1fr 1fr;
+                }
+
+                .reject-box {
+                    width: 90%;
+                    padding: 24px;
                 }
             }
     </style>
@@ -322,71 +597,177 @@
             </div>
             <div class="mod-badge"><i class="fa-solid fa-money-check-dollar"></i> @Model.Count Pending</div>
         </div>
-        <div style="background:#fff7ed; border:1.5px solid #fed7aa; border-radius:12px; padding:14px 20px; margin-bottom:20px; display:flex; align-items:flex-start; gap:12px;">
-            <i class="fas fa-shield-halved" style="color:#c2410c; font-size:1.1rem; margin-top:2px;"></i>
-            <div style="font-size:0.85rem; color:#7c2d12;">
+
+
+        <div class="stat-cards">
+            <div class="stat-card">
+                <div class="icon-circle icon-pending"><i class="fa-solid fa-hourglass-half"></i></div>
+                <div>
+                    <div class="num">@Model.Count</div>
+                    <div class="label">PENDING REVIEW</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="icon-circle icon-active"><i class="fa-solid fa-circle-check"></i></div>
+                <div>
+                    <div class="num">@paidCount</div>
+                    <div class="label">PAID SHOPS</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="icon-circle icon-pending"><i class="fa-solid fa-hourglass-half"></i></div>
+                <div>
+                    <div class="num">@trialCount</div>
+                    <div class="label">ON TRIAL</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="icon-circle icon-unpaid"><i class="fa-solid fa-circle-xmark"></i></div>
+                <div>
+                    <div class="num">@expiredCount</div>
+                    <div class="label">EXPIRED</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="notice-box">
+            <i class="fas fa-shield-halved"></i>
+            <div>
                 <strong>Before approving:</strong> Open your own JazzCash / Easypaisa app and search this exact Transaction ID in your account history. Confirm the <strong>amount, sender number, and TID</strong> all match the submitted screenshot. The system does not verify transactions automatically — approval is final and restores the seller's dashboard access immediately.
             </div>
         </div>
-        @if (!Model.Any())
-        {
-            <div class="empty-state">
-                <i class="fa-solid fa-circle-check"></i>
-                <p>No pending payments to review.</p>
-            </div>
-        }
-        else
-        {
-            <div class="table-scroll">
-                <table id="paymentsTable">
-                    <thead>
-                        <tr>
-                            <th>Seller Email</th>
-                            <th>Method</th>
-                            <th>Transaction ID</th>
-                            <th>Amount</th>
-                            <th>Sender Number</th>
-                            <th>Receipt</th>
-                            <th>Submitted</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var p in Model)
-                        {
-                            <tr id="row-@p.Id">
-                                <td>@p.SellerEmail</td>
-                                <td>@p.PaymentMethod</td>
-                                <td><strong>@p.TransactionId</strong></td>
-                                <td>Rs. @p.Amount.ToString("N0")</td>
-                                <td>@p.SenderNumber</td>
-                                <td>
-                                    @if (!string.IsNullOrEmpty(p.ScreenshotPath))
-                                    {
-                                        <a href="@p.ScreenshotPath" target="_blank" style="color:#a64d79; font-weight:600;">View</a>
-                                    }
-                                    else
-                                    {
-                                        <span style="color:#9ca3af;">—</span>
-                                    }
-                                </td>
-                                <td>@p.SubmittedAt.ToString("dd MMM yyyy, hh:mm tt", System.Globalization.CultureInfo.InvariantCulture)</td>
-                                <td>
-                                    <button class="btn-approve" onclick="approvePayment(@p.Id)">
-                                        <i class="fas fa-check"></i> Approve
-                                    </button>
-                                    <button class="btn-reject" onclick="openRejectModal(@p.Id)">
-                                        <i class="fas fa-times"></i> Reject
-                                    </button>
-                                </td>
+
+
+        <div class="section-heading"><i class="fa-solid fa-inbox"></i> Pending Submissions</div>
+        <div class="card-panel">
+            @if (!Model.Any())
+            {
+                <div class="empty-state">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <p>No pending payments to review.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-scroll">
+                    <table id="paymentsTable">
+                        <thead>
+                            <tr>
+                                <th>Seller Email</th>
+                                <th>Method</th>
+                                <th>Transaction ID</th>
+                                <th>Amount</th>
+                                <th>Sender Number</th>
+                                <th>Receipt</th>
+                                <th>Submitted</th>
+                                <th>Action</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
+                        </thead>
+                        <tbody>
+                            @foreach (var p in Model)
+                            {
+                                <tr id="row-@p.Id">
+                                    <td>@p.SellerEmail</td>
+                                    <td>@p.PaymentMethod</td>
+                                    <td class="cell-strong">@p.TransactionId</td>
+                                    <td>Rs. @p.Amount.ToString("N0")</td>
+                                    <td>@p.SenderNumber</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(p.ScreenshotPath))
+                                        {
+                                            <a href="@p.ScreenshotPath" target="_blank" class="link-view">View</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="cell-muted">—</span>
+                                        }
+                                    </td>
+                                    <td class="cell-muted">@p.SubmittedAt.ToString("dd MMM yyyy, hh:mm tt", System.Globalization.CultureInfo.InvariantCulture)</td>
+                                    <td>
+                                        <button class="btn-approve" onclick="approvePayment(@p.Id)">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                        <button class="btn-reject" onclick="openRejectModal(@p.Id)">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <!-- Seller Payment Status Overview -->
+        <div class="section-heading"><i class="fa-solid fa-list-check"></i> Seller Payment Status Overview</div>
+        <div class="card-panel">
+            @if (!allShops.Any())
+            {
+                <div class="empty-state">
+                    <i class="fa-solid fa-store"></i>
+                    <p>No sellers found.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Shop Name</th>
+                                <th>Seller Email</th>
+                                <th>Status</th>
+                                <th>Subscription End</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var s in allShops)
+                            {
+                                bool hasActiveSubscription = s.SubscriptionEnd.HasValue && s.SubscriptionEnd.Value >= DateTime.Now;
+
+                                string statusClass, statusText, statusIcon;
+
+                                if (s.IsPaid && hasActiveSubscription)
+                                {
+                                    statusClass = "status-active";
+                                    statusText = "Paid";
+                                    statusIcon = "fa-circle-check";
+                                }
+                                else if (!s.IsPaid && hasActiveSubscription)
+                                {
+                                    statusClass = "status-trial";
+                                    statusText = "Trial";
+                                    statusIcon = "fa-hourglass-half";
+                                }
+                                else
+                                {
+                                    statusClass = "status-unpaid";
+                                    statusText = "Expired";
+                                    statusIcon = "fa-circle-xmark";
+                                }
+                                <tr>
+                                    <td class="cell-strong">@s.ShopName</td>
+                                    <td>@s.SellerEmail</td>
+                                    <td>
+                                        <span class="status-pill @statusClass">
+                                            <i class="fas @statusIcon"></i> @statusText
+                                        </span>
+                                    </td>
+                                    <td class="cell-muted">
+                                        @(s.SubscriptionEnd.HasValue ? s.SubscriptionEnd.Value.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture) : "—")
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
     </div>
 
+    <!-- Reject Modal -->
     <div class="reject-modal" id="rejectModal">
         <div class="reject-box">
             <h3><i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i> Reject Payment</h3>

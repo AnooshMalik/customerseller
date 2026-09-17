@@ -483,14 +483,11 @@
         <div class="conv-panel">
             <div class="conv-panel-header">
                 <h3>Chats</h3>
-                @if (cwCurrentRole == "Admin")
-                {
-                    <div style="position:relative;">
-                        <i class="fas fa-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:0.75rem; color:#999;"></i>
-                        <input type="text" id="adminSearchInput" placeholder="Search..." oninput="onAdminSearch(this.value)"
-                               style="padding:7px 10px 7px 28px; border:1px solid #e0e0e0; border-radius:20px; font-size:0.8rem; width:140px; outline:none; font-family:inherit;" />
-                    </div>
-                }
+                <div style="position:relative;">
+                    <i class="fas fa-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:0.75rem; color:#999;"></i>
+                    <input type="text" id="adminSearchInput" placeholder="Search..." oninput="onAdminSearch(this.value)"
+                           style="padding:7px 10px 7px 28px; border:1px solid #e0e0e0; border-radius:20px; font-size:0.8rem; width:140px; outline:none; font-family:inherit;" />
+                </div>
             </div>
             <div class="conv-list" id="convList">
                 <div class="empty-state">Loading...</div>

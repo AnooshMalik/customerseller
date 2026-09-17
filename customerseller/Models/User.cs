@@ -18,5 +18,6 @@
         public bool IsBlocked { get; set; }
         public DateTime? BlockExpiry { get; set; }
         public string? BlockReason { get; set; }
+        public int RejectedOrderCount { get; set; } = 0;
     }
 }

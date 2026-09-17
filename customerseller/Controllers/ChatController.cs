@@ -105,14 +105,13 @@ namespace customerseller.Controllers
             {
                 var adminResult = new List<object>();
 
-                var sellers = _context.Users.Where(u => u.Role == "Seller" && u.Email != email).ToList();
-                adminResult.AddRange(sellers.Select(u => new
-                {
-                    email = u.Email,
-                    role = u.Role,
-                    name = GetDisplayName(u.Email, u.Role)
+                var sellerEmails = _context.SellerShops.Select(s => s.SellerEmail).Distinct().Where(e => e != email).ToList();
+                adminResult.AddRange(sellerEmails.Select(e => new {
+                    email = e,
+                    role = "Seller",
+                    name = GetDisplayName(e, "Seller")
                 }));
-
+                
                 var couriers = _context.CourierCompanies.Where(c => c.Email != email).ToList();
                 adminResult.AddRange(couriers.Select(c => new { email = c.Email, role = "Courier", name = c.CompanyName }));
 
@@ -129,9 +128,8 @@ namespace customerseller.Controllers
             var allowedRoles = ChatPermissions.GetAllowedRolesFor(role) ?? new List<string>();
             var result = new List<object>();
 
-           
             var users = _context.Users
-                .Where(u => allowedRoles.Contains(u.Role) && u.Email != email && u.Role != "Customer")
+                .Where(u => allowedRoles.Contains(u.Role) && u.Email != email && u.Role != "Customer" && u.Role != "Seller")
                 .ToList();
             result.AddRange(users.Select(u => new
             {
@@ -140,7 +138,23 @@ namespace customerseller.Controllers
                 name = GetDisplayName(u.Email, u.Role)
             }));
 
-            
+            if (allowedRoles.Contains("Seller"))
+            {
+                var approvedSellerEmails = _context.SellerShops
+                    .Where(s => s.AdminStatus == "Approved" && s.SellerEmail != email)
+                    .Select(s => s.SellerEmail)
+                    .Distinct()
+                    .ToList();
+
+                result.AddRange(approvedSellerEmails.Select(e => new
+                {
+                    email = e,
+                    role = "Seller",
+                    name = GetDisplayName(e, "Seller")
+                }));
+            }
+
+
             if (allowedRoles.Contains("Courier"))
             {
                 var couriers = _context.CourierCompanies.Where(c => c.Email != email).ToList();
@@ -292,9 +306,14 @@ namespace customerseller.Controllers
         }
 
 
+        
         [HttpGet]
         public IActionResult GetUnreadCount()
         {
+            Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
+
             var (email, _) = GetCurrentUser();
             if (string.IsNullOrEmpty(email)) return Json(new { count = 0 });
 

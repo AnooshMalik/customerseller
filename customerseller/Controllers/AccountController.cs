@@ -7,13 +7,20 @@ using System.Text.RegularExpressions;
 namespace customerseller.Controllers
 {
     public class AccountController : Controller
-    {
-        private readonly ApplicationDbContext _context;
+{
+    private readonly ApplicationDbContext _context;
 
-        public AccountController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+    private static readonly HashSet<string> ReservedSystemEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "artisanvalley.moderator@gmail.com",
+        "artisanvalley.store@gmail.com",
+        "artisanvalley.rider@gmail.com"
+    };
+
+    public AccountController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
 
         private bool IsValidEmail(string email)
         {
@@ -37,6 +44,13 @@ namespace customerseller.Controllers
             if (!IsValidEmail(email))
             {
                 TempData["LoginError"] = "Please enter a valid email address.";
+                if (isSellerPage) return RedirectToAction("Login", new { returnUrl });
+                return RedirectToAction("Index", "Home", new { returnUrl });
+            }
+
+            if (!string.IsNullOrEmpty(email) && ReservedSystemEmails.Contains(email.Trim()))
+            {
+                TempData["LoginError"] = "This email cannot be used to login as a customer or seller.";
                 if (isSellerPage) return RedirectToAction("Login", new { returnUrl });
                 return RedirectToAction("Index", "Home", new { returnUrl });
             }
@@ -82,25 +96,27 @@ namespace customerseller.Controllers
                     HttpContext.Session.SetString("TempBlocked", "true");
                 }
 
+                bool isSellerAccount = foundUser.IsSeller || foundUser.Role == "Seller";
+
+                 string role = (isSellerPage && isSellerAccount) ? "Seller" : "Customer";
+
                 HttpContext.Session.SetString("UserEmail", foundUser.Email);
                 HttpContext.Session.SetString("UserName", foundUser.FirstName);
-                HttpContext.Session.SetString("UserRole", foundUser.Role ?? "Customer");
+                HttpContext.Session.SetString("UserRole", role);
 
                 Response.Cookies.Append("UserEmail", foundUser.Email, GetCookieOptions());
                 Response.Cookies.Append("UserName", foundUser.FirstName, GetCookieOptions());
-                Response.Cookies.Append("UserRole", foundUser.Role ?? "Customer", GetCookieOptions());
-
-                bool isSellerAccount = foundUser.IsSeller || foundUser.Role == "Seller";
-
-                if (isSellerAccount)
-                {
-                    HttpContext.Session.SetString("UserRole", "Seller");
-                    Response.Cookies.Append("UserRole", "Seller", GetCookieOptions());
-                    return RedirectToAction("Dashboard", "Dashboard");
-                }
+                Response.Cookies.Append("UserRole", role, GetCookieOptions());
 
                 if (!string.IsNullOrEmpty(returnUrl))
+                {
                     return Redirect(returnUrl);
+                }
+
+                if (role == "Seller")
+                {
+                    return RedirectToAction("Dashboard", "Dashboard");
+                }
 
                 return RedirectToAction("Index", "Home");
             }
@@ -113,24 +129,6 @@ namespace customerseller.Controllers
         public IActionResult Login(string returnUrl)
         {
             var sessionEmail = HttpContext.Session.GetString("UserEmail");
-
-            if (string.IsNullOrEmpty(sessionEmail))
-            {
-                var cookieEmail = Request.Cookies["UserEmail"];
-                if (!string.IsNullOrEmpty(cookieEmail))
-                {
-                    var user = _context.Users.FirstOrDefault(u =>
-                        u.Email.ToLower() == cookieEmail.ToLower());
-
-                    if (user != null)
-                    {
-                        HttpContext.Session.SetString("UserEmail", user.Email);
-                        HttpContext.Session.SetString("UserName", user.FirstName);
-                        HttpContext.Session.SetString("UserRole", user.Role ?? "Customer");
-                        sessionEmail = user.Email;
-                    }
-                }
-            }
 
             if (!string.IsNullOrEmpty(sessionEmail))
             {
@@ -147,7 +145,6 @@ namespace customerseller.Controllers
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
-
         [HttpPost]
         public IActionResult Register(string firstName, string lastName, string email, string password, string returnUrl)
         {
@@ -170,10 +167,15 @@ namespace customerseller.Controllers
                 TempData["RegisterError"] = "Name must contain letters only.";
                 return RedirectToAction("Index", "Home", new { returnUrl });
             }
-
             if (!IsValidEmail(email))
             {
                 TempData["RegisterError"] = "Please enter a valid email address.";
+                return RedirectToAction("Index", "Home", new { returnUrl });
+            }
+
+            if (ReservedSystemEmails.Contains(email.Trim()))
+            {
+                TempData["RegisterError"] = "This email is reserved for system use and cannot be used for personal work.";
                 return RedirectToAction("Index", "Home", new { returnUrl });
             }
 
@@ -439,7 +441,9 @@ namespace customerseller.Controllers
             cmd.Parameters.AddWithValue("@end", DateTime.Now.AddMonths(1));
 
             cmd.ExecuteNonQuery();
-
+            var updateUserCmd = new Microsoft.Data.SqlClient.SqlCommand("UPDATE Users SET IsSeller = 1 WHERE Email = @email", con);
+            updateUserCmd.Parameters.AddWithValue("@email", email);
+            updateUserCmd.ExecuteNonQuery();
             HttpContext.Session.SetString("ShopName", ShopName);
             Response.Cookies.Append("ShopName", ShopName, GetCookieOptions());
 
@@ -566,13 +570,17 @@ namespace customerseller.Controllers
                 return RedirectToAction("SellerRegister");
             }
 
+            if (ReservedSystemEmails.Contains(email.Trim()))
+            {
+                TempData["RegisterError"] = "This email is reserved for system use and cannot be used for personal work.";
+                return RedirectToAction("SellerRegister");
+            }
+
             if (string.IsNullOrEmpty(password) || password.Length < 8)
             {
                 TempData["RegisterError"] = "Password must be at least 8 characters.";
                 return RedirectToAction("SellerRegister");
             }
-
-           
 
             var otp = new Random().Next(100000, 999999).ToString();
             HttpContext.Session.SetString("SellerOtp", otp);

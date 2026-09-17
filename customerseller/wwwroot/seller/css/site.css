@@ -796,11 +796,18 @@ tr:hover td {
     .btn-send:hover {
         opacity: 0.9;
     }
-/* ===== RESPONSIVE ===== */
+
 @media (max-width: 900px) {
-    #sidebar {
-        width: 70px;
+    body {
+        flex-direction: column;
     }
+
+    #sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+    
 
     .sidebar-content {
         padding: 20px 0;

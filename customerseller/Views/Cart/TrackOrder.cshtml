@@ -265,7 +265,19 @@
                 <div><strong>Total:</strong> Rs. @Model.Total.ToString("N0")</div>
                 <div><strong>Order Date:</strong> @Model.OrderDate.ToString("dd MMM yyyy", new System.Globalization.CultureInfo("en-US"))</div>
             </div>
-
+            @if (Model.Items != null && Model.Items.Any())
+{
+    <div style="text-align:left; background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:20px; font-size:0.9rem;">
+        <strong style="display:block; margin-bottom:10px;">Items Ordered:</strong>
+        @foreach (var item in Model.Items)
+        {
+            <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #eee;">
+               <span>@item.Title <span style="color:#999;">× @item.Quantity</span></span>
+                <span>Rs. @((item.Price * item.Quantity).ToString("N0"))</span>
+            </div>
+        }
+    </div>
+}
             @if (Model.TrackingTimeline != null && Model.TrackingTimeline.Any())
             {
                 <div class="status-timeline">

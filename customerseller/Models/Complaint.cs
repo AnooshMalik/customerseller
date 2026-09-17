@@ -10,7 +10,7 @@
         public string? OrderId { get; set; }
         public string? AmountPaid { get; set; }
         public string SellerName { get; set; } = string.Empty;
-        public string ComplaintType { get; set; } = string.Empty;
+        public string? ComplaintType { get; set; } = string.Empty;
         public string Priority { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string? EvidenceImageUrl { get; set; }

@@ -507,10 +507,9 @@
         }
     </style>
 
-    <button class="cw-toggle" id="cwToggle" onclick="cwOpen()">
+    <button class="cw-toggle" id="cwToggle" onclick="cwOpen()" aria-label="Open chat">
         <i class="fa-solid fa-comment-dots"></i>
     </button>
-
     <div class="cw-panel" id="cwPanel">
         <div class="cw-header">
             <div class="cw-header-title"><i class="fa-solid fa-comments"></i> Messages</div>
@@ -518,26 +517,27 @@
                 <div class="cw-mychats-link" id="cwMyChatsLink" onclick="cwShowChatList()">
                     <i class="fa-solid fa-address-book"></i> My Chats
                 </div>
-                <i class="fa-solid fa-chevron-down" onclick="cwClose()"></i>
-                <i class="fa-solid fa-xmark" onclick="cwClose()"></i>
+                <i class="fa-solid fa-chevron-down" onclick="cwClose()" role="button" tabindex="0" aria-label="Minimize chat"></i>
+                <i class="fa-solid fa-xmark" onclick="cwClose()" role="button" tabindex="0" aria-label="Close chat"></i>
             </div>
         </div>
         <div class="cw-body">
 
-            <!-- Default view: unified bot conversation -->
+           
             <div id="cwBotView" style="display:flex; flex-direction:column; flex:1; min-height:0;">
                 <div class="cw-messages" id="cwBotMessages"></div>
                 <div class="cw-input-area">
                     <i class="fa-solid fa-bars cw-hamburger" onclick="cwShowChatList()" title="My Chats"></i>
+                    <label for="cwBotInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Write your message</label>
                     <input type="text" id="cwBotInput" placeholder="Write your message" onkeypress="if(event.key==='Enter') cwBotSend()" />
-                    <button class="cw-send" onclick="cwBotSend()"><i class="fa-solid fa-paper-plane"></i></button>
+                    <button class="cw-send" onclick="cwBotSend()" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
             <div class="cw-inline-modal-overlay" id="cwClearChatModal">
                 <div class="cw-modal-box" style="width:260px;">
                     <div class="cw-modal-head">
                         <h4>Clear Chat</h4>
-                        <span class="cw-modal-close" onclick="cwCloseClearChatModal()">&times;</span>
+                        <span class="cw-modal-close" onclick="cwCloseClearChatModal()" role="button" tabindex="0" aria-label="Close">&times;</span>
                     </div>
                     <div style="padding:14px 16px;">
                         <p style="font-size:0.8rem; color:#444;">Are you sure you want to clear this chat? Yeh sirf aapki taraf se hide hoga.</p>
@@ -549,7 +549,7 @@
                 </div>
             </div>
 
-                    <!-- My Chats: real conversations with sellers/support -->
+                  
             <div id="cwChatListView" style="display:none; flex-direction:column; flex:1; min-height:0;">
                 <div class="cw-list-top">
                     <div style="display:flex; align-items:center; gap:10px;">
@@ -581,8 +581,9 @@
                 <div class="cw-messages" id="cwMessages"></div>
                 <div class="cw-input-area">
                     <i class="fa-solid fa-bars cw-hamburger" onclick="cwShowChatList()" title="My Chats"></i>
+                    <label for="cwMsgInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Write your message</label>
                     <input type="text" id="cwMsgInput" placeholder="Write your message" onkeypress="if(event.key==='Enter') cwSendMessage()" />
-                    <button class="cw-send" onclick="cwSendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                    <button class="cw-send" onclick="cwSendMessage()" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
         </div>
@@ -592,7 +593,7 @@
         <div class="cw-modal-box">
             <div class="cw-modal-head">
                 <h4>Select a Seller</h4>
-                <span class="cw-modal-close" onclick="cwCloseNewChat()">&times;</span>
+                <span class="cw-modal-close" onclick="cwCloseNewChat()" role="button" tabindex="0" aria-label="Close">&times;</span>
             </div>
             <div class="cw-modal-list" id="cwPartnersList">
                 <div class="cw-empty">Loading...</div>
@@ -604,7 +605,7 @@
         <div class="cw-modal-box" style="width:300px;">
             <div class="cw-modal-head">
                 <h4>Clear Chat</h4>
-                <span class="cw-modal-close" onclick="cwCloseClearChatModal()">&times;</span>
+                <span class="cw-modal-close" onclick="cwCloseClearChatModal()" role="button" tabindex="0" aria-label="Close">&times;</span>
             </div>
             <div style="padding:16px 18px;">
                 <p style="font-size:0.85rem; color:#444;">Are you sure you want to clear this chat?</p>

@@ -77,6 +77,7 @@ function openCart() {
     if (overlay) overlay.classList.add("active");
     if (sidebar) sidebar.classList.add("active");
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     renderCart();
     updateCartCount();
 }
@@ -87,6 +88,7 @@ function closeCart() {
     if (overlay) overlay.classList.remove("active");
     if (sidebar) sidebar.classList.remove("active");
     document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
 }
 
 document.addEventListener("click", function (e) {
@@ -123,21 +125,18 @@ document.addEventListener("DOMContentLoaded", function () {
     var searchResults = document.getElementById("searchResults");
 
     var searchData = [
-        
         { name: "Fabric & Textile", url: "/Products/FabricTextile", category: "Category" },
         { name: "Cushion Covers", url: "/Products/FabricCushionCovers", category: "Fabric & Textile" },
         { name: "Printed Kurtas", url: "/Products/FabricKurtas", category: "Fabric & Textile" },
         { name: "Tie-Dye Dupattas", url: "/Products/FabricDupattas", category: "Fabric & Textile" },
         { name: "Tote Bags", url: "/Products/FabricToteBags", category: "Fabric & Textile" },
 
-       
         { name: "Wool & Yarn", url: "/Products/WoolYarn", category: "Category" },
         { name: "Sweaters", url: "/Products/WoolSweaters", category: "Wool & Yarn" },
         { name: "Crochet Bags", url: "/Products/WoolCrochetBags", category: "Wool & Yarn" },
         { name: "Storage Baskets", url: "/Products/WoolStorageBaskets", category: "Wool & Yarn" },
         { name: "Beanies", url: "/Products/WoolBeanies", category: "Wool & Yarn" },
 
-       
         { name: "Leather", url: "/Products/Leather", category: "Category" },
         { name: "Leather Handbags", url: "/Products/LeatherHandbags", category: "Leather" },
         { name: "Wallets", url: "/Products/LeatherWallets", category: "Leather" },
@@ -145,7 +144,6 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Leather Keychains", url: "/Products/LeatherKeychains", category: "Leather" },
         { name: "Journals", url: "/Products/LeatherJournals", category: "Leather" },
 
-       
         { name: "Wood", url: "/Products/Wood", category: "Category" },
         { name: "Photo Frames", url: "/Products/WoodPhotoFrames", category: "Wood" },
         { name: "Wood Necklaces", url: "/Products/WoodNecklaces", category: "Wood" },
@@ -154,7 +152,6 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Wood Showpieces", url: "/Products/WoodShowpieces", category: "Wood" },
         { name: "Wood Keychains", url: "/Products/WoodKeychains", category: "Wood" },
 
-      
         { name: "Clay & Pottery", url: "/Products/ClayPottery", category: "Category" },
         { name: "Flower Pots", url: "/Products/ClayFlowerPots", category: "Clay & Pottery" },
         { name: "Coffee Mugs", url: "/Products/ClayCoffeeMugs", category: "Clay & Pottery" },
@@ -162,7 +159,6 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Clay Earrings", url: "/Products/ClayEarrings", category: "Clay & Pottery" },
         { name: "Clay Figurines", url: "/Products/ClayFigurines", category: "Clay & Pottery" },
 
-        
         { name: "Jewels", url: "/Products/Jewels", category: "Category" },
         { name: "Necklaces", url: "/Products/JewelsNecklaces", category: "Jewels" },
         { name: "Bracelets", url: "/Products/JewelsBracelets", category: "Jewels" },
@@ -170,7 +166,6 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Bangles", url: "/Products/JewelsBangles", category: "Jewels" },
         { name: "Earrings", url: "/Products/JewelsEarrings", category: "Jewels" },
 
-        
         { name: "Paper & Cards", url: "/Products/PaperCards", category: "Category" },
         { name: "Greeting Cards", url: "/Products/PaperGreetingCards", category: "Paper & Cards" },
         { name: "Gift Boxes", url: "/Products/PaperGiftBoxes", category: "Paper & Cards" },
@@ -178,7 +173,6 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Paper Showpieces", url: "/Products/PaperShowpieces", category: "Paper & Cards" },
         { name: "Scrapbooks", url: "/Products/PaperScrapbooks", category: "Paper & Cards" },
 
-       
         { name: "Jute & Natural", url: "/Products/JuteNatural", category: "Category" },
         { name: "Jute Bags", url: "/Products/JuteBags", category: "Jute & Natural" },
         { name: "Baskets", url: "/Products/JuteBaskets", category: "Jute & Natural" },
@@ -186,7 +180,6 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Dried Bouquets", url: "/Products/JuteDriedBouquets", category: "Jute & Natural" },
         { name: "Paintings", url: "/Products/JutePaintings", category: "Jute & Natural" },
 
-        
         { name: "Resin & Epoxy", url: "/Products/ResinEpoxy", category: "Category" },
         { name: "Coasters", url: "/Products/ResinCoasters", category: "Resin & Epoxy" },
         { name: "Resin Earrings", url: "/Products/ResinEarrings", category: "Resin & Epoxy" },
@@ -194,7 +187,6 @@ document.addEventListener("DOMContentLoaded", function () {
         { name: "Wall Art", url: "/Products/ResinWallArt", category: "Resin & Epoxy" },
         { name: "Resin Serving Trays", url: "/Products/ResinServingTrays", category: "Resin & Epoxy" },
 
-        
         { name: "Metal & Wire", url: "/Products/MetalWire", category: "Category" },
         { name: "Metal Earrings", url: "/Products/MetalEarrings", category: "Metal & Wire" },
         { name: "Vases", url: "/Products/MetalVases", category: "Metal & Wire" },
@@ -230,7 +222,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 suggestions.style.display = "block";
             } else {
-               
                 var li = document.createElement("li");
                 li.innerHTML = '<i class="fa-solid fa-magnifying-glass" style="margin-right:8px;color:#a64d79;"></i> Search "<strong>' + query + '</strong>" in all products';
                 li.style.padding = "12px 15px";
@@ -260,10 +251,8 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             if (matches.length === 1) {
-               
                 window.location.href = matches[0].url;
             } else if (matches.length > 1) {
-               
                 var resultsHtml = '<div style="margin-top:20px;"><h3 style="font-size:1.1rem;margin-bottom:15px;">Results:</h3>';
                 matches.forEach(function (match) {
                     resultsHtml += '<a href="' + match.url + '" style="display:block;padding:12px 15px;margin-bottom:8px;background:#f9f9f9;border-radius:6px;text-decoration:none;color:#333;">' +
@@ -276,7 +265,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     searchResults.style.display = "block";
                 }
             } else {
-               
                 window.location.href = "/Products/Search?query=" + encodeURIComponent(query);
             }
         }
@@ -289,71 +277,107 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("searchOverlay")?.classList.add("active");
         document.getElementById("searchPopup")?.classList.add("active");
         document.body.style.overflow = "hidden";
+        document.documentElement.style.overflow = "hidden";
     });
 
     document.getElementById("closeSearchPopup")?.addEventListener("click", function () {
         document.getElementById("searchOverlay")?.classList.remove("active");
         document.getElementById("searchPopup")?.classList.remove("active");
         document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
     });
 
     document.getElementById("searchOverlay")?.addEventListener("click", function () {
         document.getElementById("searchOverlay")?.classList.remove("active");
         document.getElementById("searchPopup")?.classList.remove("active");
         document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
     });
 });
 
-
+/* Shop mega/dropdown menu toggle */
 document.addEventListener("DOMContentLoaded", function () {
     var shopDropBtn = document.getElementById("shopDropBtn");
     var shopDropdownMenu = document.getElementById("shopDropdownMenu");
     var dropdown = shopDropBtn?.closest('.dropdown');
+    var hasHover = window.matchMedia('(hover: hover)').matches;
+
+    function preventBgTouch(e) {
+        if (!shopDropdownMenu.contains(e.target)) {
+            e.preventDefault();
+        }
+    }
+
+    function openMenu() {
+        shopDropdownMenu.classList.add("show");
+        document.body.style.overflow = "hidden";
+        document.documentElement.style.overflow = "hidden";
+        document.addEventListener("touchmove", preventBgTouch, { passive: false });
+        document.addEventListener("wheel", preventBgTouch, { passive: false });
+    }
+
+    function closeMenu() {
+        shopDropdownMenu.classList.remove("show");
+        document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
+        document.removeEventListener("touchmove", preventBgTouch);
+        document.removeEventListener("wheel", preventBgTouch);
+    }
 
     if (shopDropBtn && shopDropdownMenu && dropdown) {
         shopDropBtn.addEventListener("click", function (e) {
             e.preventDefault();
-            shopDropdownMenu.classList.toggle("show");
+            e.stopPropagation();
+            if (shopDropdownMenu.classList.contains("show")) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
         });
-        dropdown.addEventListener("mouseenter", function () {
-            shopDropdownMenu.classList.add("show");
-        });
-        dropdown.addEventListener("mouseleave", function () {
-            shopDropdownMenu.classList.remove("show");
-        });
+
+        if (hasHover) {
+            dropdown.addEventListener("mouseenter", openMenu);
+            dropdown.addEventListener("mouseleave", closeMenu);
+        }
+
         document.addEventListener("click", function (e) {
             if (!dropdown.contains(e.target)) {
-                shopDropdownMenu.classList.remove("show");
+                closeMenu();
             }
         });
     }
 });
 
-
+/* Login / Register / Recover / Cart icon / Track order — FIXED: moved to top level */
 document.addEventListener("DOMContentLoaded", function () {
 
     function showSidebar(overlayId, sidebarId) {
         document.getElementById(overlayId)?.classList.add("active");
         document.getElementById(sidebarId)?.classList.add("active");
         document.body.style.overflow = "hidden";
+        document.documentElement.style.overflow = "hidden";
     }
 
     function hideSidebar(overlayId, sidebarId) {
         document.getElementById(overlayId)?.classList.remove("active");
         document.getElementById(sidebarId)?.classList.remove("active");
         document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
     }
 
     document.getElementById("loginIcon")?.addEventListener("click", function (e) {
         e.preventDefault();
-        var returnInput = document.getElementById('returnUrlInput');
+        var returnInput = document.getElementById('loginReturnUrl');
         if (returnInput) returnInput.value = window.location.pathname;
         showSidebar("loginOverlay", "loginPopup");
     });
 
     document.getElementById("closeLoginPopup")?.addEventListener("click", function () {
         hideSidebar("loginOverlay", "loginPopup");
-        window.location.href = window.location.pathname;
+    });
+
+    document.getElementById("loginOverlay")?.addEventListener("click", function () {
+        hideSidebar("loginOverlay", "loginPopup");
     });
 
     document.getElementById("createAccountLink")?.addEventListener("click", function (e) {
@@ -363,6 +387,7 @@ document.addEventListener("DOMContentLoaded", function () {
         hideSidebar("loginOverlay", "loginPopup");
         showSidebar("registerOverlay", "registerSidebar");
     });
+
     document.getElementById("backToLogin")?.addEventListener("click", function (e) {
         e.preventDefault();
         hideSidebar("registerOverlay", "registerSidebar");
@@ -385,7 +410,15 @@ document.addEventListener("DOMContentLoaded", function () {
         hideSidebar("registerOverlay", "registerSidebar");
     });
 
+    document.getElementById("registerOverlay")?.addEventListener("click", function () {
+        hideSidebar("registerOverlay", "registerSidebar");
+    });
+
     document.getElementById("closeRecover")?.addEventListener("click", function () {
+        hideSidebar("recoverOverlay", "recoverSidebar");
+    });
+
+    document.getElementById("recoverOverlay")?.addEventListener("click", function () {
         hideSidebar("recoverOverlay", "recoverSidebar");
     });
 
@@ -394,7 +427,6 @@ document.addEventListener("DOMContentLoaded", function () {
         showSidebar("loginOverlay", "loginPopup");
     }
 
-    
     document.getElementById("footerLoginLink")?.addEventListener("click", function (e) {
         e.preventDefault();
         showSidebar("loginOverlay", "loginPopup");
@@ -412,7 +444,6 @@ document.addEventListener("DOMContentLoaded", function () {
         openCart();
     });
 
-    
     document.getElementById("cartIcon")?.addEventListener("click", function (e) {
         e.preventDefault();
         openCart();
@@ -436,10 +467,8 @@ document.addEventListener("DOMContentLoaded", function () {
         window.location.href = "/Cart/Checkout";
     });
 
-    
     renderCart();
 });
-
 
 document.addEventListener('DOMContentLoaded', function () {
     var trackModal = document.getElementById('trackingModal');

@@ -147,6 +147,10 @@
             color: #fff;
         }
 
+    .btn-track, .btn-assign {
+        white-space: nowrap;
+    }
+
     .btn-assign {
         background: #a64d79;
         color: #fff;
@@ -156,7 +160,13 @@
         font-size: 0.78rem;
         font-weight: 600;
         cursor: pointer;
-        margin-left: 6px;
+    }
+
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
     }
 
     .badge-assigned {
@@ -423,6 +433,61 @@
         cursor: pointer;
     }
 
+    .toast-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .toast-overlay.show {
+            display: flex;
+        }
+
+    .toast-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 26px 30px;
+        max-width: 380px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .toast-icon {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+    }
+
+        .toast-icon.success {
+            color: #10b981;
+        }
+
+        .toast-icon.error {
+            color: #ef4444;
+        }
+
+    .toast-message {
+        font-size: 0.92rem;
+        color: #333;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    .btn-toast-ok {
+        background: #a64d79;
+        color: #fff;
+        border: none;
+        padding: 10px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.88rem;
+    }
+
     @@media (max-width: 768px) {
         .orders-page {
             padding: 16px;
@@ -556,16 +621,18 @@
                             </td>
 
                             <td>
-                                <button class="btn-track" onclick="trackMyOrder('@order.OrderId')">
-                                    <i class="fas fa-location-dot"></i> Track
-                                </button>
-                                @if (order.CourierCompanyId == null)
-                                {
-                                    <button class="btn-assign"
-                                            onclick="openAssignModal('@order.OrderId', '@order.CustomerPhone', '@order.CustomerAddress')">
-                                        <i class="fas fa-truck"></i> Assign to Delivery
+                                <div class="action-buttons">
+                                    <button class="btn-track" onclick="trackMyOrder('@order.OrderId')">
+                                        <i class="fas fa-location-dot"></i> Track
                                     </button>
-                                }
+                                    @if (order.CourierCompanyId == null)
+                                    {
+                                        <button class="btn-assign"
+                                                onclick="openAssignModal('@order.OrderId', '@order.CustomerPhone', '@order.CustomerAddress')">
+                                            <i class="fas fa-truck"></i> Assign to Delivery
+                                        </button>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }
@@ -609,74 +676,35 @@
     </div>
 </div>
 
-
-<div class="modal-overlay" id="assignModal">
-    <div class="modal-box">
-        <h3><i class="fas fa-truck" style="color:#a64d79;"></i> Assign to Delivery</h3>
-        <input type="hidden" id="assignOrderId">
-
-        <label>Select Courier</label>
-        <select id="courierSelect">
-            @foreach (var c in couriers)
-            {
-                <option value="@c.Id">@c.CompanyName</option>
-            }
-        </select>
-
-        <label>Customer Phone Number</label>
-        <input type="text" id="customerPhoneInput" placeholder="03XX-XXXXXXX" />
-
-        <label>Customer Delivery Address</label>
-        <input type="text" id="customerAddressInput" placeholder="Full address" />
-
-        <div class="modal-actions">
-            <button class="btn-cancel-modal" onclick="closeAssignModal()">Cancel</button>
-            <button class="btn-confirm-modal" onclick="confirmAssign()">Assign</button>
-        </div>
-    </div>
-</div>
-
-
-<div class="modal-overlay" id="confirmModal">
-    <div class="modal-box" style="text-align:center;">
-        <div style="font-size:2rem; margin-bottom:12px;">🚚</div>
-        <h3>Assign to Courier?</h3>
-        <p style="color:#888; font-size:0.9rem; margin:10px 0 20px;">
-            Are you sure you want to assign this order to courier?<br>
-            Customer will be notified via email.
-        </p>
-        <div class="modal-actions">
-            <button class="btn-cancel-modal" onclick="closeConfirmModal()">Cancel</button>
-            <button class="btn-confirm-modal" onclick="proceedToAssign()">Yes, Assign</button>
-        </div>
-    </div>
-</div>
-
-
-<div class="modal-overlay" id="assignModal">
-    <div class="modal-box">
-        <h3><i class="fas fa-truck" style="color:#a64d79;"></i> Assign to Delivery</h3>
-        <input type="hidden" id="assignOrderId">
-        <label>Select Courier</label>
-        <select id="courierSelect">
-            @foreach (var c in couriers)
-            {
-                <option value="@c.Id">@c.CompanyName</option>
-            }
-        </select>
-        <label>Customer Phone Number</label>
-        <input type="text" id="customerPhoneInput" placeholder="03XX-XXXXXXX" />
-        <label>Customer Delivery Address</label>
-        <input type="text" id="customerAddressInput" placeholder="Full address" />
-        <div class="modal-actions">
-            <button class="btn-cancel-modal" onclick="closeAssignModal()">Cancel</button>
-            <button class="btn-confirm-modal" onclick="confirmAssign()">Assign</button>
-        </div>
+<div class="toast-overlay" id="toastModal">
+    <div class="toast-box">
+        <div class="toast-icon" id="toastIcon"></div>
+        <div class="toast-message" id="toastMessage"></div>
+        <button class="btn-toast-ok" onclick="closeToast()">OK</button>
     </div>
 </div>
 
 
 <script>
+    let reloadAfterToast = false;
+
+    function showToast(message, isError = false, reload = false) {
+        reloadAfterToast = reload;
+        var icon = document.getElementById('toastIcon');
+        icon.innerHTML = isError ? '<i class="fas fa-circle-xmark"></i>' : '<i class="fas fa-circle-check"></i>';
+        icon.className = 'toast-icon ' + (isError ? 'error' : 'success');
+        document.getElementById('toastMessage').textContent = message;
+        document.getElementById('toastModal').classList.add('show');
+    }
+
+    function closeToast() {
+        document.getElementById('toastModal').classList.remove('show');
+        if (reloadAfterToast) {
+            reloadAfterToast = false;
+            location.reload();
+        }
+    }
+
     function openAssignModal(orderId, customerPhone, customerAddress) {
         document.getElementById('assignOrderId').value = orderId;
         document.getElementById('customerPhoneInput').value = customerPhone || '';
@@ -710,10 +738,9 @@
         const customerPhone = document.getElementById('customerPhoneInput').value.trim();
         const customerAddress = document.getElementById('customerAddressInput').value.trim();
 
-        if (!courierId) { alert('Please select a courier.'); return; }
-        if (!customerPhone) { alert('Please enter customer phone number.'); return; }
-        if (!customerAddress) { alert('Please enter customer address.'); return; }
-
+        if (!courierId) { showToast('Please select a courier.', true); return; }
+        if (!customerPhone) { showToast('Please enter customer phone number.', true); return; }
+        if (!customerAddress) { showToast('Please enter customer address.', true); return; }
         const res = await fetch('/Orders/AssignToDelivery', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -723,10 +750,9 @@
 
         if (data.success) {
             closeAssignModal();
-            alert('✅ Order assigned to courier! Email sent to customer.');
-            location.reload();
+            showToast('Order assigned to courier! Email sent to customer.', false, true);
         } else {
-            alert('Error: ' + (data.error || 'Something went wrong'));
+            showToast('Error: ' + (data.error || 'Something went wrong'), true);
         }
     }
 

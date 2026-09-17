@@ -271,6 +271,7 @@ namespace customerseller.Controllers
 
             ViewBag.Pending = orders.Count(o => o.CourierStatus == "Assigned" || o.CourierStatus == "PickedUp");
             ViewBag.Delivered = orders.Count(o => o.CourierStatus == "Delivered");
+            ViewBag.Cancelled = orders.Count(o => o.CourierStatus == "Cancelled");
             ViewBag.Total = orders.Count;
 
             return View(orders);
@@ -371,7 +372,7 @@ namespace customerseller.Controllers
             return Json(new { success = true });
         }
         [HttpPost]
-        public IActionResult CancelOrderByRider(string orderId, string reason)
+        public IActionResult CancelOrderByRider(string orderId, string reason, bool customerRefused = false)
         {
             var courierId = HttpContext.Session.GetInt32("CourierId");
             if (courierId == null) return Json(new { error = "Unauthorized" });
@@ -385,6 +386,22 @@ namespace customerseller.Controllers
             order.LastUpdatedAt = DateTime.Now;
             order.PaymentReceived = false;
             order.PaymentNotReceivedReason = reason;
+
+            if (customerRefused && !string.IsNullOrEmpty(order.Email))
+            {
+                var customer = _context.Users.FirstOrDefault(u => u.Email == order.Email);
+                if (customer != null)
+                {
+                    customer.RejectedOrderCount += 1;
+
+                    if (customer.RejectedOrderCount >= 3 && !customer.IsBlocked)
+                    {
+                        customer.IsBlocked = true;
+                        customer.BlockReason = "Account blocked: refused delivery 3 or more times.";
+                        customer.BlockExpiry = null;
+                    }
+                }
+            }
 
             _context.SaveChanges();
 

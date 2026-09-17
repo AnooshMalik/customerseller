@@ -98,6 +98,15 @@
             color: #fff;
         }
 
+    #mobileCloseBtn {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #555;
+    }
+
     .filter-section {
         border-bottom: 1px solid var(--gray-border);
     }
@@ -361,27 +370,75 @@
         border: 1px solid var(--gray-border);
         border-radius: 6px;
         overflow: hidden;
+        width: 100%;
+    }
+
+    .search-wrapper {
+        position: relative;
         flex: 1;
         max-width: 320px;
     }
 
-        .search-bar-filter input {
-            flex: 1;
-            border: none;
-            padding: 8px 12px;
-            font-size: 0.88rem;
-            outline: none;
-            color: var(--text-dark);
+    .search-suggestions {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--white);
+        border: 1px solid var(--gray-border);
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        box-shadow: var(--shadow);
+        max-height: 260px;
+        overflow-y: auto;
+        z-index: 50;
+    }
+
+        .search-suggestions.active {
+            display: block;
         }
 
-        .search-bar-filter button {
-            background: var(--pink);
-            border: none;
-            color: #fff;
-            padding: 8px 14px;
-            cursor: pointer;
-            font-size: 0.9rem;
+    .search-suggestion-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        color: var(--text-dark);
+        cursor: pointer;
+    }
+
+        .search-suggestion-item:hover {
+            background: var(--pink-light);
+            color: var(--pink);
         }
+
+        .search-suggestion-item img {
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+    .search-bar-filter input {
+        flex: 1;
+        border: none;
+        padding: 8px 12px;
+        font-size: 0.88rem;
+        outline: none;
+        color: var(--text-dark);
+    }
+
+    .search-bar-filter button {
+        background: var(--pink);
+        border: none;
+        color: #fff;
+        padding: 8px 14px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
 
     .sort-bar {
         display: flex;
@@ -555,6 +612,44 @@
         font-weight: 700;
     }
 
+    .product-cart-btn {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: var(--pink);
+        color: #fff;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        cursor: pointer;
+        opacity: 0;
+        transform: translateY(6px);
+        transition: opacity 0.2s, transform 0.2s, background 0.2s;
+        box-shadow: 0 2px 8px rgba(166,77,121,0.35);
+        z-index: 3;
+    }
+
+        .product-cart-btn:hover {
+            background: var(--pink-dark);
+        }
+
+    .product-card:hover .product-cart-btn {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    @@media (max-width: 900px) {
+        .product-cart-btn {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .no-results {
         text-align: center;
         padding: 60px 20px;
@@ -656,6 +751,10 @@
         .mobile-filter-btn {
             display: flex;
         }
+
+        #mobileCloseBtn {
+            display: inline-block;
+        }
     }
 
     @@media (max-width: 576px) {
@@ -673,12 +772,6 @@
             max-width: 100%;
         }
     }
-
-    @@media (max-width: 900px) {
-        #mobileCloseBtn {
-            display: inline-block !important;
-        }
-    }
 </style>
 
 
@@ -692,32 +785,32 @@
             <h3><i class="fa-solid fa-sliders"></i> Filters</h3>
             <div style="display:flex; gap:8px; align-items:center;">
                 <button id="resetAllBtn" onclick="resetAllFilters()">Reset All</button>
-                <button onclick="closeMobileFilter()" style="display:none; background:none; border:none; font-size:1.2rem; cursor:pointer; color:#555;" id="mobileCloseBtn">&times;</button>
+                <button onclick="closeMobileFilter()" id="mobileCloseBtn">&times;</button>
             </div>
         </div>
         <div class="filter-section">
             <div class="filter-section-header" onclick="toggleSection(this)">
                 <span>Category</span><i class="fa-solid fa-chevron-down"></i>
             </div>
-           <div class="filter-section-body" id="categoryFilter">
-    <label class="filter-option"><input type="checkbox" value="FabricTextile" onchange="applyFilters()"> Fabric & Textile</label>
-    <label class="filter-option"><input type="checkbox" value="WoolYarn" onchange="applyFilters()"> Wool & Yarn</label>
-    <label class="filter-option"><input type="checkbox" value="Leather" onchange="applyFilters()"> Leather</label>
-    <label class="filter-option"><input type="checkbox" value="Wood" onchange="applyFilters()"> Wood</label>
-    <label class="filter-option"><input type="checkbox" value="ClayPottery" onchange="applyFilters()"> Clay & Pottery</label>
-    <label class="filter-option"><input type="checkbox" value="Jewels" onchange="applyFilters()"> Jewels</label>
-    <label class="filter-option"><input type="checkbox" value="PaperCards" onchange="applyFilters()"> Paper & Cards</label>
-    <label class="filter-option"><input type="checkbox" value="JuteNatural" onchange="applyFilters()"> Jute & Natural</label>
-    <label class="filter-option"><input type="checkbox" value="ResinEpoxy" onchange="applyFilters()"> Resin & Epoxy</label>
-    <label class="filter-option"><input type="checkbox" value="MetalWire" onchange="applyFilters()"> Metal & Wire</label>
-</div>
+            <div class="filter-section-body" id="categoryFilter">
+                <label class="filter-option"><input type="checkbox" value="FabricTextile" onchange="onCategoryChange()"> Fabric & Textile</label>
+                <label class="filter-option"><input type="checkbox" value="WoolYarn" onchange="onCategoryChange()"> Wool & Yarn</label>
+                <label class="filter-option"><input type="checkbox" value="Leather" onchange="onCategoryChange()"> Leather</label>
+                <label class="filter-option"><input type="checkbox" value="Wood" onchange="onCategoryChange()"> Wood</label>
+                <label class="filter-option"><input type="checkbox" value="ClayPottery" onchange="onCategoryChange()"> Clay & Pottery</label>
+                <label class="filter-option"><input type="checkbox" value="Jewels" onchange="onCategoryChange()"> Jewels</label>
+                <label class="filter-option"><input type="checkbox" value="PaperCards" onchange="onCategoryChange()"> Paper & Cards</label>
+                <label class="filter-option"><input type="checkbox" value="JuteNatural" onchange="onCategoryChange()"> Jute & Natural</label>
+                <label class="filter-option"><input type="checkbox" value="ResinEpoxy" onchange="onCategoryChange()"> Resin & Epoxy</label>
+                <label class="filter-option"><input type="checkbox" value="MetalWire" onchange="onCategoryChange()"> Metal & Wire</label>
+            </div>
             <div class="filter-section" id="subCategorySection" style="display:none;">
-    <div class="filter-section-header" onclick="toggleSection(this)">
-        <span>Subcategory</span><i class="fa-solid fa-chevron-down"></i>
-    </div>
-    <div class="filter-section-body" id="subCategoryFilter">
-    </div>
-</div>
+                <div class="filter-section-header" onclick="toggleSection(this)">
+                    <span>Subcategory</span><i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="filter-section-body" id="subCategoryFilter">
+                </div>
+            </div>
         </div>
         <div class="filter-section">
             <div class="filter-section-header" onclick="toggleSection(this)">
@@ -725,12 +818,12 @@
             </div>
             <div class="filter-section-body">
                 <div class="price-inputs">
-                    <input type="number" id="minPrice" placeholder="Min" value="0" onchange="applyFilters()">
+                    <input type="number" id="minPrice" placeholder="Min" value="0" min="0" onchange="applyFilters()">
                     <span>—</span>
-                    <input type="number" id="maxPrice" placeholder="Max" value="50000" onchange="applyFilters()">
+                    <input type="number" id="maxPrice" placeholder="Max" value="20000" min="0" onchange="applyFilters()">
                 </div>
-                <input type="range" class="price-range-slider" id="priceSlider" min="0" max="50000" value="50000" step="500" oninput="updatePriceSlider(this.value)">
-                <div class="price-labels"><span>Rs. 0</span><span>Rs. 50,000</span></div>
+                <input type="range" class="price-range-slider" id="priceSlider" min="0" max="20000" value="20000" step="500" oninput="updatePriceSlider(this.value)">
+                <div class="price-labels"><span>Rs. 0</span><span id="priceSliderMaxLabel">Rs. 20,000</span></div>
             </div>
         </div>
         <div class="filter-section">
@@ -787,9 +880,12 @@
             <button type="button" class="mobile-filter-btn" onclick="openMobileFilter()">
                 <i class="fa-solid fa-sliders"></i> Filter
             </button>
-            <div class="search-bar-filter">
-                <input type="text" id="searchInput" placeholder="Search products..." oninput="applyFilters()">
-                <button><i class="fa-solid fa-magnifying-glass"></i></button>
+            <div class="search-wrapper">
+                <div class="search-bar-filter">
+                    <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off" oninput="applyFilters(); showSuggestions();" onfocus="showSuggestions();">
+                    <button type="button" onclick="applyFilters()"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+                <div class="search-suggestions" id="searchSuggestions"></div>
             </div>
             <div class="sort-bar">
                 <span class="product-count">Showing <strong id="productCount">0</strong> products</span>
@@ -812,229 +908,395 @@
 
 <script>
     const subCategoryMap = {
-    'FabricTextile': [
-        { val: 'CushionCovers', label: 'Cushion Covers' },
-        { val: 'PrintedKurtas', label: 'Printed Kurtas' },
-        { val: 'TieDyeDupattas', label: 'Tie-Dye Dupattas' },
-        { val: 'FabricToteBags', label: 'Tote Bags' },
-        { val: 'FabricTextile', label: 'General Fabric' }
-    ],
-    'WoolYarn': [
-        { val: 'Sweaters', label: 'Sweaters' },
-        { val: 'CrochetBags', label: 'Crochet Bags' },
-        { val: 'StorageBaskets', label: 'Storage Baskets' },
-        { val: 'Beanies', label: 'Beanies' },
-        { val: 'WoolYarn', label: 'General Wool' }
-    ],
-    'Leather': [
-        { val: 'LeatherHandbags', label: 'Handbags' },
-        { val: 'Wallets', label: 'Wallets' },
-        { val: 'Belts', label: 'Belts' },
-        { val: 'LeatherKeychains', label: 'Keychains' },
-        { val: 'Journals', label: 'Journals' },
-        { val: 'Leather', label: 'General Leather' }
-    ],
-    'Wood': [
-        { val: 'PhotoFrames', label: 'Photo Frames' },
-        { val: 'WoodNecklaces', label: 'Necklaces' },
-        { val: 'WoodToys', label: 'Toys' },
-        { val: 'ServingTrays', label: 'Serving Trays' },
-        { val: 'WoodShowpieces', label: 'Showpieces' },
-        { val: 'WoodKeychains', label: 'Keychains' },
-        { val: 'Wood', label: 'General Wood' }
-    ],
-    'ClayPottery': [
-        { val: 'FlowerPots', label: 'Flower Pots' },
-        { val: 'CoffeeMugs', label: 'Coffee Mugs' },
-        { val: 'ClayVases', label: 'Vases' },
-        { val: 'ClayEarrings', label: 'Earrings' },
-        { val: 'ClayFigurines', label: 'Figurines' },
-        { val: 'ClayPottery', label: 'General Clay' }
-    ],
-    'Jewels': [
-        { val: 'Necklaces', label: 'Necklaces' },
-        { val: 'Bracelets', label: 'Bracelets' },
-        { val: 'Rings', label: 'Rings' },
-        { val: 'Bangles', label: 'Bangles' },
-        { val: 'JewelEarrings', label: 'Earrings' },
-        { val: 'Jewels', label: 'General Jewels' }
-    ],
-    'PaperCards': [
-        { val: 'GreetingCards', label: 'Greeting Cards' },
-        { val: 'GiftBoxes', label: 'Gift Boxes' },
-        { val: 'PaperFlowers', label: 'Paper Flowers' },
-        { val: 'PaperShowpieces', label: 'Showpieces' },
-        { val: 'Scrapbooks', label: 'Scrapbooks' },
-        { val: 'PaperCards', label: 'General Paper' }
-    ],
-    'JuteNatural': [
-        { val: 'JuteBags', label: 'Bags' },
-        { val: 'Baskets', label: 'Baskets' },
-        { val: 'Trays', label: 'Trays' },
-        { val: 'DriedBouquets', label: 'Dried Bouquets' },
-        { val: 'Paintings', label: 'Paintings' },
-        { val: 'JuteNatural', label: 'General Jute' }
-    ],
-    'ResinEpoxy': [
-        { val: 'Coasters', label: 'Coasters' },
-        { val: 'ResinEarrings', label: 'Earrings' },
-        { val: 'ResinKeychains', label: 'Keychains' },
-        { val: 'WallArt', label: 'Wall Art' },
-        { val: 'ResinServingTrays', label: 'Serving Trays' },
-        { val: 'ResinEpoxy', label: 'General Resin' }
-    ],
-    'MetalWire': [
-        { val: 'MetalEarrings', label: 'Earrings' },
-        { val: 'MetalVases', label: 'Vases' },
-        { val: 'MetalFigurines', label: 'Figurines' },
-        { val: 'MetalWallArt', label: 'Wall Art' },
-        { val: 'CandleHolders', label: 'Candle Holders' },
-        { val: 'MetalWire', label: 'General Metal' }
-    ]
-};
+        'FabricTextile': [
+            { val: 'CushionCovers', label: 'Cushion Covers' },
+            { val: 'PrintedKurtas', label: 'Printed Kurtas' },
+            { val: 'TieDyeDupattas', label: 'Tie-Dye Dupattas' },
+            { val: 'FabricToteBags', label: 'Tote Bags' },
+            { val: 'FabricTextile', label: 'General Fabric' }
+        ],
+        'WoolYarn': [
+            { val: 'Sweaters', label: 'Sweaters' },
+            { val: 'CrochetBags', label: 'Crochet Bags' },
+            { val: 'StorageBaskets', label: 'Storage Baskets' },
+            { val: 'Beanies', label: 'Beanies' },
+            { val: 'WoolYarn', label: 'General Wool' }
+        ],
+        'Leather': [
+            { val: 'LeatherHandbags', label: 'Handbags' },
+            { val: 'Wallets', label: 'Wallets' },
+            { val: 'Belts', label: 'Belts' },
+            { val: 'LeatherKeychains', label: 'Keychains' },
+            { val: 'Journals', label: 'Journals' },
+            { val: 'Leather', label: 'General Leather' }
+        ],
+        'Wood': [
+            { val: 'PhotoFrames', label: 'Photo Frames' },
+            { val: 'WoodNecklaces', label: 'Necklaces' },
+            { val: 'WoodToys', label: 'Toys' },
+            { val: 'ServingTrays', label: 'Serving Trays' },
+            { val: 'WoodShowpieces', label: 'Showpieces' },
+            { val: 'WoodKeychains', label: 'Keychains' },
+            { val: 'Wood', label: 'General Wood' }
+        ],
+        'ClayPottery': [
+            { val: 'FlowerPots', label: 'Flower Pots' },
+            { val: 'CoffeeMugs', label: 'Coffee Mugs' },
+            { val: 'ClayVases', label: 'Vases' },
+            { val: 'ClayEarrings', label: 'Earrings' },
+            { val: 'ClayFigurines', label: 'Figurines' },
+            { val: 'ClayPottery', label: 'General Clay' }
+        ],
+        'Jewels': [
+            { val: 'Necklaces', label: 'Necklaces' },
+            { val: 'Bracelets', label: 'Bracelets' },
+            { val: 'Rings', label: 'Rings' },
+            { val: 'Bangles', label: 'Bangles' },
+            { val: 'JewelEarrings', label: 'Earrings' },
+            { val: 'Jewels', label: 'General Jewels' }
+        ],
+        'PaperCards': [
+            { val: 'GreetingCards', label: 'Greeting Cards' },
+            { val: 'GiftBoxes', label: 'Gift Boxes' },
+            { val: 'PaperFlowers', label: 'Paper Flowers' },
+            { val: 'PaperShowpieces', label: 'Showpieces' },
+            { val: 'Scrapbooks', label: 'Scrapbooks' },
+            { val: 'PaperCards', label: 'General Paper' }
+        ],
+        'JuteNatural': [
+            { val: 'JuteBags', label: 'Bags' },
+            { val: 'Baskets', label: 'Baskets' },
+            { val: 'Trays', label: 'Trays' },
+            { val: 'DriedBouquets', label: 'Dried Bouquets' },
+            { val: 'Paintings', label: 'Paintings' },
+            { val: 'JuteNatural', label: 'General Jute' }
+        ],
+        'ResinEpoxy': [
+            { val: 'Coasters', label: 'Coasters' },
+            { val: 'ResinEarrings', label: 'Earrings' },
+            { val: 'ResinKeychains', label: 'Keychains' },
+            { val: 'WallArt', label: 'Wall Art' },
+            { val: 'ResinServingTrays', label: 'Serving Trays' },
+            { val: 'ResinEpoxy', label: 'General Resin' }
+        ],
+        'MetalWire': [
+            { val: 'MetalEarrings', label: 'Earrings' },
+            { val: 'MetalVases', label: 'Vases' },
+            { val: 'MetalFigurines', label: 'Figurines' },
+            { val: 'MetalWallArt', label: 'Wall Art' },
+            { val: 'CandleHolders', label: 'Candle Holders' },
+            { val: 'MetalWire', label: 'General Metal' }
+        ]
+    };
     const allProducts = @Html.Raw(Json.Serialize(Model ?? new List<customerseller.Models.Product>()));
 
     console.log('✅ Products loaded:', allProducts.length);
 
     
     function renderProducts(products) {
-      const grid = document.getElementById('productsGrid');
-      if (products.length === 0) {
-        grid.innerHTML = '<div class="no-results"><i class="fa-solid fa-box"></i><p>No products found</p></div>';
-        return;
-      }
+        const grid = document.getElementById('productsGrid');
+        document.getElementById('productCount').textContent = products.length;
 
-      grid.innerHTML = products.map(p => `
-        <div class="product-card">
-          <div class="product-img-wrap">
-            <img src="${p.imageUrl || 'https://via.placeholder.com/150'}" alt="${p.title}" onerror="this.src='https://via.placeholder.com/150'" style="width:100%;height:100%;object-fit:cover;">
-          </div>
-          <div class="product-title">${p.title}</div>
-          <div class="product-price-row">
-            <span class="product-price">Rs. ${p.price?.toLocaleString() || '0'}</span>
-          </div>
-        </div>
-      `).join('');
+        if (products.length === 0) {
+            grid.innerHTML = '<div class="no-results"><i class="fa-solid fa-box"></i><p>No products found</p></div>';
+            return;
+        }
 
-      document.getElementById('productCount').textContent = products.length;
+        grid.innerHTML = products.map(p => `
+                <div class="product-card" onclick="goToProductDetails('${p.id}')">
+                  <div class="product-img-wrap">
+                    <img src="${p.imageUrl || 'https://via.placeholder.com/150'}" alt="${p.title}" onerror="this.src='https://via.placeholder.com/150'" style="width:100%;height:100%;object-fit:cover;">
+                  </div>
+                  <div class="product-title">${p.title}</div>
+                  <div class="product-price-row">
+                    <span class="product-price">Rs. ${p.price?.toLocaleString() || '0'}</span>
+                  </div>
+                  <button type="button" class="product-cart-btn" title="Add to cart" onclick="event.stopPropagation(); addToCart('${p.id}')">
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                </div>
+              `).join('');
     }
 
     
     function toggleSection(header) {
-      const body = header.nextElementSibling;
-      header.classList.toggle('collapsed');
-      body.classList.toggle('hidden');
+        const body = header.nextElementSibling;
+        header.classList.toggle('collapsed');
+        body.classList.toggle('hidden');
     }
 
      
-function norm(str) {
-  return (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-}
-function updateSubCategoryOptions() {
-  const selectedCategories = getCheckedValues('categoryFilter');
-  const subSection = document.getElementById('subCategorySection');
-  const subContainer = document.getElementById('subCategoryFilter');
+    function norm(str) {
+        return (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
 
-  if (selectedCategories.length === 0) {
-    subSection.style.display = 'none';
-    subContainer.innerHTML = '';
-    return;
-  }
+    // Strips a simple trailing "s" so "ring"/"rings" are treated as the
+    // same word, without collapsing distinct words like "earrings".
+    function singularize(word) {
+        return word.length > 3 && word.endsWith('s') ? word.slice(0, -1) : word;
+    }
 
-  let possibleSubs = [];
-  selectedCategories.forEach(mainCat => {
-    if (subCategoryMap[mainCat]) possibleSubs = possibleSubs.concat(subCategoryMap[mainCat]);
-  });
+    // Matches whole words in the title against the search phrase (allowing
+    // singular/plural on either side), so "rings" finds "Ring" products but
+    // not "Earrings", and "ring" still finds "Rings" products too.
+    function titleMatchesSearch(title, search) {
+        if (!search) return true;
+        const searchWords = search.split(/\s+/).filter(Boolean).map(singularize);
+        const titleWords = (title || '').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).map(singularize);
+        return searchWords.every(sw => titleWords.some(tw => tw === sw));
+    }
 
-  const existingCodes = new Set(allProducts.map(p => p.category));
-  const relevantSubs = possibleSubs.filter(s => existingCodes.has(s.val));
+    // Runs whenever a top-level Category checkbox changes. Rebuilds the
+    // subcategory list FIRST, then re-applies filters, so applyFilters()
+    // never reads stale/removed subcategory checkboxes from the old list.
+    function onCategoryChange() {
+        updateSubCategoryOptions();
+        applyFilters();
+    }
 
-  if (relevantSubs.length === 0) {
-    subSection.style.display = 'none';
-    subContainer.innerHTML = '';
-    return;
-  }
+    function updateSubCategoryOptions() {
+        const selectedCategories = getCheckedValues('categoryFilter');
+        const subSection = document.getElementById('subCategorySection');
+        const subContainer = document.getElementById('subCategoryFilter');
 
-  subSection.style.display = 'block';
-  subContainer.innerHTML = relevantSubs.map(s => `
-    <label class="filter-option">
-      <input type="checkbox" value="${s.val}" onchange="applyFilters()"> ${s.label}
-    </label>
-  `).join('');
-}
-function getCheckedValues(containerId) {
-  return Array.from(document.querySelectorAll('#' + containerId + ' input[type="checkbox"]:checked'))
-    .map(cb => cb.value);
-}
-function applyFilters() {
-  const selectedCategories = getCheckedValues('categoryFilter');
-  const selectedSubCategories = getCheckedValues('subCategoryFilter');
-  const selectedSizes = getCheckedValues('sizeFilter');
+        if (selectedCategories.length === 0) {
+            subSection.style.display = 'none';
+            subContainer.innerHTML = '';
+            return;
+        }
 
-  let filtered = allProducts.filter(p => {
+        let possibleSubs = [];
+        selectedCategories.forEach(mainCat => {
+            if (subCategoryMap[mainCat]) possibleSubs = possibleSubs.concat(subCategoryMap[mainCat]);
+        });
+
+        const existingCodes = new Set(allProducts.map(p => p.category));
+        const relevantSubs = possibleSubs.filter(s => existingCodes.has(s.val));
+
+        if (relevantSubs.length === 0) {
+            subSection.style.display = 'none';
+            subContainer.innerHTML = '';
+            return;
+        }
+
+        subSection.style.display = 'block';
+        subContainer.innerHTML = relevantSubs.map(s => `
+            <label class="filter-option">
+              <input type="checkbox" value="${s.val}" onchange="applyFilters()"> ${s.label}
+            </label>
+          `).join('');
+    }
+    function getCheckedValues(containerId) {
+        return Array.from(document.querySelectorAll('#' + containerId + ' input[type="checkbox"]:checked'))
+            .map(cb => cb.value);
+    }
+    function applyFilters() {
+        const selectedCategories = getCheckedValues('categoryFilter');
+        const selectedSubCategories = getCheckedValues('subCategoryFilter');
+        const selectedSizes = getCheckedValues('sizeFilter');
+
+        let filtered = allProducts.filter(p => {
 
     
-    if (selectedSubCategories.length > 0) {
-      if (!selectedSubCategories.includes(p.category)) return false;
-    } else if (selectedCategories.length > 0) {
-      let allowedCodes = [];
-      selectedCategories.forEach(mainCat => {
-        if (subCategoryMap[mainCat]) allowedCodes = allowedCodes.concat(subCategoryMap[mainCat].map(s => s.val));
-      });
-      if (!allowedCodes.includes(p.category)) return false;
+            if (selectedSubCategories.length > 0) {
+                if (!selectedSubCategories.includes(p.category)) return false;
+            } else if (selectedCategories.length > 0) {
+                let allowedCodes = [];
+                selectedCategories.forEach(mainCat => {
+                    if (subCategoryMap[mainCat]) allowedCodes = allowedCodes.concat(subCategoryMap[mainCat].map(s => s.val));
+                });
+                if (!allowedCodes.includes(p.category)) return false;
+            }
+
+            if (selectedSizes.length > 0) {
+                const productSizes = (p.sizes || '').split(',').map(s => norm(s));
+                const matches = selectedSizes.some(sz => productSizes.includes(norm(sz)));
+                if (!matches) return false;
+            }
+
+            const minP = parseFloat(document.getElementById('minPrice').value) || 0;
+            const maxP = parseFloat(document.getElementById('maxPrice').value) || 999999;
+            const price = parseFloat(p.price) || 0;
+            if (price < minP || price > maxP) return false;
+
+            const activeColors = Array.from(document.querySelectorAll('.color-swatch.active'))
+                .map(el => el.getAttribute('data-color'));
+            if (activeColors.length > 0) {
+                const productColor = norm(p.color);
+                if (!activeColors.some(c => productColor.includes(norm(c)))) return false;
+            }
+
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+            if (search && !titleMatchesSearch(p.title, search)) return false;
+
+            return true;
+        });
+
+        const sortVal = document.getElementById('sortSelect').value;
+        if (sortVal === 'price-low') filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
+        else if (sortVal === 'price-high') filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+
+        renderProducts(filtered);
+        renderActiveFilters();
     }
 
-    if (selectedSizes.length > 0) {
-      const productSizes = (p.sizes || '').split(',').map(s => norm(s));
-      const matches = selectedSizes.some(sz => productSizes.includes(norm(sz)));
-      if (!matches) return false;
+    // Builds the removable "chips" shown above the grid (e.g. "Blue x",
+    // "M x", "\"lamp\" x") so active filters are actually visible/removable,
+    // and lets each chip clear just that one filter.
+    function renderActiveFilters() {
+        const container = document.getElementById('activeFilters');
+        const chips = [];
+
+        document.querySelectorAll('#categoryFilter input:checked').forEach(cb => {
+            chips.push({ label: cb.parentElement.textContent.trim(), onRemove: () => { cb.checked = false; onCategoryChange(); } });
+        });
+        document.querySelectorAll('#subCategoryFilter input:checked').forEach(cb => {
+            chips.push({ label: cb.parentElement.textContent.trim(), onRemove: () => { cb.checked = false; applyFilters(); } });
+        });
+        document.querySelectorAll('#sizeFilter input:checked').forEach(cb => {
+            chips.push({ label: cb.value.toUpperCase(), onRemove: () => { cb.checked = false; applyFilters(); } });
+        });
+        document.querySelectorAll('.color-swatch.active').forEach(el => {
+            chips.push({ label: el.getAttribute('title'), onRemove: () => { el.classList.remove('active'); applyFilters(); } });
+        });
+        const search = document.getElementById('searchInput').value.trim();
+        if (search) {
+            chips.push({ label: '"' + search + '"', onRemove: () => { document.getElementById('searchInput').value = ''; applyFilters(); } });
+        }
+
+        container.innerHTML = '';
+        chips.forEach(chip => {
+            const el = document.createElement('span');
+            el.className = 'filter-tag';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.innerHTML = '&times;';
+            btn.addEventListener('click', chip.onRemove);
+            el.textContent = chip.label + ' ';
+            el.appendChild(btn);
+            container.appendChild(el);
+        });
     }
 
-    const minP = parseFloat(document.getElementById('minPrice').value) || 0;
-    const maxP = parseFloat(document.getElementById('maxPrice').value) || 999999;
-    const price = parseFloat(p.price) || 0;
-    if (price < minP || price > maxP) return false;
-
-    const activeColors = Array.from(document.querySelectorAll('.color-swatch.active'))
-      .map(el => el.getAttribute('data-color'));
-    if (activeColors.length > 0) {
-      const productColor = norm(p.color);
-      if (!activeColors.some(c => productColor.includes(norm(c)))) return false;
+    function resetAllFilters() {
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+        document.querySelectorAll('.color-swatch.active').forEach(el => el.classList.remove('active'));
+        document.getElementById('searchInput').value = '';
+        document.getElementById('sortSelect').value = 'default';
+        document.getElementById('minPrice').value = '0';
+        document.getElementById('maxPrice').value = '20000';
+        document.getElementById('priceSlider').value = '20000';
+        document.getElementById('priceSliderMaxLabel').textContent = 'Rs. 20,000';
+        document.getElementById('subCategorySection').style.display = 'none';
+        document.getElementById('subCategoryFilter').innerHTML = '';
+        hideSuggestions();
+        applyFilters();
     }
 
-    const search = document.getElementById('searchInput').value.toLowerCase().trim();
-    if (search && !(p.title || '').toLowerCase().includes(search)) return false;
+    // Opens the real product detail page (ProductsController.Details).
+    function goToProductDetails(id) {
+        window.location.href = '/Products/Details/' + id;
+    }
 
-    return true;
-  });
+    // Adds a product to the same localStorage-based cart used across the
+    // rest of the site (see the cart script in _Layout.cshtml).
+    function addToCart(id) {
+        const product = allProducts.find(p => p.id === id);
+        if (!product) return;
 
-  const sortVal = document.getElementById('sortSelect').value;
-  if (sortVal === 'price-low') filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
-  else if (sortVal === 'price-high') filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const existingIndex = cart.findIndex(item => item.id === id);
 
-  renderProducts(filtered);
-}
-   function resetAllFilters() {
-  document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
-  document.getElementById('minPrice').value = '0';
-  document.getElementById('maxPrice').value = '50000';
-  document.getElementById('subCategorySection').style.display = 'none';
-  document.getElementById('subCategoryFilter').innerHTML = '';
-  renderProducts(allProducts);
-}
+        // NOTE: assumes the JSON serializer camelCases property names
+        // (Product.SellerEmail -> product.sellerEmail). If your product
+        // JSON uses different casing, adjust this line to match.
+        const shopId = product.sellerEmail || product.SellerEmail || '';
+        const shopName = product.shopName || product.ShopName || '';
+
+        if (existingIndex > -1) {
+            cart[existingIndex].qty = (parseInt(cart[existingIndex].qty) || 1) + 1;
+            cart[existingIndex].shopId = shopId;
+            cart[existingIndex].shopName = shopName;
+        } else {
+            cart.push({
+                id: product.id,
+                img: product.imageUrl || 'https://via.placeholder.com/150',
+                title: product.title,
+                price: product.price,
+                qty: 1,
+                shopId: shopId,
+                shopName: shopName
+            });
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+
+        // These live in _Layout.cshtml and are already loaded on this page.
+        if (typeof updateCartCount === 'function') updateCartCount();
+        if (typeof openCart === 'function') openCart();
+    }
 
     function toggleColor(el) {
-      el.classList.toggle('active');
-      applyFilters();
+        el.classList.toggle('active');
+        applyFilters();
     }
+
+    // ===== Search suggestions dropdown =====
+    let currentSuggestions = [];
+
+    function showSuggestions() {
+        const search = document.getElementById('searchInput').value.trim().toLowerCase();
+        const box = document.getElementById('searchSuggestions');
+
+        if (!search) {
+            hideSuggestions();
+            return;
+        }
+
+        currentSuggestions = allProducts.filter(p =>
+            (p.title || '').toLowerCase().split(/[^a-z0-9]+/).some(word => word.startsWith(search))
+        ).slice(0, 6);
+
+        if (currentSuggestions.length === 0) {
+            hideSuggestions();
+            return;
+        }
+
+        box.innerHTML = currentSuggestions.map((p, i) => `
+                <div class="search-suggestion-item" onclick="selectSuggestion(${i})">
+                  <img src="${p.imageUrl || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'">
+                  <span>${p.title}</span>
+                </div>
+              `).join('');
+        box.classList.add('active');
+    }
+
+    function hideSuggestions() {
+        const box = document.getElementById('searchSuggestions');
+        box.classList.remove('active');
+        box.innerHTML = '';
+    }
+
+    function selectSuggestion(index) {
+        const p = currentSuggestions[index];
+        if (!p) return;
+        document.getElementById('searchInput').value = p.title;
+        hideSuggestions();
+        applyFilters();
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-wrapper')) hideSuggestions();
+    });
 
     function updatePriceSlider(value) {
-      document.getElementById('maxPrice').value = value;
-      applyFilters();
+        document.getElementById('maxPrice').value = value;
+        document.getElementById('priceSliderMaxLabel').textContent = 'Rs. ' + Number(value).toLocaleString();
+        applyFilters();
     }
 
-        function openMobileFilter() {
+    function openMobileFilter() {
         document.getElementById('filterSidebar').classList.add('open');
         document.getElementById('sidebarOverlay').classList.add('active');
     }
@@ -1045,8 +1307,5 @@ function applyFilters() {
     }
 
     document.getElementById('sidebarOverlay').addEventListener('click', closeMobileFilter);
-    document.querySelectorAll('#categoryFilter input[type="checkbox"]').forEach(cb => {
-  cb.addEventListener('change', updateSubCategoryOptions);
-});
     renderProducts(allProducts);
 </script>

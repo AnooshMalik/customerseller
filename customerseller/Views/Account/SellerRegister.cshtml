@@ -19,8 +19,8 @@
     }
 </style>
 <div class="register-box">
-    <h2 style="color:#a64d79; margin-bottom:5px;">🏪 Register as Seller</h2>
-    <p style="color:#888; margin-bottom:25px; font-size:0.9rem;">Create your seller account and start selling!</p>
+    <h1 style="color:#a64d79; margin-bottom:5px; font-size:1.5rem;">🏪 Register as Seller</h1>
+ <p style="color:#888; margin-bottom:25px; font-size:0.9rem;">Create your seller account and start selling!</p>
 
     @if (TempData["RegisterError"] != null)
     {
@@ -31,13 +31,21 @@
 
     <form asp-controller="Account" asp-action="SellerRegister" method="post" autocomplete="off">
         <input type="hidden" name="role" value="Seller" />
-        <input type="text" name="firstName" placeholder="First Name" required
+
+        <label for="sellerFirstName" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">First Name</label>
+        <input type="text" id="sellerFirstName" name="firstName" placeholder="First Name" required
                style="width:100%; padding:10px; margin-bottom:12px; border:1px solid #ddd; border-radius:6px;">
-        <input type="text" name="lastName" placeholder="Last Name" required
+
+        <label for="sellerLastName" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Last Name</label>
+        <input type="text" id="sellerLastName" name="lastName" placeholder="Last Name" required
                style="width:100%; padding:10px; margin-bottom:12px; border:1px solid #ddd; border-radius:6px;">
-        <input type="email" name="email" placeholder="Email *" autocomplete="off" value="" required
+
+        <label for="sellerEmail" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Email</label>
+        <input type="email" id="sellerEmail" name="email" placeholder="Email *" autocomplete="off" value="" required
                style="width:100%; padding:10px; margin-bottom:12px; border:1px solid #ddd; border-radius:6px;">
-        <input type="password" name="password" placeholder="Password * (min 8 characters)" autocomplete="new-password" value="" required minlength="8"
+
+        <label for="sellerPassword" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Password</label>
+        <input type="password" id="sellerPassword" name="password" placeholder="Password * (min 8 characters)" autocomplete="new-password" value="" required minlength="8"
                style="width:100%; padding:10px; margin-bottom:20px; border:1px solid #ddd; border-radius:6px;">
         <button type="submit"
                 style="width:100%; padding:12px; background:#a64d79; color:#fff; border:none; border-radius:6px; font-weight:700; font-size:1rem; cursor:pointer;">

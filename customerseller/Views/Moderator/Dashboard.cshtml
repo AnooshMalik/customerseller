@@ -12,85 +12,401 @@
     <title>Moderator Dashboard - Artisan Valley</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f5f3ff; display: flex; }
-        .sidebar { width: 260px; background: #a64d79; height: 100vh; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; }
-        .sidebar-logo { padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: center; }
-        .sidebar-logo img { height: 55px; }
-        .sidebar-logo p { color: rgba(255,255,255,0.5); font-size: 0.7rem; font-weight: 700; margin-top: 8px; letter-spacing: 3px; text-transform: uppercase; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.88rem; transition: all 0.2s; cursor: pointer; border-left: 3px solid transparent; }
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.08); color: #fff; border-left-color: #fff; }
-        .nav-item i { width: 18px; }
-        .sidebar-bottom { margin-top: auto; padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.08); }
-        .logout-item { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: #ff6b6b; text-decoration: none; font-size: 0.88rem; }
-        .main { 
-    margin-left: 260px; 
-    padding: 30px 40px; 
-    min-height: 100vh; 
-    max-width: 1100px;
-    width: calc(100% - 260px);
-}
-        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-        .topbar h1 { font-size: 1.5rem; color: #1a1a2e; font-weight: 700; }
-        .topbar p { color: #888; font-size: 0.85rem; margin-top: 3px; }
-        .mod-badge { background: #a64d79; color: #fff; padding: 8px 18px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 7px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
-        .stat-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-left: 4px solid #a64d79; }
-        .stat-card.pending { border-left-color: #f59e0b; }
-        .stat-card.approved { border-left-color: #10b981; }
-        .stat-card.rejected { border-left-color: #ef4444; }
-        .stat-number { font-size: 1.8rem; font-weight: 700; color: #1a1a2e; }
-        .stat-label { color: #888; font-size: 0.78rem; margin-top: 4px; }
-        .section { display: none; }
-        .section.active { display: block; }
-        .video-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); 
-    gap: 24px; 
-}
-        .video-card { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
-        .video-wrapper { width: 100%; height: 180px; background: #000; display: flex; align-items: center; justify-content: center; }
-        .video-wrapper video { width: 100%; height: 180px; object-fit: cover; }
-        .video-body { padding: 16px; }
-        .product-name { font-size: 1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 8px; }
-        .info-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-        .info-badge { background: #f1f5f9; color: #475569; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-        .seller-info { font-size: 0.82rem; color: #888; margin-bottom: 14px; padding: 10px; background: #f8fafc; border-radius: 8px; }
-        .seller-info span { display: block; margin-bottom: 3px; }
-        .seller-info strong { color: #1a1a2e; }
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-        .action-area { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-approve { flex: 1; padding: 10px; background: #10b981; color: #fff; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
-        .btn-reject { flex: 1; padding: 10px; background: #ef4444; color: #fff; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
-        .history-card { 
-    background: #fff; 
-    border-radius: 12px; 
-    padding: 18px 24px; 
-    margin-bottom: 12px; 
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06); 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center; 
-    border-left: 4px solid #10b981;
-    transition: transform 0.2s;
-}
-.history-card:hover { transform: translateX(4px); }
-        .history-card.rejected-card { border-left-color: #ef4444; }
-        .history-info h4 { font-size: 0.95rem; font-weight: 700; color: #1a1a2e; }
-        .history-info p { font-size: 0.8rem; color: #888; margin-top: 3px; }
-        .history-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
-        .history-badge.app { background: #d1fae5; color: #065f46; }
-        .history-badge.rej { background: #fee2e2; color: #991b1b; }
-        .empty-state { text-align: center; padding: 50px; color: #888; }
-        .empty-state i { font-size: 3rem; color: #ddd; margin-bottom: 15px; display: block; }
-        .reject-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
-        .reject-modal.show { display: flex; }
-        .reject-box { background: #fff; border-radius: 16px; padding: 30px; width: 450px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-        .reject-box h3 { font-size: 1.1rem; color: #1a1a2e; margin-bottom: 20px; }
-        .reject-box select, .reject-box textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 0.9rem; outline: none; margin-bottom: 15px; font-family: inherit; }
-        .reject-box textarea { height: 80px; resize: none; }
-        .reject-btns { display: flex; gap: 10px; }
-        .btn-confirm-reject { flex: 1; padding: 12px; background: #ef4444; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+            body {
+                font-family: 'Segoe UI', sans-serif;
+                background: #f5f3ff;
+                display: flex;
+            }
+
+            .sidebar {
+                width: 260px;
+                background: #a64d79;
+                height: 100vh;
+                position: fixed;
+                left: 0;
+                top: 0;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .sidebar-logo {
+                padding: 25px 20px;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                text-align: center;
+            }
+
+                .sidebar-logo img {
+                    height: 55px;
+                }
+
+                .sidebar-logo p {
+                    color: rgba(255,255,255,0.5);
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    margin-top: 8px;
+                    letter-spacing: 3px;
+                    text-transform: uppercase;
+                }
+
+            .nav-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 20px;
+                color: rgba(255,255,255,0.6);
+                text-decoration: none;
+                font-size: 0.88rem;
+                transition: all 0.2s;
+                cursor: pointer;
+                border-left: 3px solid transparent;
+            }
+
+                .nav-item:hover, .nav-item.active {
+                    background: rgba(255,255,255,0.08);
+                    color: #fff;
+                    border-left-color: #fff;
+                }
+
+                .nav-item i {
+                    width: 18px;
+                }
+
+            .sidebar-bottom {
+                margin-top: auto;
+                padding: 15px 0;
+                border-top: 1px solid rgba(255,255,255,0.08);
+            }
+
+            .logout-item {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 12px 20px;
+                color: #ff6b6b;
+                text-decoration: none;
+                font-size: 0.88rem;
+            }
+
+            .main {
+                margin-left: 260px;
+                padding: 30px 40px;
+                min-height: 100vh;
+                max-width: 1100px;
+                width: calc(100% - 260px);
+            }
+
+            .topbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 28px;
+            }
+
+                .topbar h1 {
+                    font-size: 1.5rem;
+                    color: #1a1a2e;
+                    font-weight: 700;
+                }
+
+                .topbar p {
+                    color: #888;
+                    font-size: 0.85rem;
+                    margin-top: 3px;
+                }
+
+            .mod-badge {
+                background: #a64d79;
+                color: #fff;
+                padding: 8px 18px;
+                border-radius: 20px;
+                font-size: 0.82rem;
+                font-weight: 600;
+                display: flex;
+                align-items: center;
+                gap: 7px;
+            }
+
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+                margin-bottom: 28px;
+            }
+
+            .stat-card {
+                background: #fff;
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+                border-left: 4px solid #a64d79;
+            }
+
+                .stat-card.pending {
+                    border-left-color: #f59e0b;
+                }
+
+                .stat-card.approved {
+                    border-left-color: #10b981;
+                }
+
+                .stat-card.rejected {
+                    border-left-color: #ef4444;
+                }
+
+            .stat-number {
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: #1a1a2e;
+            }
+
+            .stat-label {
+                color: #888;
+                font-size: 0.78rem;
+                margin-top: 4px;
+            }
+
+            .section {
+                display: none;
+            }
+
+                .section.active {
+                    display: block;
+                }
+
+            .video-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+                gap: 24px;
+            }
+
+            .video-card {
+                background: #fff;
+                border-radius: 14px;
+                overflow: hidden;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            }
+
+            .video-wrapper {
+                width: 100%;
+                height: 180px;
+                background: #000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .video-wrapper video {
+                    width: 100%;
+                    height: 180px;
+                    object-fit: cover;
+                }
+
+            .video-body {
+                padding: 16px;
+            }
+
+            .product-name {
+                font-size: 1rem;
+                font-weight: 700;
+                color: #1a1a2e;
+                margin-bottom: 8px;
+            }
+
+            .info-row {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                margin-bottom: 12px;
+            }
+
+            .info-badge {
+                background: #f1f5f9;
+                color: #475569;
+                padding: 3px 10px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+
+            .seller-info {
+                font-size: 0.82rem;
+                color: #888;
+                margin-bottom: 14px;
+                padding: 10px;
+                background: #f8fafc;
+                border-radius: 8px;
+            }
+
+                .seller-info span {
+                    display: block;
+                    margin-bottom: 3px;
+                }
+
+                .seller-info strong {
+                    color: #1a1a2e;
+                }
+
+            .action-area {
+                display: flex;
+                gap: 10px;
+                margin-top: 10px;
+            }
+
+            .btn-approve {
+                flex: 1;
+                padding: 10px;
+                background: #10b981;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .btn-reject {
+                flex: 1;
+                padding: 10px;
+                background: #ef4444;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                font-size: 0.85rem;
+                font-weight: 600;
+                cursor: pointer;
+            }
+
+            .history-card {
+                background: #fff;
+                border-radius: 12px;
+                padding: 18px 24px;
+                margin-bottom: 12px;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-left: 4px solid #10b981;
+                transition: transform 0.2s;
+            }
+
+                .history-card:hover {
+                    transform: translateX(4px);
+                }
+
+                .history-card.rejected-card {
+                    border-left-color: #ef4444;
+                }
+
+            .history-info h4 {
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: #1a1a2e;
+            }
+
+            .history-info p {
+                font-size: 0.8rem;
+                color: #888;
+                margin-top: 3px;
+            }
+
+            .history-badge {
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                font-weight: 600;
+            }
+
+                .history-badge.app {
+                    background: #d1fae5;
+                    color: #065f46;
+                }
+
+                .history-badge.rej {
+                    background: #fee2e2;
+                    color: #991b1b;
+                }
+
+            .empty-state {
+                text-align: center;
+                padding: 50px;
+                color: #888;
+            }
+
+                .empty-state i {
+                    font-size: 3rem;
+                    color: #ddd;
+                    margin-bottom: 15px;
+                    display: block;
+                }
+
+            .reject-modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                z-index: 9999;
+                align-items: center;
+                justify-content: center;
+            }
+
+                .reject-modal.show {
+                    display: flex;
+                }
+
+            .reject-box {
+                background: #fff;
+                border-radius: 16px;
+                padding: 30px;
+                width: 450px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            }
+
+                .reject-box h3 {
+                    font-size: 1.1rem;
+                    color: #1a1a2e;
+                    margin-bottom: 20px;
+                }
+
+                .reject-box select, .reject-box textarea {
+                    width: 100%;
+                    padding: 12px 14px;
+                    border: 1.5px solid #e0e0e0;
+                    border-radius: 10px;
+                    font-size: 0.9rem;
+                    outline: none;
+                    margin-bottom: 15px;
+                    font-family: inherit;
+                }
+
+                .reject-box textarea {
+                    height: 80px;
+                    resize: none;
+                }
+
+            .reject-btns {
+                display: flex;
+                gap: 10px;
+            }
+
+            .btn-confirm-reject {
+                flex: 1;
+                padding: 12px;
+                background: #ef4444;
+                color: #fff;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                cursor: pointer;
+            }
 
             .btn-cancel-reject {
                 flex: 1;
@@ -103,19 +419,87 @@
                 cursor: pointer;
             }
 
+            /* ===== MOBILE RESPONSIVE (top icon bar, single-column cards, like Seller Dashboard) ===== */
             @@media (max-width: 768px) {
+                body {
+                    flex-direction: column;
+                }
+
                 .sidebar {
                     width: 100%;
                     height: auto;
                     position: relative;
+                    flex-direction: row;
+                    align-items: center;
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+
+                .sidebar-logo {
+                    display: none;
+                }
+
+                .nav-item {
+                    flex: 1 0 auto;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 4px;
+                    padding: 10px 8px;
+                    font-size: 0.62rem;
+                    text-align: center;
+                    white-space: nowrap;
+                    border-left: none;
+                    border-bottom: 3px solid transparent;
+                }
+
+                    .nav-item i {
+                        width: auto;
+                        font-size: 1rem;
+                    }
+
+                    .nav-item:hover, .nav-item.active {
+                        border-left: none;
+                        border-bottom-color: #fff;
+                    }
+
+                    .nav-item span {
+                        margin-left: 0 !important;
+                        position: absolute;
+                        top: 4px;
+                        right: 6px;
+                    }
+
+                .sidebar-bottom {
+                    margin-top: 0;
+                    padding: 0;
+                    border-top: none;
+                    flex: 0 0 auto;
+                }
+
+                .logout-item {
+                    flex-direction: column;
+                    gap: 4px;
+                    padding: 10px 12px;
+                    font-size: 0.62rem;
+                    white-space: nowrap;
                 }
 
                 .main {
                     margin-left: 0;
                     width: 100%;
                     max-width: 100%;
-                    padding: 20px 15px;
+                    padding: 16px;
                 }
+
+                .topbar {
+                    flex-wrap: wrap;
+                    gap: 10px;
+                }
+
+                    .topbar h1 {
+                        font-size: 1.2rem;
+                    }
 
                 .stats-grid {
                     grid-template-columns: 1fr;
@@ -140,13 +524,24 @@
                     flex-direction: column;
                 }
             }
+
             #confirmModal .reject-box {
-    width: 340px;
-    padding: 26px 24px;
-}
-#confirmModal #confirmModalIcon { font-size: 2rem; margin-bottom: 8px; }
-#confirmModal #confirmModalTitle { font-size: 1.05rem; }
-#confirmModal #confirmModalMsg { font-size: 0.82rem; }
+                width: 340px;
+                padding: 26px 24px;
+            }
+
+            #confirmModal #confirmModalIcon {
+                font-size: 2rem;
+                margin-bottom: 8px;
+            }
+
+            #confirmModal #confirmModalTitle {
+                font-size: 1.05rem;
+            }
+
+            #confirmModal #confirmModalMsg {
+                font-size: 0.82rem;
+            }
     </style>
 </head>
 <body>
@@ -200,7 +595,7 @@
             </div>
         </div>
 
-       
+
         <div class="section active" id="sec-pending">
             @if (pendingVideos != null && pendingVideos.Count > 0)
             {
@@ -232,17 +627,17 @@
                                 </div>
 
                                 <div class="seller-info" style="margin-top:8px;">
-    <span>
-        <strong>Products in this sub-category:</strong> 
-        @v.ProductCount
-    </span>
-    @if (!string.IsNullOrEmpty(v.ProductTitles?.ToString()))
-    {
-        <span style="margin-top:4px; color:#555;">
-            @v.ProductTitles
-        </span>
-    }
-</div>
+                                    <span>
+                                        <strong>Products in this sub-category:</strong>
+                                        @v.ProductCount
+                                    </span>
+                                    @if (!string.IsNullOrEmpty(v.ProductTitles?.ToString()))
+                                    {
+                                        <span style="margin-top:4px; color:#555;">
+                                            @v.ProductTitles
+                                        </span>
+                                    }
+                                </div>
                                 <div class="action-area">
                                     <button class="btn-approve" onclick="approveVideo(@v.Id)">
                                         <i class="fa-solid fa-check"></i> Approve
@@ -265,14 +660,14 @@
             }
         </div>
 
-       
+
         <div class="section" id="sec-approved">
             <div id="approvedList">
                 <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading...</p></div>
             </div>
         </div>
 
-       
+
         <div class="section" id="sec-rejected">
             <div id="rejectedList">
                 <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><p>Loading...</p></div>
@@ -280,7 +675,7 @@
         </div>
     </div>
 
-    
+
     <div class="reject-modal" id="rejectModal">
         <div class="reject-box">
             <h3><i class="fa-solid fa-circle-xmark" style="color:#ef4444;"></i> Reject Video</h3>
@@ -300,29 +695,29 @@
             </div>
         </div>
     </div>
-        
-        <div class="reject-modal" id="confirmModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999; align-items:center; justify-content:center;">
-            <div class="reject-box" style="text-align:center;">
-                <div style="font-size:2.5rem; margin-bottom:12px;" id="confirmModalIcon"></div>
-                <h3 id="confirmModalTitle" style="margin-bottom:8px;"></h3>
-                <p id="confirmModalMsg" style="font-size:0.85rem; color:#6b7280; margin-bottom:20px;"></p>
-                <div style="display:flex; gap:10px; justify-content:center;">
-                    <button class="btn-cancel-reject" onclick="closeConfirmModal()">Cancel</button>
-                    <button class="btn-confirm-reject" id="confirmModalBtn" style="background:#10b981;">Confirm</button>
-                </div>
+
+    <div class="reject-modal" id="confirmModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:9999; align-items:center; justify-content:center;">
+        <div class="reject-box" style="text-align:center;">
+            <div style="font-size:2.5rem; margin-bottom:12px;" id="confirmModalIcon"></div>
+            <h3 id="confirmModalTitle" style="margin-bottom:8px;"></h3>
+            <p id="confirmModalMsg" style="font-size:0.85rem; color:#6b7280; margin-bottom:20px;"></p>
+            <div style="display:flex; gap:10px; justify-content:center;">
+                <button class="btn-cancel-reject" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn-confirm-reject" id="confirmModalBtn" style="background:#10b981;">Confirm</button>
             </div>
         </div>
-    
+    </div>
+
 
     <script>
-       fetch('/Moderator/GetStats')
-    .then(r => r.json())
-    .then(d => {
-        document.getElementById('statPending').textContent = d.pending;
-        document.getElementById('statApproved').textContent = d.approved;
-        document.getElementById('statRejected').textContent = d.rejected;
-    });
-                fetch('/Chat/GetUnreadCount')
+            fetch('/Moderator/GetStats')
+                .then(r => r.json())
+                .then(d => {
+                    document.getElementById('statPending').textContent = d.pending;
+                    document.getElementById('statApproved').textContent = d.approved;
+                    document.getElementById('statRejected').textContent = d.rejected;
+                });
+            fetch('/Chat/GetUnreadCount')
                 .then(r => r.json())
                 .then(d => {
                     const badge = document.getElementById('chatUnreadBadge');
@@ -332,38 +727,39 @@
                     }
                 });
 
-loadHistory('Approved', 'approvedList');
-loadHistory('Rejected', 'rejectedList');
+            loadHistory('Approved', 'approvedList');
+            loadHistory('Rejected', 'rejectedList');
 
-        function showSection(name, el) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('sec-' + name).classList.add('active');
-            el.classList.add('active');
-            if (name === 'approved') loadHistory('Approved', 'approvedList');
-            if (name === 'rejected') loadHistory('Rejected', 'rejectedList');
-        }
-
-        async function loadHistory(status, containerId) {
-            const res = await fetch('/Moderator/GetVideoHistory?status=' + status);
-            const videos = await res.json();
-            const container = document.getElementById(containerId);
-            if (videos.length === 0) {
-                container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-circle-check"></i><p>No ${status.toLowerCase()} videos yet.</p></div>`;
-                return;
+            function showSection(name, el) {
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                document.getElementById('sec-' + name).classList.add('active');
+                el.classList.add('active');
+                if (name === 'approved') loadHistory('Approved', 'approvedList');
+                if (name === 'rejected') loadHistory('Rejected', 'rejectedList');
             }
-                        container.innerHTML = videos.map(v => `
+
+            async function loadHistory(status, containerId) {
+                const res = await fetch('/Moderator/GetVideoHistory?status=' + status);
+                const videos = await res.json();
+                const container = document.getElementById(containerId);
+                if (videos.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><i class="fa-solid fa-circle-check"></i><p>No ${status.toLowerCase()} videos yet.</p></div>`;
+                    return;
+                }
+                container.innerHTML = videos.map(v => `
                 <div class="history-card ${status === 'Rejected' ? 'rejected-card' : ''}">
                     <div class="history-info">
                         <h4>${v.subCategory}</h4>
                         <p>${v.sellerEmail} • ${new Date(v.uploadedAt).toLocaleDateString()}</p>
                         ${status === 'Rejected' && v.rejectionReason ? `<p style="color:#dc2626; margin-top:4px;"><strong>Reason:</strong> ${v.rejectionReason}</p>` : ''}
+                        ${v.videoUrl ? `<a href="${v.videoUrl}" target="_blank" style="display:inline-flex; align-items:center; gap:6px; margin-top:8px; color:#7c3aed; font-size:0.82rem; font-weight:600; text-decoration:none;"><i class="fa-solid fa-play-circle"></i> Watch Video</a>` : ''}
                     </div>
                     <span class="history-badge ${status === 'Approved' ? 'app' : 'rej'}">${status}</span>
                 </div>`).join('');
-        }
+            }
 
-                    function showConfirmModal(icon, title, msg, onConfirm) {
+            function showConfirmModal(icon, title, msg, onConfirm) {
                 document.getElementById('confirmModalIcon').textContent = icon;
                 document.getElementById('confirmModalTitle').textContent = title;
                 document.getElementById('confirmModalMsg').textContent = msg;
@@ -377,11 +773,11 @@ loadHistory('Rejected', 'rejectedList');
             function closeConfirmModal() {
                 document.getElementById('confirmModal').style.display = 'none';
             }
-function confirmLogout() {
-    showConfirmModal(' ', 'Logout?', 'Are you sure you want to logout?', () => {
-        window.location.href = '/Moderator/Logout';
-    });
-}
+            function confirmLogout() {
+                showConfirmModal(' ', 'Logout?', 'Are you sure you want to logout?', () => {
+                    window.location.href = '/Moderator/Logout';
+                });
+            }
 
             async function approveVideo(videoId) {
                 showConfirmModal('✅', 'Approve Video?',
@@ -399,43 +795,43 @@ function confirmLogout() {
                     }
                 );
             }
-        function openRejectModal(videoId) {
-            document.getElementById('rejectVideoId').value = videoId;
-            document.getElementById('rejectModal').classList.add('show');
-        }
+            function openRejectModal(videoId) {
+                document.getElementById('rejectVideoId').value = videoId;
+                document.getElementById('rejectModal').classList.add('show');
+            }
 
-        function closeRejectModal() {
-            document.getElementById('rejectModal').classList.remove('show');
-        }
-        async function confirmReject() {
-    const videoId = document.getElementById('rejectVideoId').value;
-    const reason = document.getElementById('rejectReason').value;
-    const custom = document.getElementById('rejectCustomReason').value;
-    
-    if (!reason && !custom) {
-        showConfirmModal('⚠️', 'Required', 'Please provide a rejection reason.', () => {});
-        return;
-    }
-    
-    
-    const finalReason = (custom && custom.trim()) ? custom.trim() : reason;
-    
-    console.log('Sending reason:', finalReason); 
-    
-    const res = await fetch('/Moderator/Reject', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `videoId=${videoId}&reason=${encodeURIComponent(finalReason)}`
-    });
-   
-    const data = await res.json();
-    if (data.success) {
-        closeRejectModal();
-        location.reload();
-    }
-}
-           
-        
+            function closeRejectModal() {
+                document.getElementById('rejectModal').classList.remove('show');
+            }
+            async function confirmReject() {
+                const videoId = document.getElementById('rejectVideoId').value;
+                const reason = document.getElementById('rejectReason').value;
+                const custom = document.getElementById('rejectCustomReason').value;
+
+                if (!reason && !custom) {
+                    showConfirmModal('⚠️', 'Required', 'Please provide a rejection reason.', () => { });
+                    return;
+                }
+
+
+                const finalReason = (custom && custom.trim()) ? custom.trim() : reason;
+
+                console.log('Sending reason:', finalReason);
+
+                const res = await fetch('/Moderator/Reject', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `videoId=${videoId}&reason=${encodeURIComponent(finalReason)}`
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    closeRejectModal();
+                    location.reload();
+                }
+            }
+
+
     </script>
 </body>
 </html>

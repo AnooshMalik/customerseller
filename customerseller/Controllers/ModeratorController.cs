@@ -549,6 +549,12 @@ namespace customerseller.Controllers
                 .OrderBy(p => p.SubmittedAt)
                 .ToList();
 
+            var allShops = _context.SellerShops
+                .OrderByDescending(s => s.SubscriptionEnd)
+                .ToList();
+
+            ViewBag.AllShops = allShops;
+
             return View(pending);
         }
 

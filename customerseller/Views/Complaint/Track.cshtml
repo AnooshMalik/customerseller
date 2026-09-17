@@ -1,0 +1,138 @@
+﻿@model customerseller.Models.Complaint
+@{
+    ViewData["Title"] = "Track Complaint";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Track Complaint - Artisan Valley</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body style="font-family:'Segoe UI', sans-serif; background:#f5f3ff; margin:0;">
+
+<div style="min-height:85vh; display:flex; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#fff; width:100%; max-width:520px; padding:40px; border-radius:24px; box-shadow:0 20px 60px rgba(166,77,121,0.12); text-align:center;">
+
+        <h2 style="color:#333; margin:0; font-weight:800;">Track Your Complaint</h2>
+        <p style="color:#888; font-size:0.9rem;">Enter your Ticket Number to see status.</p>
+
+        <form method="get" action="/Complaint/Track">
+            <div style="display:flex; background:#fdf7f9; border:2px solid #f1e1e9; border-radius:15px; padding:6px; margin:25px 0 15px 0;">
+                <input type="text" name="ticket"
+                       placeholder="e.g. CMP-1234"
+                       style="flex-grow:1; border:none; background:transparent; padding:12px; outline:none; font-size:1rem;"
+                       value="@(Model?.TicketNumber ?? "")" />
+                <button type="submit" style="background:#a64d79; color:white; border:none; padding:0 25px; border-radius:12px; cursor:pointer; font-weight:bold;">Search</button>
+            </div>
+        </form>
+
+        @if (TempData["TrackError"] != null)
+        {
+            <div style="color:#d32f2f; background:#ffebee; padding:10px; border-radius:8px; margin-bottom:15px; font-size:0.85rem;">
+                ❌ @TempData["TrackError"]
+            </div>
+        }
+
+        @if (Model != null)
+        {
+            var statusColor = Model.Status switch
+            {
+                "Open" => "#0369a1",
+                "Forwarded" => "#e65100",
+                "SellerResponded" => "#d97706",
+                "Escalated" => "#dc2626",
+                "Resolved" => "#059669",
+                "Fake" => "#6b7280",
+                _ => "#0369a1"
+            };
+
+            <div style="background:#f0f7ff; color:#007bff; padding:10px; border-radius:10px; margin-bottom:20px; font-weight:bold; font-size:0.9rem;">
+                Ticket: <span>@Model.TicketNumber</span>
+            </div>
+
+            <div style="text-align:left; background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:20px; font-size:0.9rem;">
+                <div><strong>Name:</strong> @Model.CustomerName</div>
+                <div><strong>Status:</strong> <span style="color:@statusColor; font-weight:700;">@Model.Status</span></div>
+                <div><strong>Seller / Shop:</strong> @Model.SellerName</div>
+                <div><strong>Type:</strong> @Model.ComplaintType</div>
+                <div><strong>Submitted On:</strong> @Model.CreatedAt.ToString("dd MMM yyyy, hh:mm tt", new System.Globalization.CultureInfo("en-US"))</div>
+            </div>
+
+            <div style="text-align:left; background:#fdf7f9; border-left:3px solid #a64d79; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:0.88rem; color:#444;">
+                <strong style="color:#a64d79;">Your Description:</strong><br />
+                @Model.Description
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.AdminNotes))
+            {
+                <div style="text-align:left; background:#f5f3ff; border-left:3px solid #7c3aed; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:0.85rem; color:#4c1d95;">
+                    <strong>Admin Notes:</strong> @Model.AdminNotes
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.SellerResponse))
+            {
+                <div style="text-align:left; background:#f0fdf4; border-left:3px solid #16a34a; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:0.85rem; color:#166534;">
+                    <strong>Seller Response:</strong> @Model.SellerResponse
+                    @if (!string.IsNullOrEmpty(Model.SellerProofImageUrl))
+                    {
+                        <br /><a href="@Model.SellerProofImageUrl" target="_blank" style="color:#16a34a; font-size:0.8rem;">
+                            <i class="fas fa-image"></i> View Proof Image
+                        </a>
+                    }
+                </div>
+            }
+
+            @if (Model.Status == "SellerResponded" && !Model.IsResolvedByCustomer.HasValue)
+            {
+                <div style="text-align:left; background:#fef3c7; border-left:3px solid #f59e0b; padding:14px 16px; border-radius:8px; margin-bottom:20px;">
+                    <strong style="color:#92400e; font-size:0.88rem; display:block; margin-bottom:10px;">Has your issue been resolved?</strong>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="confirmResolution(@Model.Id, true)"
+                                style="flex:1; background:#d1fae5; color:#065f46; border:1.5px solid #6ee7b7; padding:10px; border-radius:9px; font-weight:600; cursor:pointer;">
+                            ✅ Yes, Resolved
+                        </button>
+                        <button onclick="confirmResolution(@Model.Id, false)"
+                                style="flex:1; background:#fee2e2; color:#991b1b; border:1.5px solid #fca5a5; padding:10px; border-radius:9px; font-weight:600; cursor:pointer;">
+                            ❌ Not Resolved
+                        </button>
+                    </div>
+                </div>
+            }
+
+            @if (Model.IsResolvedByCustomer.HasValue)
+            {
+                <div style="text-align:left; background:#eff6ff; border-left:3px solid #2563eb; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:0.85rem; color:#1e3a8a;">
+                    <strong>Your Response:</strong>
+                    @(Model.IsResolvedByCustomer.Value ? "✅ You confirmed the issue is resolved." : "❌ You reported the issue is still unresolved.")
+                </div>
+            }
+        }
+
+        <a href="/" style="display:inline-block; margin-top:10px; color:#a64d79; font-size:0.88rem; font-weight:600; text-decoration:none;">
+            ← Back to Home
+        </a>
+    </div>
+</div>
+
+<script>
+    async function confirmResolution(complaintId, isResolved) {
+        const res = await fetch('/Complaint/CustomerConfirm', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `complaintId=${complaintId}&isResolved=${isResolved}`
+        });
+        const data = await res.json();
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Something went wrong. Please try again.');
+        }
+    }
+</script>
+
+</body>
+</html>

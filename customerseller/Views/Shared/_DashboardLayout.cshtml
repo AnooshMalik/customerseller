@@ -90,49 +90,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SELLER DASHBOARD</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="~/seller/css/site.css" rel="stylesheet" />
+    <link href="~/seller/css/site.css?v=2" rel="stylesheet" />
     <style>
-            #mobileTopbar {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                height: 56px;
-                background: #a64d79;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 16px;
-                z-index: 1100;
-            }
-
-                #mobileTopbar h2 {
-                    color: #fff;
-                    font-size: 1.1rem;
-                    font-weight: 700;
-                }
-
-                    #mobileTopbar h2 span {
-                        color: rgba(255,255,255,0.6);
-                    }
-
-            #hamburgerBtn {
-                background: none;
-                border: none;
-                color: #fff;
-                font-size: 1.3rem;
-                cursor: pointer;
-                padding: 8px;
-            }
-
-            #sidebarOverlay {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,0.4);
-                z-index: 999;
-            }
-
             .nav-disabled {
                 opacity: 0.45;
                 cursor: not-allowed !important;
@@ -149,40 +108,11 @@
                     opacity: 0.8;
                 }
 
-            @@media (max-width: 900px) {
-                #sidebar {
-                    transform: translateX(-100%);
-                    transition: transform 0.28s ease;
-                    top: 56px;
-                }
-
-                    #sidebar.open {
-                        transform: translateX(0);
-                    }
-
-                #mobileTopbar {
-                    display: flex;
-                }
-
-                #sidebarOverlay.open {
-                    display: block;
-                }
-
-                main {
-                    margin-left: 0 !important;
-                    margin-top: 56px;
-                }
-            }
+           
     </style>
 </head>
 <body>
-    <div id="mobileTopbar">
-        <h2>Artisan<span>Valley</span></h2>
-        <button id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menu">
-            <i class="fas fa-bars"></i>
-        </button>
-    </div>
-    <div id="sidebarOverlay" onclick="closeSidebar()"></div>
+   
     <aside id="sidebar">
         <div class="vertical-text">SELLER DASHBOARD</div>
         <div class="sidebar-content">
@@ -233,22 +163,21 @@
                     </a>
 
                 }
-
                 else
                 {
-                    <a href="javascript:void(0)" class="nav-disabled" title="Available after admin approval">
+                    <a href="#" onclick="return false;" class="nav-disabled" title="Available after admin approval" aria-disabled="true">
                         <i class="fas fa-comment-dots"></i> Messages
                     </a>
-                    <a href="javascript:void(0)" class="nav-disabled" title="Available after admin approval">
+                    <a href="#" onclick="return false;" class="nav-disabled" title="Available after admin approval" aria-disabled="true">
                         <i class="fas fa-shopping-cart"></i> Orders
                     </a>
-                    <a href="javascript:void(0)" class="nav-disabled" title="Available after admin approval">
+                    <a href="#" onclick="return false;" class="nav-disabled" title="Available after admin approval" aria-disabled="true">
                         <i class="fas fa-flag"></i> Complaints
                     </a>
-                    <a href="javascript:void(0)" class="nav-disabled" title="Available after admin approval">
+                    <a href="#" onclick="return false;" class="nav-disabled" title="Available after admin approval" aria-disabled="true">
                         <i class="fas fa-star"></i> Reviews
                     </a>
-                    <a href="javascript:void(0)" class="nav-disabled" title="Available after admin approval">
+                    <a href="#" onclick="return false;" class="nav-disabled" title="Available after admin approval" aria-disabled="true">
                         <i class="fas fa-wallet"></i> Payments
                     </a>
                 }
@@ -418,9 +347,9 @@
         }
     </script>
     <script>
-        async function loadSellerComplaintBadge() {
-        try {
-        const res = await fetch('/SellerComplaint/GetCount');
+            async function loadSellerComplaintBadge() {
+                try {
+                    const res = await fetch('/SellerComplaint/GetCount', { cache: 'no-store' });
         const data = await res.json();
         const badge = document.getElementById('sellerComplaintBadge');
         if (data.count > 0) {
@@ -432,9 +361,9 @@
         }
         @(isApproved ? "loadSellerComplaintBadge();" : "")
 
-        async function loadOrderBadge() {
-        try {
-        const res = await fetch('/Orders/GetOrderCount');
+                async function loadOrderBadge() {
+                    try {
+                        const res = await fetch('/Orders/GetOrderCount', { cache: 'no-store' });
         const data = await res.json();
         const badge = document.getElementById('orderCountBadge');
         if (data.count > 0) {
@@ -445,9 +374,9 @@
         }
         @(isApproved ? "loadOrderBadge();" : "")
 
-        async function loadChatUnreadBadge() {
-        try {
-        const res = await fetch('/Chat/GetUnreadCount');
+                async function loadChatUnreadBadge() {
+                    try {
+                        const res = await fetch('/Chat/GetUnreadCount', { cache: 'no-store' });
         const data = await res.json();
         const badge = document.getElementById('chatUnreadBadge');
         if (data.count > 0) {
@@ -458,7 +387,13 @@
         }
         } catch(e) {}
         }
-        @(isApproved ? "loadChatUnreadBadge(); setInterval(loadChatUnreadBadge, 10000);" : "")
+                           @(isApproved ? "loadChatUnreadBadge(); setInterval(loadChatUnreadBadge, 10000);" : "")
+
+                window.addEventListener('pageshow', function(event) {
+                    if (event.persisted) {
+                            @(isApproved ? "loadChatUnreadBadge(); loadOrderBadge(); loadSellerComplaintBadge();" : "")
+                        }
+                });
     </script>
 </body>
 </html>

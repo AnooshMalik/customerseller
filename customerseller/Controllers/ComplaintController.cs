@@ -14,6 +14,25 @@ namespace customerseller.Controllers
             _context = context;
         }
 
+        [HttpGet]
+        public IActionResult Track(string ticket)
+        {
+            if (string.IsNullOrWhiteSpace(ticket))
+                return View("~/Views/Complaint/Track.cshtml", null);
+
+            string searchTicket = ticket.Trim().ToUpper();
+
+            var complaint = _context.Complaints
+                .FirstOrDefault(c => c.TicketNumber.Trim().ToUpper() == searchTicket);
+
+            if (complaint == null)
+            {
+                TempData["TrackError"] = $"No complaint found with ticket: {ticket}. Please check and try again.";
+                return View("~/Views/Complaint/Track.cshtml", null);
+            }
+
+            return View("~/Views/Complaint/Track.cshtml", complaint);
+        }
         [HttpPost]
         public async Task<IActionResult> Submit(
             string customerName, string customerPhone, string customerEmail,
@@ -21,7 +40,10 @@ namespace customerseller.Controllers
             string complaintType, string priority, string description,
             IFormFile? evidenceFile)
         {
-            
+            if (string.IsNullOrWhiteSpace(complaintType))
+            {
+                return Json(new { success = false, message = "Please select a complaint type." });
+            }
             var ticket = "CMP-" + new Random().Next(1000, 9999).ToString();
 
             string? imageUrl = null;

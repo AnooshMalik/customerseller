@@ -1,5 +1,34 @@
 ﻿@model customerseller.Models.UserProfile
 @{
+    var subCategoryMap = new Dictionary<string, (string Label, string[] Subs)>
+    {
+        ["FabricTextile"] = ("🧵 Fabric & Textile", new[] { "CushionCovers", "PrintedKurtas", "TieDyeDupattas", "FabricToteBags", "FabricTextile" }),
+        ["WoolYarn"] = ("🧶 Wool & Yarn", new[] { "Sweaters", "CrochetBags", "StorageBaskets", "Beanies", "WoolYarn" }),
+        ["Leather"] = ("👜 Leather", new[] { "LeatherHandbags", "Wallets", "Belts", "LeatherKeychains", "Journals", "Leather" }),
+        ["Wood"] = ("🪵 Wood", new[] { "PhotoFrames", "WoodNecklaces", "WoodToys", "ServingTrays", "WoodShowpieces", "WoodKeychains", "Wood" }),
+        ["ClayPottery"] = ("🏺 Clay & Pottery", new[] { "FlowerPots", "CoffeeMugs", "ClayVases", "ClayEarrings", "ClayFigurines", "ClayPottery" }),
+        ["Jewels"] = ("💎 Jewels", new[] { "Necklaces", "Bracelets", "Rings", "Bangles", "JewelEarrings", "Jewels" }),
+        ["PaperCards"] = ("📄 Paper & Cards", new[] { "GreetingCards", "GiftBoxes", "PaperFlowers", "PaperShowpieces", "Scrapbooks", "PaperCards" }),
+        ["JuteNatural"] = ("🌿 Jute & Natural", new[] { "JuteBags", "Baskets", "Trays", "DriedBouquets", "Paintings", "JuteNatural" }),
+        ["ResinEpoxy"] = ("🔮 Resin & Epoxy", new[] { "Coasters", "ResinEarrings", "ResinKeychains", "WallArt", "ResinServingTrays", "ResinEpoxy" }),
+        ["MetalWire"] = ("⚙️ Metal & Wire", new[] { "MetalEarrings", "MetalVases", "MetalFigurines", "MetalWallArt", "CandleHolders", "MetalWire" })
+    };
+
+    var mySubs = (Model?.Categories ?? "")
+        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+        .Select(c => c.Trim())
+        .ToList();
+
+    var groupedCats = subCategoryMap
+        .Select(kvp => new
+        {
+            MainLabel = kvp.Value.Label,
+            Subs = mySubs.Where(s => kvp.Value.Subs.Contains(s)).ToList()
+        })
+        .Where(g => g.Subs.Any())
+        .ToList();
+}
+@{
     Layout = "_Dashboardlayout";
     
     var initial = !string.IsNullOrEmpty(Model?.FullName) ? Model.FullName.Substring(0, 1).ToUpper() : "U";
@@ -399,14 +428,27 @@
                 <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#8b5cf6; margin-bottom:10px;">
                     Categories
                 </div>
-                <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                    @foreach (var cat in (Model?.Categories ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries))
+                @if (groupedCats.Any())
+                {
+                    @foreach (var group in groupedCats)
                     {
-                        <span style="background:#ede9fe; color:#4c1d95; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600;">
-                            @cat.Trim()
-                        </span>
+                        <div style="margin-bottom:10px;">
+                            <div style="font-size:0.8rem; font-weight:700; color:#a64d79; margin-bottom:6px;">@group.MainLabel</div>
+                            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                                @foreach (var sub in group.Subs)
+                                {
+                                    <span style="background:#ede9fe; color:#4c1d95; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600;">
+                                        @sub
+                                    </span>
+                                }
+                            </div>
+                        </div>
                     }
-                </div>
+                }
+                else
+                {
+                    <p style="font-size:0.82rem; color:#9ca3af; margin:0;">No categories selected yet.</p>
+                }
             </div>
             <div class="contact-info">
                 <div class="icon-box">
@@ -456,7 +498,8 @@
 
             <div class="form-group">
                 <label><i class="fas fa-envelope"></i> Email Address</label>
-                <input type="email" asp-for="Email" class="form-input" placeholder="Email">
+                <input type="email" asp-for="Email" class="form-input" readonly style="background:#e5e7eb; color:#6b7280; cursor:not-allowed;">
+                <p style="font-size:0.72rem; color:#9ca3af; margin-top:4px;">Email cannot be changed.</p>
             </div>
 
             <div class="form-group">

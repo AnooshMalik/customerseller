@@ -51,16 +51,16 @@
         margin: 26px 0 12px 0;
     }
 
-   .checkout-left input[type="text"], .checkout-left input[type="email"], .checkout-left select {
-    width: 100%;
-    padding: 9px 12px;
-    font-size: 1rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    margin-bottom: 16px;
-    box-sizing: border-box;
-    background: #faf8fa;
-}
+    .checkout-left input[type="text"], .checkout-left input[type="email"], .checkout-left select {
+        width: 100%;
+        padding: 9px 12px;
+        font-size: 1rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        margin-bottom: 16px;
+        box-sizing: border-box;
+        background: #faf8fa;
+    }
 
     .inline-inputs {
         display: flex;
@@ -205,6 +205,39 @@
         color: #fff;
     }
 
+    /* Remove ("x") button on each order-summary line item */
+    .remove-item-btn {
+        background: none;
+        border: none;
+        color: #bbb;
+        font-size: 1.15rem;
+        line-height: 1;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 50%;
+        transition: color 0.15s, background 0.15s;
+    }
+
+        .remove-item-btn:hover {
+            color: #fff;
+            background: #d9534f;
+        }
+
+    .empty-cart-msg {
+        color: #999;
+        text-align: center;
+        padding: 24px 0;
+    }
+
+    /* Single-option Country field: looks like a field, not a real dropdown */
+    .country-select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        cursor: default;
+        background-image: none;
+    }
+
     @@media (max-width: 950px) {
         .checkout-wrapper {
             flex-direction: column;
@@ -252,8 +285,8 @@
             <input type="text" asp-for="Email" id="phoneInput" placeholder="03XX-XXXXXXX" maxlength="12" />
 
             <div class="section-title">Delivery</div>
-            <select asp-for="Country">
-                <option value="Pakistan" selected>Pakistan</option>
+            <select asp-for="Country" class="country-select">
+                <option value="Pakistan" selected>Pakistan, Rawalpindi</option>
             </select>
 
             <div class="inline-inputs">
@@ -266,8 +299,8 @@
             <textarea asp-for="Address" id="addressInput" rows="3"
                       placeholder="Full address (e.g. Shop 5, behind KFC, Saddar, Rawalpindi)" required
                       style="width:100%; padding:9px 12px; font-size:1rem; font-family:inherit; border:1px solid #e0e0e0; border-radius:4px; margin-bottom:8px; box-sizing:border-box; background:#faf8fa; resize:none; line-height:1.4;"></textarea>
-           
 
+           
             <small style="color:#888; font-size:0.82rem; display:block; margin-top:0; margin-bottom:12px;">
                 📍 Delivery charge will be auto-detected from your address
             </small>
@@ -319,17 +352,63 @@
 
 @section Scripts {
     <script>
-        let deliveryFee = 0;
+        let deliveryFee = 0;      // final delivery charge actually charged (base + extra items)
+        let baseDeliveryFee = 0;  // flat charge for the detected area, before the extra-items surcharge
         let subtotal = 0;
         let displayItems = [];
         let isSubmitting = false;
+        let isBuyNow = false; // true when this checkout came from "Buy Now" (single item, not the cart)
+
+        // Rs. added per EXTRA product that comes from the SAME shop (i.e.
+        // it still ships in the same parcel as another item you ordered).
+        const SAME_SHOP_EXTRA_CHARGE = 20;
+
+        // Groups the cart items by shop. Two products only "combine" into
+        // one cheaper parcel if they're from the same seller; items with no
+        // shopId (older cart entries) are each treated as their own single-
+        // item shop so they never get wrongly merged with someone else's.
+        function groupItemsByShop(items) {
+            const groups = new Map();
+            items.forEach(item => {
+                const key = item.shopId ? ('shop:' + item.shopId) : ('item:' + item.id);
+                if (!groups.has(key)) groups.set(key, []);
+                groups.get(key).push(item);
+            });
+            return Array.from(groups.values());
+        }
+
+        // Recomputes the final delivery fee: each shop's parcel costs the
+        // area's base delivery fee, plus Rs.20 for every EXTRA product from
+        // that same shop. Different shops' parcels are simply added together
+        // (each priced as if it were its own single-product order).
+        function recalcDeliveryFee() {
+            if (baseDeliveryFee <= 0 || displayItems.length === 0) {
+                deliveryFee = 0;
+                return;
+            }
+
+            const shopGroups = groupItemsByShop(displayItems);
+            let total = 0;
+            let totalExtraItems = 0;
+
+            shopGroups.forEach(group => {
+                const extraItems = Math.max(group.length - 1, 0);
+                total += baseDeliveryFee + (extraItems * SAME_SHOP_EXTRA_CHARGE);
+                totalExtraItems += extraItems;
+            });
+
+            deliveryFee = total;
+            document.getElementById('deliveryFeeInput').value = deliveryFee;
+
+            document.getElementById('shippingDisplay').textContent = 'Rs. ' + deliveryFee.toLocaleString();
+        }
 
         function showCustomModal(icon, title, msg, callback) {
             document.getElementById('customModalIcon').textContent = icon;
             document.getElementById('customModalTitle').textContent = title;
             document.getElementById('customModalMsg').textContent = msg;
             document.getElementById('customModal').classList.add('show');
-            document.getElementById('customModalBtn').onclick = function () {
+            document.getElementById('customModalBtn').onclick = function() {
                 closeCustomModal();
                 if (callback) callback();
             };
@@ -339,36 +418,97 @@
             document.getElementById('customModal').classList.remove('show');
         }
 
+        // Recomputes cartDataInput (the hidden field actually posted to the
+        // server) from whatever is currently left in displayItems.
+        function syncCartDataInput() {
+            const cartDataInput = document.getElementById('cartDataInput');
+            cartDataInput.value = displayItems.length > 0
+                ? JSON.stringify(displayItems.map(i => ({
+                    ProductId: (i.id || "0").toString(),
+                    Title: i.title,
+                    Price: parseFloat(i.price),
+                    Quantity: parseInt(i.qty),
+                    ImageUrl: i.img
+                })))
+                : '[]';
+        }
+
+        // Removes one line item (by its index in displayItems), keeps
+        // localStorage, the subtotal, the posted form data and the Pay
+        // button all in sync with what's actually left in the summary.
+        function removeItem(index) {
+            if (index < 0 || index >= displayItems.length) return;
+
+            displayItems.splice(index, 1);
+
+            subtotal = 0;
+            displayItems.forEach(item => {
+                subtotal += (parseFloat(item.price) || 0) * (parseInt(item.qty) || 1);
+            });
+
+            if (isBuyNow) {
+                localStorage.removeItem('buyNowItem');
+            } else {
+                localStorage.setItem('cart', JSON.stringify(displayItems));
+            }
+
+            syncCartDataInput();
+            recalcDeliveryFee();
+
+            if (typeof updateCartCount === 'function') updateCartCount();
+
+            const payBtn = document.getElementById('payBtn');
+            if (payBtn) payBtn.disabled = displayItems.length === 0;
+
+            updateSummary();
+        }
+
         function updateSummary() {
             const summaryDiv = document.getElementById('orderSummary');
             let html = '<h3 style="margin-bottom:20px; font-weight:800; color:#333;">Order Summary</h3>';
-            displayItems.forEach(item => {
+
+            if (displayItems.length === 0) {
+                html += '<div class="empty-cart-msg">Your cart is empty.</div>';
+                summaryDiv.innerHTML = html;
+                return;
+            }
+
+            displayItems.forEach((item, index) => {
                 let price = parseFloat(item.price) || 0;
                 let qty = parseInt(item.qty) || 1;
                 html += `
-                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <img src="${item.img}" style="width:50px; border-radius:5px; object-fit:cover;">
-                            <div style="font-weight:600;">${item.title} (x${qty})</div>
-                        </div>
-                        <div style="color:#a64d79; font-weight:bold;">Rs.${(price * qty).toLocaleString()}</div>
-                    </div>`;
+                            <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <img src="${item.img}" style="width:50px; border-radius:5px; object-fit:cover;">
+                                    <div style="font-weight:600;">${item.title} (x${qty})</div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div style="color:#a64d79; font-weight:bold;">Rs.${(price * qty).toLocaleString()}</div>
+                                    <button type="button" class="remove-item-btn" data-index="${index}" title="Remove item">&times;</button>
+                                </div>
+                            </div>`;
             });
             html += `
-                <hr>
-                <div style="display:flex; justify-content:space-between; margin:8px 0; color:#555;">
-                    <span>Subtotal</span><span>Rs.${subtotal.toLocaleString()}</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; margin:8px 0; color:#555;">
-                    <span>Delivery</span>
-                    <span>${deliveryFee > 0 ? 'Rs.' + deliveryFee.toLocaleString() : '<span style="color:#999;">Enter address</span>'}</span>
-                </div>
-                <hr>
-                <div style="display:flex; justify-content:space-between; font-weight:800; font-size:1.2rem; margin-top:8px;">
-                    <span>Total</span>
-                    <span style="color:#a64d79;">Rs.${(subtotal + deliveryFee).toLocaleString()}</span>
-                </div>`;
+                        <hr>
+                        <div style="display:flex; justify-content:space-between; margin:8px 0; color:#555;">
+                            <span>Subtotal</span><span>Rs.${subtotal.toLocaleString()}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin:8px 0; color:#555;">
+                            <span>Delivery</span>
+                            <span>${deliveryFee > 0 ? 'Rs.' + deliveryFee.toLocaleString() : '<span style="color:#999;">Enter address</span>'}</span>
+                        </div>
+                        <hr>
+                        <div style="display:flex; justify-content:space-between; font-weight:800; font-size:1.2rem; margin-top:8px;">
+                            <span>Total</span>
+                            <span style="color:#a64d79;">Rs.${(subtotal + deliveryFee).toLocaleString()}</span>
+                        </div>`;
             summaryDiv.innerHTML = html;
+
+            summaryDiv.querySelectorAll('.remove-item-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    removeItem(parseInt(this.getAttribute('data-index'), 10));
+                });
+            });
         }
 
         async function detectAreaFromAddress(address) {
@@ -386,6 +526,7 @@
                     console.error('Area detection error:', err);
                 }
             }
+            baseDeliveryFee = 0;
             deliveryFee = 0;
             document.getElementById('areaNotFound').style.display = 'block';
             document.getElementById('shippingDisplay').textContent = 'Area not found';
@@ -397,10 +538,9 @@
                 const res = await fetch(`/Cart/GetDeliveryCharge?area=${encodeURIComponent(area)}`);
                 const data = await res.json();
                 if (data.found) {
-                    deliveryFee = parseFloat(data.charge);
+                    baseDeliveryFee = parseFloat(data.charge);
                     document.getElementById('areaNotFound').style.display = 'none';
-                    document.getElementById('shippingDisplay').textContent = 'Rs. ' + deliveryFee.toLocaleString();
-                    document.getElementById('deliveryFeeInput').value = deliveryFee;
+                    recalcDeliveryFee();
                     updateSummary();
                 }
             } catch (err) {
@@ -498,7 +638,7 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const cartDataInput = document.getElementById('cartDataInput');
             const checkoutForm = document.getElementById('checkoutForm');
             const addressInput = document.getElementById('addressInput');
@@ -507,23 +647,22 @@
 
             let buyNowData = localStorage.getItem('buyNowItem');
             let cartData = localStorage.getItem('cart');
-            if (buyNowData) displayItems = [JSON.parse(buyNowData)];
-            else if (cartData) displayItems = JSON.parse(cartData);
+            if (buyNowData) {
+                displayItems = [JSON.parse(buyNowData)];
+                isBuyNow = true;
+            } else if (cartData) {
+                displayItems = JSON.parse(cartData);
+                isBuyNow = false;
+            }
 
             if (displayItems && displayItems.length > 0) {
                 subtotal = 0;
                 displayItems.forEach(item => {
                     subtotal += (parseFloat(item.price) || 0) * (parseInt(item.qty) || 1);
                 });
-                cartDataInput.value = JSON.stringify(displayItems.map(i => ({
-                    ProductId: (i.id || "0").toString(),
-                    Title: i.title,
-                    Price: parseFloat(i.price),
-                    Quantity: parseInt(i.qty),
-                    ImageUrl: i.img
-                })));
-                updateSummary();
+                syncCartDataInput();
             }
+            updateSummary();
 
             fetch('/Account/GetUserRole')
                 .then(r => r.json())
@@ -537,7 +676,7 @@
                 .catch(err => console.error('Role check error:', err));
 
             if (phoneInput) {
-                phoneInput.addEventListener('input', function () {
+                phoneInput.addEventListener('input', function() {
                     let val = this.value.replace(/\D/g, '');
                     if (val.length > 11) val = val.slice(0, 11);
                     this.value = val.length > 4 ? val.slice(0, 4) + '-' + val.slice(4) : val;
@@ -546,7 +685,7 @@
 
             let detectTimeout;
             if (addressInput) {
-                addressInput.addEventListener('input', function () {
+                addressInput.addEventListener('input', function() {
                     clearTimeout(detectTimeout);
                     detectTimeout = setTimeout(() => {
                         detectAreaFromAddress(this.value.trim());
@@ -558,7 +697,7 @@
                 payBtn.addEventListener('click', submitOrder);
             }
 
-            checkoutForm.addEventListener('keypress', function (e) {
+            checkoutForm.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                 }
@@ -566,4 +705,3 @@
         });
     </script>
 }
-    

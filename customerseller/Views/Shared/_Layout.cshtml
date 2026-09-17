@@ -73,9 +73,8 @@
                     <span id="chatUnreadCount" style="display:none; position:absolute; top:-8px; right:-8px; background:#a64d79; color:#fff; font-size:0.65rem; font-weight:700; width:18px; height:18px; border-radius:50%; text-align:center; line-height:18px;">0</span>
                 </a>
             }
-
-           <a href="javascript:void(0)" onclick="openCart()" id="cartIcon" aria-label="Shopping cart" style="position:relative;">
-                <i class="fa-solid fa-cart-shopping"></i>
+            <a href="#" onclick="openCart(); return false;" id="cartIcon" aria-label="Shopping cart" style="position:relative;">
+   <i class="fa-solid fa-cart-shopping"></i>
                 <span id="cartCount" style="display:none; position:absolute; top:-8px; right:-8px; background:#a64d79; color:#fff; font-size:0.65rem; font-weight:700; width:18px; height:18px; border-radius:50%; text-align:center; line-height:18px;">0</span>
             </a>
         </div>
@@ -144,10 +143,11 @@
                 </ul>
             </div>
             <div class="footer-col">
-               <form id="newsletterForm" style="display:flex; align-items:center; margin-bottom:8px; margin-top:36px;">
-     <input type="email" name="email" id="newsletterEmail" placeholder="Your email address" required
-                   style="padding:7px 10px; font-size:0.8rem; border:none; border-radius:4px 0 0 4px; outline:none; width:155px; color:#333; background:#fff; height:34px; box-sizing:border-box;">
-            <button type="submit" style="height:34px; padding:0 12px; background:#fff; color:#a64d79; border:none; border-radius:0 4px 4px 0; font-weight:700; cursor:pointer; font-size:0.8rem; box-sizing:border-box;">
+                <form id="newsletterForm" style="display:flex; align-items:center; margin-bottom:8px; margin-top:36px;">
+                    <label for="newsletterEmail" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Newsletter email address</label>
+                    <input type="email" name="email" id="newsletterEmail" placeholder="Your email address" required
+                           style="padding:7px 10px; font-size:0.8rem; border:none; border-radius:4px 0 0 4px; outline:none; width:155px; color:#333; background:#fff; height:34px; box-sizing:border-box;">
+                <button type="submit" style="height:34px; padding:0 12px; background:#fff; color:#a64d79; border:none; border-radius:0 4px 4px 0; font-weight:700; cursor:pointer; font-size:0.8rem; box-sizing:border-box;">
                 Enter
             </button>
         </form>
@@ -168,11 +168,12 @@
   
     <div id="searchOverlay" class="search-overlay"></div>
     <div id="searchPopup" class="search-sidebar">
-        <button id="closeSearchPopup" class="close-btn">&times;</button>
+        <button id="closeSearchPopup" class="close-btn" aria-label="Close search">&times;</button>
         <h2>SEARCH OUR SITE</h2>
         <div class="search-box">
+            <label for="searchInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Search products</label>
             <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off" />
-           <button type="button" id="searchBtn" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button type="button" id="searchBtn" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
         </div>
         <ul id="suggestions" class="suggestions-list"></ul>
         <div id="searchResults" class="search-results"></div>
@@ -185,10 +186,10 @@
 
     @if (!isSellerPage)
     {
-        <!-- Login Sidebar -->
+
         <div id="loginOverlay" class="search-overlay"></div>
         <div id="loginPopup" class="search-sidebar">
-            <button id="closeLoginPopup" class="close-btn">&times;</button>
+            <button id="closeLoginPopup" class="close-btn" aria-label="Close login">&times;</button>
             <h2>LOGIN</h2>
             @if (TempData["LoginError"] != null)
             {
@@ -198,12 +199,13 @@
             }
             <form asp-controller="Account" asp-action="Login" method="post" class="login-form">
                 <input type="hidden" name="returnUrl" value="" id="loginReturnUrl" />
-                <label>Email <span style="color:red">*</span></label>
-               
-                <input type="text" name="email" placeholder="Enter your email" required
+                <label for="loginEmailInput">Email <span style="color:red">*</span></label>
+
+                <input type="text" id="loginEmailInput" name="email" placeholder="Enter your email" required
                        autocomplete="new-password"
                        onfocus="this.type='email'">
-                <input type="text" name="password" placeholder="Enter your password" required minlength="8"
+                <label for="loginPasswordInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Password</label>
+                <input type="text" id="loginPasswordInput" name="password" placeholder="Enter your password" required minlength="8"
                        autocomplete="new-password"
                        onfocus="this.type='password'">
                 <button type="submit" class="login-btn">Login</button>
@@ -224,10 +226,10 @@
             </div>
         </div>
 
-        <!-- Register Sidebar -->
+      
         <div id="registerOverlay" class="register-overlay"></div>
         <div id="registerSidebar" class="register-sidebar">
-            <button id="closeRegister" class="close-register">&times;</button>
+            <button id="closeRegister" class="close-register" aria-label="Close register">&times;</button>
             <h2>REGISTER</h2>
           @if (TempData["RegisterSuccess"] != null)
             {
@@ -243,19 +245,23 @@
             }
             <form id="registerForm" asp-controller="Account" asp-action="Register" method="post" autocomplete="off" novalidate>
                 <input type="hidden" name="returnUrl" value="" id="registerReturnUrl" />
-            <div style="margin-bottom:6px;">
+                <div style="margin-bottom:6px;">
+                    <label for="regFirstName" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">First Name</label>
                     <input type="text" name="firstName" id="regFirstName" placeholder="First Name" required autocomplete="off">
                     <span class="field-error" id="err-firstName"></span>
                 </div>
                 <div style="margin-bottom:6px;">
+                    <label for="regLastName" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Last Name</label>
                     <input type="text" name="lastName" id="regLastName" placeholder="Last Name" required autocomplete="off">
                     <span class="field-error" id="err-lastName"></span>
                 </div>
                 <div style="margin-bottom:6px;">
+                    <label for="regEmail" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Email</label>
                     <input type="email" name="email" id="regEmail" placeholder="Email *" required autocomplete="new-password">
                     <span class="field-error" id="err-email"></span>
                 </div>
                 <div style="margin-bottom:6px;">
+                    <label for="regPassword" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Password</label>
                     <input type="password" name="password" id="regPassword" placeholder="Password * (min 8 characters)" required minlength="8" autocomplete="new-password">
                     <span class="field-error" id="err-password"></span>
                 </div>
@@ -264,10 +270,10 @@
             <p>Already have an account? <a href="#" id="backToLogin">Login here</a></p>
         </div>
 
-        <!-- Recover Password Sidebar -->
+      
         <div id="recoverOverlay" class="register-overlay"></div>
         <div id="recoverSidebar" class="register-sidebar">
-            <button id="closeRecover" class="close-register">&times;</button>
+            <button id="closeRecover" class="close-register" aria-label="Close reset password">&times;</button>
             <h2>RESET YOUR PASSWORD</h2>
             <p>Lost your password? Please enter your email address.<br><br>You will receive a link to create a new password via email.</p>
             @if (resetMsgVal != null)
@@ -282,17 +288,18 @@
                 </div>
             }
             <form asp-controller="Account" asp-action="ResetPassword" method="post">
-                <input type="email" name="email" placeholder="Email address" required>
+                <label for="recoverEmailInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Email address</label>
+                <input type="email" id="recoverEmailInput" name="email" placeholder="Email address" required>
                 <button type="submit" class="register-btn">Reset Password</button>
             </form>
             <p><a href="#" id="recoverCancel">Cancel</a></p>
         </div>
     }
 
-    <!-- Cart Sidebar -->
+  
     <div id="cartOverlay" class="cart-overlay"></div>
     <div id="cartSidebar" class="cart-sidebar">
-        <button id="closeCart" class="close-cart">&times;</button>
+        <button id="closeCart" class="close-cart" aria-label="Close cart">&times;</button>
         <h2 style="margin-top:8px; font-size:1.22rem; font-weight:700;">Your Cart</h2>
         <div id="emptyCart" class="empty-cart">
             <p>🛒 Your cart is empty</p>
@@ -320,6 +327,8 @@
                 if (cartSidebar && cartOverlay) {
                     cartSidebar.classList.add('active');
                     cartOverlay.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                    document.documentElement.style.overflow = 'hidden';
                     renderCart();
                     updateCartCount();
                 }
@@ -357,10 +366,11 @@
                 }
                 return true;
             }
-
             function closeCart() {
                 document.getElementById('cartSidebar')?.classList.remove('active');
                 document.getElementById('cartOverlay')?.classList.remove('active');
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
                 window.location.href = window.location.pathname;
             }
 

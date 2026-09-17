@@ -186,7 +186,7 @@ namespace customerseller.Controllers
             ViewBag.PendingShopsCount = (int)pendingShopsCmd.ExecuteScalar();
 
             var pendingProductsCmd = new Microsoft.Data.SqlClient.SqlCommand(
-                "SELECT COUNT(*) FROM Products WHERE IsAdminApproved = 0 AND VideoStatus = 'Approved'", con);
+     "SELECT COUNT(*) FROM Products WHERE IsAdminApproved = 0 AND VideoStatus = 'Approved' AND AdminRejectionReason IS NULL", con);
             ViewBag.PendingProductsCount = (int)pendingProductsCmd.ExecuteScalar();
 
             var totalOrders = _context.Orders.Count();
@@ -275,10 +275,10 @@ namespace customerseller.Controllers
                 _context.Database.GetConnectionString());
 
             var cmd = new Microsoft.Data.SqlClient.SqlCommand(@"
-        SELECT Id, Title, Category, Price, SellerEmail, SellerName, 
-               ImageUrl, VideoUrl, VideoStatus
-        FROM Products 
-        WHERE IsAdminApproved = 0 AND VideoStatus = 'Approved'", con);
+    SELECT Id, Title, Category, Price, SellerEmail, SellerName, 
+           ImageUrl, VideoUrl, VideoStatus
+    FROM Products 
+    WHERE IsAdminApproved = 0 AND VideoStatus = 'Approved' AND AdminRejectionReason IS NULL", con);
 
             con.Open();
             var reader = cmd.ExecuteReader();
@@ -859,9 +859,6 @@ namespace customerseller.Controllers
         [HttpPost]
         public IActionResult ApproveSubCategory([FromBody] SubCategoryRejectModel model)
         {
-            if (HttpContext.Session.GetString("AdminEmail") == null)
-                return Json(new { error = "Unauthorized" });
-
             var shop = _context.SellerShops.Find(model.ShopId);
             if (shop == null) return Json(new { error = "Shop not found" });
 
@@ -871,6 +868,15 @@ namespace customerseller.Controllers
             if (video == null) return Json(new { error = "Subcategory video not found" });
 
             video.VideoStatus = "Approved";
+            _context.SaveChanges();
+
+            var affectedProducts = _context.Products
+                .Where(p => p.SellerEmail == shop.SellerEmail && p.Category == model.SubCategory)
+                .ToList();
+            foreach (var prod in affectedProducts)
+            {
+                prod.VideoStatus = "Approved";
+            }
             _context.SaveChanges();
 
             return Json(new { success = true });

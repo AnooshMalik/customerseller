@@ -142,6 +142,10 @@ Thank you for shopping with Artisan Valley! 🌸";
 
         public IActionResult GetOrderCount()
         {
+            Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
+
             var email = HttpContext.Session.GetString("UserEmail");
             if (string.IsNullOrEmpty(email)) return Json(new { count = 0 });
 
@@ -151,7 +155,9 @@ Thank you for shopping with Artisan Valley! 🌸";
                 .ToList();
 
             var count = _context.Orders
-                .Where(o => o.Items != null && o.Items.Any(i => sellerProductIds.Contains(i.ProductId)))
+                .Where(o => o.Items != null
+                         && o.Items.Any(i => sellerProductIds.Contains(i.ProductId))
+                         && o.Status == "Placed")
                 .Count();
 
             return Json(new { count = count });

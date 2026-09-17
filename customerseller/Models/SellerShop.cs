@@ -32,6 +32,8 @@
         public string? SellerArea { get; set; }
         public string? SellerPhone { get; set; }
 
+        public string? LastEditSummary { get; set; }
+
         public string? RejectedSubCategories { get; set; }
         public string? SubCategoryRejectionReasons { get; set; }
     }
