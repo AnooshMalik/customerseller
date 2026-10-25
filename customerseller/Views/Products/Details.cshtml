@@ -1,9 +1,11 @@
 ﻿@model customerseller.Models.Product
 @{
-    ViewData["Title"] = Model.Title + " - Artisan Valley";
+    ViewData["Title"] = Model.Title;
     var imagePath = Model.ImageUrl;
+    var reviews = ViewBag.Reviews as List<customerseller.Models.Review> ?? new List<customerseller.Models.Review>();
+    double avgRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
+    int fullStars = (int)Math.Round(avgRating);
 }
-
 <style>
     .pd-wrap {
         max-width: 1100px;
@@ -253,12 +255,9 @@
         }
     }
 
-    .pd-img-box {
+        .pd-img-box {
         position: static;
     }
-
-    }
-
     .reviews-section {
         max-width: 1100px;
         margin: 50px auto 40px;
@@ -426,6 +425,36 @@
         margin: 0;
         text-align: center;
     }
+    .related-section { max-width: 1100px; margin: 50px auto 40px; padding: 0 20px; }
+.related-section h3 {
+    font-size: 1.8rem;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 24px;
+}
+.related-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+@@media (max-width: 900px) {
+    .related-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .related-grid .product-card {
+        min-width: 0;
+        width: 100%;
+        padding: 12px 8px;
+    }
+
+    .related-grid .image-wrapper {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1 / 1;
+    }
+
+    .related-grid .plus-btn {
+        opacity: 1;
+    }
+}
 </style>
 
 <div class="pd-wrap">
@@ -445,36 +474,42 @@
 
            
             <span style="font-size:0.8rem; color:#a64d79; font-weight:600; margin-left:8px;">@Model.DisplayId</span>
-            <h1 class="pd-title">@Model.Title</h1>
+           <div style="display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:10px;">
+    <h1 class="pd-title" style="margin:0;">@Model.Title</h1>
+    <span style="background:@(Model.Stock != "0" ? "#ecfdf5" : "#fef2f2"); color:@(Model.Stock != "0" ? "#10b981" : "#dc2626"); font-size:0.8rem; font-weight:700; padding:4px 12px; border-radius:20px;">
+        @(Model.Stock != "0" ? $"{Model.Stock} in stock" : "Out of stock")
+    </span>
+</div>
+<a href="#reviews" style="text-decoration:none;">
+    <div class="pd-rating">
+        @if (reviews.Any())
+        {
+            <span class="pd-stars">@(new string('★', fullStars))@(new string('☆', 5 - fullStars))</span>
+            <span>@avgRating.ToString("0.0") · @reviews.Count review(s)</span>
+        }
+        else
+        {
+            <span>No reviews yet</span>
+        }
+    </div>
+</a>
 
-            <div class="pd-rating">
-                <span class="pd-stars">★★★★★</span>
-                <span style="color:@(Model.Stock != "0" ? "#10b981" : "#dc2626"); font-weight:600;">
-                    @(Model.Stock != "0" ? $"{Model.Stock} in stock" : "Out of stock")
-                </span>
-            </div>
-
-            <div class="pd-price">Rs.@Model.Price</div>
+           <div class="pd-price">PKR @Model.Price</div>
             <div class="pd-divider"></div>
             @{
-                var bothVariant = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                               var sizeableSubCats = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 {
-    "PrintedKurtas", "Sweaters", "Belts"
+    "PrintedKurtas", "Sweaters", "Beanies", "Belts"
 };
-                var sizeOnlyVariant = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-{
-    "Rings", "Bangles"
-};
-                var noVariant = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                var noColorVariant = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 {
     "LeatherKeychains", "WoodKeychains", "ResinKeychains", "Journals", "WoodToys",
     "GreetingCards", "GiftBoxes", "Scrapbooks", "Paintings"
 };
-                var subCat = Model.SubCategory ?? "";
+               var subCat = Model.Category ?? "";
 
-                bool wantsSize = bothVariant.Contains(subCat) || sizeOnlyVariant.Contains(subCat);
-                bool wantsColor = !noVariant.Contains(subCat) && !sizeOnlyVariant.Contains(subCat);
-
+                bool wantsSize = sizeableSubCats.Contains(subCat);
+                bool wantsColor = !noColorVariant.Contains(subCat);
                 var sizeList = wantsSize && !string.IsNullOrWhiteSpace(Model.Sizes)
                     ? Model.Sizes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                     : Array.Empty<string>();
@@ -591,28 +626,56 @@ else
 
 </div>
 </div>
+@{
+    var related = ViewBag.RelatedProducts as List<customerseller.Models.Product> ?? new List<customerseller.Models.Product>();
+}
 
-    
-<div class="reviews-section">
+@if (related.Any())
+{
+    <div class="related-section">
+        <h3>You May Also Like</h3>
+        <div class="related-grid">
+            @foreach (var p in related)
+            {
+                <div class="product-card">
+                    <a href="/Products/Details/@p.Id" style="display:block; text-decoration:none; color:inherit;">
+                        <div class="image-wrapper">
+                            <img src="@Url.Content(p.ImageUrl ?? "~/images/default.jpg")" alt="@p.Title" loading="lazy" />
+                        </div>
+                        <h3 style="font-size:1rem; margin:0 0 6px;">@p.Title</h3>
+                        <div style="color:#a64d79; font-weight:700;">PKR @p.Price</div>
+                    </a>
+                    <button type="button" class="plus-btn"
+                            data-id="@p.Id" data-title="@p.Title" data-price="@p.Price"
+                            data-img="@Url.Content(p.ImageUrl ?? "~/images/default.jpg")">+</button>
+                </div>
+            }
+        </div>
+    </div>
+}
+<div class="reviews-section" id="reviews">
     <h3>Customer Reviews</h3>
 
-    @{
-        var reviews = ViewBag.Reviews as List<customerseller.Models.Review>;
-        if (reviews == null) reviews = new List<customerseller.Models.Review>();
-        double avgRating = reviews.Any() ? reviews.Average(r => r.Rating) : 0;
-        int fullStars = (int)Math.Round(avgRating);
+   
+
+        @if (reviews.Any())
+    {
+        <div class="avg-rating">
+            <span class="avg-stars">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <span>@(i <= fullStars ? "★" : "☆")</span>
+                }
+            </span>
+            <span><strong>@avgRating.ToString("0.0")</strong> / 5 &nbsp;·&nbsp; @reviews.Count review(s)</span>
+        </div>
     }
-
-    <div class="avg-rating">
-        <span class="avg-stars">
-            @for (int i = 1; i <= 5; i++)
-            {
-                <span>@(i <= fullStars ? "★" : "☆")</span>
-            }
-        </span>
-        <span><strong>@avgRating.ToString("0.0")</strong> / 5 &nbsp;·&nbsp; @reviews.Count review(s)</span>
-    </div>
-
+    else
+    {
+        <div class="avg-rating">
+            <span>No reviews yet. Be the first to review this product!</span>
+        </div>
+    }
     @if (reviews.Any())
     {
         foreach (var r in reviews)
@@ -643,28 +706,26 @@ else
         }
     }
 
-    <div class="review-form">
+       <div class="review-form">
         <h4> Write a Review</h4>
+        @if (TempData["ReviewError"] != null)
+        {
+            <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:8px; padding:10px 14px; margin-bottom:14px; color:#c62828; font-size:0.85rem;">
+                <i class="fa-solid fa-circle-exclamation"></i> @TempData["ReviewError"]
+            </div>
+        }
         @using (Html.BeginForm("Submit", "Review", FormMethod.Post))
         {
             <input type="hidden" name="ProductId" value="@Model.Id" />
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Your Name</label>
-                    <input type="text" name="UserName" placeholder="e.g. Sara Ahmed" required />
-                </div>
-
-                <div class="form-group">
-                    <label>Rating</label>
-                    <select name="Rating">
-                        <option value="5">★★★★★ Excellent</option>
-                        <option value="4">★★★★☆ Good</option>
-                        <option value="3">★★★☆☆ Average</option>
-                        <option value="2">★★☆☆☆ Poor</option>
-                        <option value="1">★☆☆☆☆ Terrible</option>
-                    </select>
-                </div>
+                       <div class="form-group">
+                <label>Rating</label>
+                <select name="Rating">
+                    <option value="5">★★★★★ Excellent</option>
+                    <option value="4">★★★★☆ Good</option>
+                    <option value="3">★★★☆☆ Average</option>
+                    <option value="2">★★☆☆☆ Poor</option>
+                    <option value="1">★☆☆☆☆ Terrible</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -675,6 +736,7 @@ else
             <button type="submit">Submit Review</button>
         }
     </div>
+
 </div>
 </div>
 
@@ -714,18 +776,15 @@ else
                 var currentQty = parseInt(document.getElementById('pd-qty-val').innerText) || 1;
                 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-                let item = {
-                    id: "@Model.Id",
-                    title: "@Model.Title",
-                    price: parseFloat("@Model.Price") || 0,
-                    img: "@imagePath",
-                    qty: currentQty,
-                    // Which seller/shop this product belongs to. Used at
-                    // checkout to work out whether items ship together
-                    // (same shop) or as separate parcels (different shops).
-                    shopId: "@Model.SellerEmail",
-                    shopName: "@ViewBag.ShopName"
-                };
+               let item = {
+    id: "@Model.Id",
+    title: "@Model.Title",
+    price: parseFloat("@Model.Price") || 0,
+    img: "@imagePath",
+    qty: currentQty,
+    shopId: "@Model.SellerName",
+    shopName: "@ViewBag.ShopName"
+};
 
                 let existing = cart.find(i => i.id.toString() === item.id.toString());
                 if (existing) {
@@ -747,16 +806,15 @@ else
         function pdBuyNow() {
             try {
                 var currentQty = parseInt(document.getElementById('pd-qty-val').innerText) || 1;
-
-                let buyNowData = {
-                    id: "@Model.Id",
-                    title: "@Model.Title",
-                    price: parseFloat("@Model.Price") || 0,
-                    img: "@imagePath",
-                    qty: currentQty,
-                    shopId: "@Model.SellerEmail",
-                    shopName: "@ViewBag.ShopName"
-                };
+let buyNowData = {
+    id: "@Model.Id",
+    title: "@Model.Title",
+    price: parseFloat("@Model.Price") || 0,
+    img: "@imagePath",
+    qty: currentQty,
+    shopId: "@Model.SellerName",
+    shopName: "@ViewBag.ShopName"
+};
 
                 localStorage.setItem('buyNowItem', JSON.stringify(buyNowData));
 
@@ -785,7 +843,7 @@ else
         async function startSellerChat() {
             if (!isUserLoggedIn) {
                 const inp = document.getElementById('loginReturnUrl');
-                if (inp) inp.value = '/Chat/Messages';
+                               if (inp) inp.value = window.location.pathname;
                 const loginPopup = document.getElementById('loginPopup');
                 const loginOverlay = document.getElementById('loginOverlay');
                 if (loginPopup && loginOverlay) {
@@ -794,11 +852,9 @@ else
                 }
                 return;
             }
-
-            const formData = new FormData();
-            formData.append('otherEmail', '@Model.SellerEmail');
-            formData.append('otherRole', 'Seller');
-            formData.append('productId', '@Model.Id');
+const formData = new FormData();
+formData.append('otherRole', 'Seller');
+formData.append('productId', '@Model.Id');
 
             const res = await fetch('/Chat/StartConversation', { method: 'POST', body: formData });
             const data = await res.json();

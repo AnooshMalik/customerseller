@@ -251,7 +251,7 @@
         <p>Copy your Sub-Category name from the list below. Use this <strong>exact same name</strong> in the Excel file.</p>
     <div class="custom-dropdown" id="customDropdown">
             <div class="dropdown-selected" id="dropdownSelected" onclick="toggleDropdown()">
-                 Sub-Category 
+                 Sub-Category
             </div>
             <div class="dropdown-list" id="dropdownList">
                 @foreach (var group in groupedSubCategories)
@@ -259,7 +259,7 @@
                     <div class="dropdown-group-label">@group.Key</div>
                     foreach (var sub in group.Value)
                     {
-                        <div class="dropdown-option" onclick="copySubCategory('@sub')">@sub <span style="float:right; font-size:0.75rem; color:#aaa;">click to copy</span></div>
+                    <div class="dropdown-option" data-sub="@sub" onclick="copySubCategory(this.dataset.sub)">@sub <span style="float:right; font-size:0.75rem; color:#aaa;">click to copy</span></div>
                     }
                 }
             </div>
@@ -336,22 +336,22 @@
             text.textContent = 'Click to choose video file(s)';
         }
     }
-        function downloadTemplate() {
+
+    function downloadTemplate() {
         window.location.href = '/Products/DownloadTemplate';
     }
 
     function copySubCategory(sub) {
-        document.getElementById('dropdownSelected').textContent = sub;
+        const el = document.getElementById('dropdownSelected');
+        el.textContent = sub;
         document.getElementById('dropdownList').classList.remove('open');
 
-       
-        navigator.clipboard.writeText(sub).then(() => {
-            
-            const el = document.getElementById('dropdownSelected');
-            const original = el.textContent;
-            el.textContent = `"${sub}" copied!`;
-            setTimeout(() => { el.textContent = original; }, 1200);
-        });
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(sub).then(() => {
+                el.textContent = 'Copied: ' + sub;
+                setTimeout(() => { el.textContent = sub; }, 1200);
+            }).catch(() => { });
+        }
     }
 
     function toggleDropdown() {
@@ -363,12 +363,13 @@
             document.getElementById('dropdownList').classList.remove('open');
         }
     });
+
     async function submitBulkUpload() {
         const excelFile = document.getElementById('excelFile').files[0];
         const videoFiles = document.getElementById('videoFiles').files;
 
         if (!excelFile) {
-            alert('Please select an Excel file first.');
+            showPopup('Please select an Excel file first.', 'warning', 'Excel file required');
             return;
         }
 
@@ -385,66 +386,227 @@
                 method: 'POST',
                 body: formData
             });
+
+            if (!res.ok) {
+                document.getElementById('spinner').style.display = 'none';
+                showPopup('Upload failed (' + res.status + '). Please try again.', 'error', 'Upload failed');
+                return;
+            }
+
             const data = await res.json();
 
             document.getElementById('spinner').style.display = 'none';
 
-           
             const entry = document.createElement('div');
             entry.style.marginBottom = '14px';
 
-            let html = `<div class="result-success"><i class="fa-solid fa-check"></i> ${data.inserted} products uploaded successfully.</div>`;
+            let html = '';
+
+            // Hara box sirf tab jab kam az kam 1 product upload hua ho
+            if (data.inserted > 0) {
+                html += `<div class="result-success"><i class="fa-solid fa-check"></i> ${data.inserted} product(s) uploaded successfully.</div>`;
+            } else if (data.errorCount > 0) {
+                showPopup('No products were uploaded. Please fix the errors shown below and try again.', 'error', 'Upload failed');
+            } else {
+                showPopup('No products were found in the Excel file.', 'warning', 'Nothing to upload');
+            }
 
             if (data.errorCount > 0) {
                 html += `<div class="result-errors"><i class="fa-solid fa-circle-exclamation"></i> ${data.errorCount} rows had errors:
-                    <ul>${data.errors.map(e => `<li>${e}</li>`).join('')}</ul>
+                    <ul>${data.errors.map(e => `<li>${escapeHtml(e)}</li>`).join('')}</ul>
                 </div>`;
             }
 
-               entry.innerHTML = html;
+            entry.innerHTML = html;
 
-    const box = document.getElementById('resultBox');
-    box.style.display = 'block';
-    box.innerHTML = ""; 
-    box.appendChild(entry); 
+            const box = document.getElementById('resultBox');
+            box.style.display = 'block';
+            box.innerHTML = "";
+            box.appendChild(entry);
             resetUploadForm();
 
         } catch (e) {
             document.getElementById('spinner').style.display = 'none';
-            alert('An error occurred during upload. Please try again.');
+            showPopup('An error occurred during upload. Please try again.', 'error', 'Something went wrong');
         }
     }
 
-    function resetUploadForm() {
-        document.getElementById('dropdownSelected').textContent = 'View valid Sub-Category names';
+    function escapeHtml(t) {
+        const d = document.createElement('div');
+        d.textContent = t;
+        return d.innerHTML;
+    }
 
-       
+    function resetUploadForm() {
+        document.getElementById('dropdownSelected').textContent = 'Sub-Category';
+
         const excelInput = document.getElementById('excelFile');
         excelInput.value = "";
         document.getElementById('excelUploadBox').classList.remove('has-file');
         document.getElementById('excelUploadText').textContent = 'Click to choose Excel file';
 
-      
         const videoInput = document.getElementById('videoFiles');
         videoInput.value = "";
         document.getElementById('videoUploadBox').classList.remove('has-file');
         document.getElementById('videoUploadText').textContent = 'Click to choose video file(s)';
-    }        let selectedMainCategory = "";
+    }
+</script>
 
-    function toggleDropdown() {
-        document.getElementById('dropdownList').classList.toggle('open');
+@* ================= Popup (alert() ki jagah) ================= *@
+<style>
+    .av-popup-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(30, 16, 50, 0.5);
+        backdrop-filter: blur(2px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        padding: 16px;
+    }
+    .av-popup-overlay.show { display: flex; }
+
+    .av-popup-box {
+        background: #fff;
+        border-radius: 16px;
+        width: 380px;
+        max-width: 100%;
+        padding: 30px 28px 24px;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        font-family: inherit;
+        animation: avPopIn 0.18s ease-out;
+    }
+    @@keyframes avPopIn {
+        from { opacity: 0; transform: scale(0.92) translateY(8px); }
+        to   { opacity: 1; transform: none; }
     }
 
-    function selectOption(mainCategory, subCategory) {
-        selectedMainCategory = mainCategory;
-        document.getElementById('dropdownSelected').textContent = subCategory;
-        document.getElementById('dropdownList').classList.remove('open');
-        document.getElementById('downloadBtn').disabled = false;
+    .av-popup-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        margin: 0 auto 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1;
     }
+    .av-popup-icon.success { background: #e8f5e9; color: #2e7d32; }
+    .av-popup-icon.error   { background: #ffebee; color: #c62828; }
+    .av-popup-icon.warning { background: #fdf0f6; color: #a64d79; }
 
-    document.addEventListener('click', function (e) {
-        if (!document.getElementById('customDropdown').contains(e.target)) {
-            document.getElementById('dropdownList').classList.remove('open');
+    .av-popup-title {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1a1a2e;
+    }
+    .av-popup-msg {
+        margin: 0;
+        font-size: 0.92rem;
+        line-height: 1.55;
+        color: #666;
+        white-space: pre-line;
+        word-wrap: break-word;
+    }
+    .av-popup-btn {
+        margin-top: 22px;
+        padding: 11px 38px;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #a64d79, #880e4f);
+        color: #fff;
+        font-size: 0.92rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: opacity 0.2s;
+    }
+    .av-popup-btn:hover { opacity: 0.9; }
+    .av-popup-btn:focus-visible { outline: 3px solid rgba(166, 77, 121, 0.35); outline-offset: 2px; }
+</style>
+
+<script>
+    // Browser ke alert() ko khoobsurat popup se badal deta hai.
+    // showPopup('message', 'success' | 'error' | 'warning', 'Title') se seedha bhi use kar sakte hain.
+    (function () {
+        if (window.__avPopupInstalled) return;
+        window.__avPopupInstalled = true;
+
+        const queue = [];
+        let showing = false;
+        let overlay, iconEl, titleEl, msgEl, okBtn;
+
+        function build() {
+            overlay = document.createElement('div');
+            overlay.className = 'av-popup-overlay';
+            overlay.innerHTML =
+                '<div class="av-popup-box" role="alertdialog" aria-modal="true">' +
+                '<div class="av-popup-icon"></div>' +
+                '<h3 class="av-popup-title"></h3>' +
+                '<p class="av-popup-msg"></p>' +
+                '<button type="button" class="av-popup-btn">OK</button>' +
+                '</div>';
+            document.body.appendChild(overlay);
+
+            iconEl  = overlay.querySelector('.av-popup-icon');
+            titleEl = overlay.querySelector('.av-popup-title');
+            msgEl   = overlay.querySelector('.av-popup-msg');
+            okBtn   = overlay.querySelector('.av-popup-btn');
+
+            okBtn.addEventListener('click', close);
+            overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && overlay.classList.contains('show')) close();
+            });
         }
-    });
+
+        // Message ke alfaaz dekh kar rang/icon chunta hai
+        function detectType(msg) {
+            const m = String(msg).toLowerCase();
+            const bad = /(error|fail|invalid|wrong|cannot|can't|unable|denied|exceed|too large|not allowed|expired)/.test(m);
+            const good = /(success|saved|submitted|uploaded|sent|updated|deleted|done|✅)/.test(m);
+            if (bad) return 'error';
+            if (good) return 'success';
+            return 'warning';
+        }
+
+        const ICONS  = { success: '✓', error: '✕', warning: '!' };
+        const TITLES = { success: 'Done!', error: 'Something went wrong', warning: 'Please check' };
+
+        function next() {
+            if (!queue.length) { showing = false; return; }
+            showing = true;
+            if (!overlay) build();
+
+            const item = queue.shift();
+            iconEl.className = 'av-popup-icon ' + item.type;
+            iconEl.textContent = ICONS[item.type];
+            titleEl.textContent = item.title || TITLES[item.type];
+            msgEl.textContent = item.msg;
+
+            overlay.classList.add('show');
+            okBtn.focus();
+        }
+
+        function close() {
+            overlay.classList.remove('show');
+            setTimeout(next, 150);   // agle popup ki baari (agar ek se zyada hon)
+        }
+
+        function show(msg, type, title) {
+            msg = (msg === null || msg === undefined) ? '' : String(msg);
+            queue.push({ msg: msg, type: type || detectType(msg), title: title });
+            if (showing) return;
+            if (document.body) next();
+            else document.addEventListener('DOMContentLoaded', next);
+        }
+
+        window.showPopup = show;
+        window.alert = function (msg) { show(msg); };
+    })();
 </script>

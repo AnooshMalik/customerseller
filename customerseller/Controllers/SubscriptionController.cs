@@ -20,6 +20,10 @@ namespace customerseller.Controllers
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Login", "Account");
 
+            if (HttpContext.Session.GetString("UserRole") != "Seller")
+                return RedirectToAction("Index", "Home");
+
+
             var lastSubmission = _context.PaymentSubmissions
                 .Where(p => p.SellerEmail == email)
                 .OrderByDescending(p => p.SubmittedAt)
@@ -56,11 +60,18 @@ namespace customerseller.Controllers
                 var res = checkCmd.ExecuteScalar();
                 DateTime? subEnd = res != null && res != DBNull.Value ? (DateTime?)res : null;
 
-                if (subEnd.HasValue && subEnd.Value > DateTime.Now)
+                if (subEnd.HasValue && subEnd.Value > DateTime.Now.AddDays(3))
                 {
                     TempData["PaymentError"] = "You have already paid for this month. Your subscription is active until " + subEnd.Value.ToString("dd MMM yyyy", System.Globalization.CultureInfo.InvariantCulture) + ".";
                     return RedirectToAction("Pay");
                 }
+            }
+
+            bool hasPending = _context.PaymentSubmissions.Any(p => p.SellerEmail == email && p.Status == "Pending");
+            if (hasPending)
+            {
+                TempData["PaymentError"] = "You already have a payment submission under review. Please wait for it to be processed.";
+                return RedirectToAction("Pay");
             }
 
             transactionId = transactionId?.Trim() ?? "";
@@ -92,6 +103,29 @@ namespace customerseller.Controllers
             {
                 TempData["PaymentError"] = "Screenshot must be a JPG, PNG, or WEBP image.";
                 return RedirectToAction("Pay");
+            }
+
+            using (var checkStream = screenshot.OpenReadStream())
+            {
+                var headerBytes = new byte[12];
+                int read = checkStream.Read(headerBytes, 0, 12);
+                checkStream.Position = 0;
+
+                if (read < 12)
+                {
+                    TempData["PaymentError"] = "The uploaded file is not a valid image.";
+                    return RedirectToAction("Pay");
+                }
+
+                bool isJpg = headerBytes[0] == 0xFF && headerBytes[1] == 0xD8;
+                bool isPng = headerBytes[0] == 0x89 && headerBytes[1] == 0x50 && headerBytes[2] == 0x4E && headerBytes[3] == 0x47;
+                bool isWebp = headerBytes[8] == 0x57 && headerBytes[9] == 0x45 && headerBytes[10] == 0x42 && headerBytes[11] == 0x50;
+
+                if (!isJpg && !isPng && !isWebp)
+                {
+                    TempData["PaymentError"] = "The uploaded file is not a valid image.";
+                    return RedirectToAction("Pay");
+                }
             }
 
             if (screenshot.Length > 5 * 1024 * 1024)
@@ -132,7 +166,16 @@ namespace customerseller.Controllers
             };
 
             _context.PaymentSubmissions.Add(submission);
-            _context.SaveChanges();
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (Microsoft.EntityFrameworkCore.DbUpdateException)
+            {
+                System.IO.File.Delete(filePath);
+                TempData["PaymentError"] = "This Transaction ID has already been submitted.";
+                return RedirectToAction("Pay");
+            }
 
             TempData["PaymentSuccess"] = "Payment submitted! It will be reviewed within 24 hours.";
             return RedirectToAction("Pay");

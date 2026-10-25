@@ -294,7 +294,8 @@
             {
                 "Forwarded" => "badge-forwarded",
                 "SellerResponded" => "badge-responded",
-                "Resolved" => "badge-resolved",
+                               "Resolved" => "badge-resolved",
+                "Escalated" => "badge-responded",
                 _ => "badge-forwarded"
             };
 
@@ -386,6 +387,12 @@
                         <i class="fas fa-clock"></i> Waiting for admin to review your response.
                     </div>
                 }
+                                else if (c.Status == "Escalated")
+                {
+                    <div style="font-size:0.83rem; color:#6b7280; padding-top:10px; border-top:1px solid #f5f0ff;">
+                        <i class="fas fa-user-shield"></i> Customer was not satisfied. This complaint is now under admin review. No action needed from you right now.
+                    </div>
+                }
             </div>
         </div>
     }
@@ -437,7 +444,7 @@
         if (data.success) {
             showModal('✅', 'Response Submitted!', 'Admin has been notified and will review your response.');
         } else {
-            showModal('❌', 'Error', 'Something went wrong. Please try again.');
+                    showModal('❌', 'Error', data.error || 'Something went wrong. Please try again.');   
         }
     }
 </script>

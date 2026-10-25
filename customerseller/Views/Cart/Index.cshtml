@@ -265,7 +265,7 @@
         </div>
 
        
-        <div class="cart-summary-section">
+               <div class="cart-summary-section" id="cartSummarySection">
             <h2 class="summary-title">Order Summary</h2>
             <div id="cartSummaryPage">
                
@@ -283,11 +283,16 @@
             var summaryDiv = document.getElementById('cartSummaryPage');
             if (!itemsDiv) return;
 
+                       var summarySection = document.getElementById('cartSummarySection');
+
             if (cart.length === 0) {
-                itemsDiv.innerHTML = '<div class="empty-cart"><i class="fa-solid fa-cart-shopping"></i><div class="empty-cart-text">Your cart is empty</div><a href="/" style="color:#a64d79;font-weight:600;">Start Shopping</a></div>';
+                itemsDiv.innerHTML = '<div class="empty-cart"><i class="fa-solid fa-cart-shopping"></i><div class="empty-cart-text">Your cart is empty</div><a href="/Products/AllProducts" style="color:#a64d79;font-weight:600;">Start Shopping</a></div>';
                 summaryDiv.innerHTML = '';
+                if (summarySection) summarySection.style.display = 'none';
                 return;
             }
+
+            if (summarySection) summarySection.style.display = '';
 
             var subtotal = 0;
             var html = '';
@@ -313,8 +318,8 @@
             summaryDiv.innerHTML = '<div class="summary-row"><span>Subtotal:</span><span>Rs.' + subtotal + '</span></div>'
                 + '<div class="summary-row"><span>Shipping:</span><span style="color:#888; font-size:0.85rem;">Calculated at checkout</span></div>'
                 + '<div class="summary-row total"><span>Total:</span><span>Rs.' + subtotal + '</span></div>'
-                + '<button class="checkout-btn-page" onclick="location.href=\'/Cart/Checkout\'">Proceed to Checkout</button>'
-                + '<a href="/" class="continue-shopping">Continue Shopping</a>';
+                + '<button class="checkout-btn-page" onclick="localStorage.removeItem(\'buyNowItem\'); location.href=\'/Cart/Checkout\'">Proceed to Checkout</button>'
+                              + '<a href="javascript:void(0)" onclick="continueShopping()" class="continue-shopping">Continue Shopping</a>';
         }
 
         function pgQty(id, delta) {
@@ -327,8 +332,24 @@
             renderCartPage();
         }
 
+                function continueShopping() {
+            var ref = document.referrer;
+            try {
+                var u = new URL(ref);
+                
+                if (u.origin === window.location.origin &&
+                    u.pathname.toLowerCase().indexOf('/cart') !== 0) {
+                    window.location.href = u.pathname + u.search + u.hash;
+                    return;
+                }
+            } catch (e) { }
+            
+            if (window.history.length > 1) { window.history.back(); }
+            else { window.location.href = '/Products/AllProducts'; }
+        }
+
         function pgRemove(id) {
-            var cart = JSON.parse(localStorage.getItem('cart')) || [];
+            var cart = JSON.parse(localStorage.getItem('cart')) || []
             cart = cart.filter(function(i){ return i.id !== id; });
             localStorage.setItem('cart', JSON.stringify(cart));
             renderCartPage();

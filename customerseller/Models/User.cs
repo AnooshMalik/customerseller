@@ -15,6 +15,7 @@
 
         public bool IsVerified { get; set; } = false;
         public string? VerificationToken { get; set; }
+        public DateTime? VerificationTokenExpiry { get; set; }
         public bool IsBlocked { get; set; }
         public DateTime? BlockExpiry { get; set; }
         public string? BlockReason { get; set; }

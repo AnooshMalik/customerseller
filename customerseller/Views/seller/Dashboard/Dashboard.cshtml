@@ -83,6 +83,30 @@
 
     </div>
 
+        <div id="complaintAlertBox" style="display:none; background:#fff8e1; border:1.5px solid #ffe082; border-radius:12px; padding:16px 20px; margin-bottom:20px; align-items:center; justify-content:space-between; gap:12px;">
+        <div style="font-size:0.88rem; color:#92400e; font-weight:600;">
+            <i class="fas fa-flag"></i>
+            <span id="complaintAlertText"></span>
+        </div>
+        <a href="/SellerComplaint"
+           style="background:#a64d79; color:#fff; padding:7px 16px; border-radius:8px; text-decoration:none; font-size:0.8rem; font-weight:600; white-space:nowrap;">
+            View Complaints
+        </a>
+    </div>
+
+    <script>
+        fetch('/SellerComplaint/GetCount', { cache: 'no-store' })
+            .then(r => r.json())
+            .then(d => {
+                if (d.count > 0) {
+                    document.getElementById('complaintAlertText').textContent =
+                        ' You have ' + d.count + ' complaint(s) waiting for your response.';
+                    document.getElementById('complaintAlertBox').style.display = 'flex';
+                }
+            })
+            .catch(() => { });
+    </script>
+
     @{
         var rejectedAlerts = ViewBag.RejectedAlerts as List<object>;
         var rejectedProducts = ViewBag.RejectedProducts as List<object>;
@@ -164,7 +188,7 @@
     else
     {
         <div class="activity-box">
-            <div class="section-title">Recent Sales Activity</div>
+            <div class="section-title">Recent Activity</div>
             @if (Model.RecentSales != null && Model.RecentSales.Any())
             {
                 <div class="activity-list">

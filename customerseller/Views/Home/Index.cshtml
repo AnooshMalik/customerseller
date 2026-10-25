@@ -10,8 +10,8 @@
     <div class="slide"><img src="~/customer/images/banner1.jpeg" alt="Slide 2" loading="lazy"></div>
     <div class="slide"><img src="~/customer/images/banner3.jpg" alt="Slide 3" loading="lazy"></div>
 </div>
-    <span class="prev"></span>
-    <span class="next"></span>
+       <button type="button" class="banner-arrow prev" aria-label="Previous slide"><i class="fa-solid fa-chevron-left"></i></button>
+    <button type="button" class="banner-arrow next" aria-label="Next slide"><i class="fa-solid fa-chevron-right"></i></button>
     <div class="dots">
         <span class="dot active"></span>
         <span class="dot"></span>
@@ -187,7 +187,7 @@
                 When you choose handmade, you're supporting artists, preserving craftsmanship, and bringing home something truly special.
             </p>
             
-            <a asp-controller="Home" asp-action="Story" class="story-cta-btn">Read Our Full Story</a>
+            <a asp-controller="Home" asp-action="Story" class="story-cta-btn">Read More</a>
         </div>
     </div>
 </section>
@@ -201,16 +201,17 @@
     <div class="trust-badge-item">
         <i class="fa-solid fa-shield-halved trust-badge-icon"></i>
         <span class="trust-badge-text">Quality Guaranteed</span>
-        <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">30-day return policy</p>
+       <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">Return request after delivery</p>
     </div>
     <div class="trust-badge-item">
         <i class="fa-solid fa-truck-fast trust-badge-icon"></i>
-        <span class="trust-badge-text">Free Delivery</span>
-        <p style="font-size: 0.85rem; color: #666; margin-top: 5px;">On all orders</p>
+    <span class="trust-badge-text">Area-based Delivery</span>
+<p style="font-size: 0.85rem; color: #666; margin-top: 5px;">Charges shown at checkout</p>   
     </div>
     <div class="trust-badge-item">
         <i class="fa-solid fa-lock trust-badge-icon"></i>
-        <span class="trust-badge-text">Secure Payment</span>
+       <span class="trust-badge-text">Cash on Delivery</span>
+<p style="font-size: 0.85rem; color: #666; margin-top: 5px;">Pay when you receive</p>
     </div>
 </div>
 
@@ -219,148 +220,167 @@
 
 <div class="product-carousel-wrapper">
     <div class="product-carousel-track">
-    @{
-        var productIndex = 0;
-        
-        var ratings = new[] {
-        "★★★★★|4.9",
-        "★★★★★|4.8",
-        "★★★★☆|4.5",
-        "★★★★★|5.0",
-        "★★★★☆|4.7",
-        "★★★★★|4.9",
-        "★★★★☆|4.6",
-        "★★★★★|4.8"
-        };
-    }
-    @if (Model != null && Model.Any())
-    {
-        @foreach (var product in Model)
+        @if (Model != null && Model.Any())
         {
-            var imagePath = Url.Content(product.ImageUrl ?? "~/images/default.jpg");
-            var ratingData = ratings[productIndex % ratings.Length].Split('|');
-            var stars = ratingData[0];
-            var score = ratingData[1];
-            productIndex++;
+            @for (int pass = 0; pass < 4; pass++)
+            {
+                @foreach (var product in Model)
+                {
+                    var imagePath = Url.Content(product.ImageUrl ?? "~/images/default.jpg");
 
-            
-           <div class="product-card" style="position:relative;">
-    <a href="/Products/Details/@product.Id" style="display:block; text-decoration:none; color:inherit;">
-       <div class="image-wrapper">
-    <img src="@imagePath" alt="@product.Title" loading="lazy" />
-</div>
-        <div class="product-info">
-            <h3>@product.Title</h3>
-            <p style="font-size:0.78rem; color:#888; margin:4px 0; line-height:1.4;">
-                @(product.Description != null && product.Description.Length > 40
-                    ? product.Description.Substring(0, 40) + "..."
-                    : product.Description)
-            </p>
-            <div class="price" style="color:#a64d79; font-weight:700; margin:6px 0;">
-                PKR @product.Price
-            </div>
-            <div class="rating" style="color:#f59e0b; font-size:0.85rem;">
-                <span>@stars</span>
-                <span style="color:#888; font-size:0.8rem;">(@score)</span>
-            </div>
-        </div>
-    </a>
-    <button class="plus-btn" onclick="event.preventDefault(); event.stopPropagation(); addToCart('@product.Id')">+</button>
-</div>        }
+                    double avgRating = 0;
+                    int reviewCount = 0;
+                    var ratingsDict = ViewBag.ProductRatings as Dictionary<string, dynamic>;
+                    if (ratingsDict != null && ratingsDict.ContainsKey(product.Id))
+                    {
+                        avgRating = ratingsDict[product.Id].AverageRating;
+                        reviewCount = ratingsDict[product.Id].ReviewCount;
+                    }
 
-        
-    }
-    else
-    {
-        <div style="text-align:center; padding: 50px; color: #999; font-style: italic; width: 100%;">
-            <p>No featured products available right now.</p>
-        </div>
-    }
+                    int fullStars = (int)Math.Round(avgRating);
+
+                    <div class="product-card" style="position:relative;">
+                        <a href="/Products/Details/@product.Id" style="display:block; text-decoration:none; color:inherit;">
+                            <div class="image-wrapper">
+                                <img src="@imagePath" alt="@product.Title" loading="lazy" />
+                            </div>
+                            <div class="product-info">
+                                <h3>@product.Title</h3>
+                                <p style="font-size:0.78rem; color:#888; margin:4px 0; line-height:1.4;">
+                                    @(product.Description != null && product.Description.Length > 40
+                                        ? product.Description.Substring(0, 40) + "..."
+                                        : product.Description)
+                                </p>
+                                <div class="price" style="color:#a64d79; font-weight:700; margin:6px 0;">
+                                    PKR @product.Price
+                                </div>
+                                <div class="rating" style="color:#f59e0b; font-size:0.85rem;">
+                                    @if (reviewCount > 0)
+                                    {
+                                        <span>@(new string('★', fullStars))@(new string('☆', 5 - fullStars))</span>
+                                        <span style="color:#888; font-size:0.8rem;">(@avgRating.ToString("0.0"))</span>
+                                    }
+                                    else
+                                    {
+                                        <span style="color:#aaa; font-size:0.8rem;">No reviews yet</span>
+                                    }
+                                </div>
+                            </div>
+                        </a>
+                        <button class="plus-btn" onclick="event.preventDefault(); event.stopPropagation(); addToCart('@product.Id')">+</button>
+                    </div>
+                }
+            }
+        }
+        else
+        {
+            <div style="text-align:center; padding: 50px; color: #999; font-style: italic; width: 100%;">
+                <p>No featured products available right now.</p>
+            </div>
+        }
     </div>
-
+</div>
 <a href="/Products/AllProducts" class="view-all-btn">VIEW ALL PRODUCTS</a>
-
 <section class="testimonials-section">
     <h2 class="testimonials-heading">What Our Customers Say</h2>
-    <div class="testimonials-container">
-        <div class="testimonial-card">
-            <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">
-                "The quality is amazing! You can really feel the care and craftsmanship in every stitch. These handmade products are truly special."
-            </p>
-            <p class="testimonial-author">— Sarah Ahmed</p>
+
+    <div class="testi-wrap">
+        <button type="button" class="testi-arrow testi-prev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+
+        <div class="testi-marquee">
+            <div class="testi-marquee-track">
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"The quality is amazing! You can really feel the care and craftsmanship in every stitch. These handmade products are truly special."</p>
+                    <p class="testimonial-author">— Sarah Ahmed</p>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"I love supporting local artisans. The bag I ordered is beautiful and unique – I get compliments everywhere I go!"</p>
+                    <p class="testimonial-author">— Fatima Khan</p>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Fast delivery and excellent customer service. The handmade leather wallet is beautiful and well made. Highly recommend!"</p>
+                    <p class="testimonial-author">— Ali Hassan</p>
+                </div>
+            </div>
         </div>
 
-        <div class="testimonial-card">
-            <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">
-                "I love supporting local artisans. The bag I ordered is beautiful and unique – I get compliments everywhere I go!"
-            </p>
-            <p class="testimonial-author">— Fatima Khan</p>
-        </div>
-
-        <div class="testimonial-card">
-            <div class="testimonial-stars">★★★★★</div>
-            <p class="testimonial-text">
-                "Fast delivery and excellent customer service. The handmade shoes are comfortable and stylish. Highly recommend!"
-            </p>
-            <p class="testimonial-author">— Ali Hassan</p>
-        </div>
+        <button type="button" class="testi-arrow testi-next" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
     </div>
 </section>
 
 @section Scripts {
     <script>
-       
+    (function () {
+        const slider = document.querySelector('.banner-slider');
+        if (!slider) return;
+
+        const slides = slider.querySelector('.slides');
+        const dots = slider.querySelectorAll('.dot');
+        const total = dots.length;
         let index = 0;
-        const slides = document.querySelector('.slides');
-        const dots = document.querySelectorAll('.dot');
+        let timer = null;
 
         function showSlide(i) {
-            index = (i + 3) % 3;
+            index = (i + total) % total;
             slides.style.transform = `translateX(-${index * 100}%)`;
-            dots.forEach(d => d.classList.remove("active"));
-            dots[index].classList.add("active");
+            dots.forEach(d => d.classList.remove('active'));
+            dots[index].classList.add('active');
         }
 
-        document.querySelector('.next').onclick = () => showSlide(index + 1);
-        document.querySelector('.prev').onclick = () => showSlide(index - 1);
+        function startAuto() {
+            clearInterval(timer);
+            timer = setInterval(() => showSlide(index + 1), 6000);
+        }
 
-        dots.forEach((dot, i) => {
-            dot.onclick = () => showSlide(i);
+        slider.querySelector('.banner-arrow.next').addEventListener('click', function () {
+            showSlide(index + 1);
+            startAuto();      
+            this.blur();      
         });
 
-        setInterval(() => showSlide(index + 1), 6000);
-    </script>
+        slider.querySelector('.banner-arrow.prev').addEventListener('click', function () {
+            showSlide(index - 1);
+            startAuto();
+            this.blur();
+        });
 
+        dots.forEach((dot, i) => {
+            dot.addEventListener('click', () => {
+                showSlide(i);
+                startAuto();
+            });
+        });
+
+        startAuto();
+    })();
+</script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-           
             var shouldOpenLogin = '@TempData["OpenLoginSidebar"]';
 
             if (shouldOpenLogin === "true") {
-               
                 openLoginSidebar();
-
             }
         });
 
-        
         function openLoginSidebar() {
-            const sidebar = document.querySelector('.login-sidebar'); 
-            if(sidebar) {
-                sidebar.style.right = "0"; 
+            const sidebar = document.querySelector('.login-sidebar');
+            if (sidebar) {
+                sidebar.style.right = "0";
             }
         }
 
-                function addToCart(productId) {
-            
+        function addToCart(productId) {
             fetch('/Products/GetProductJson?id=' + productId)
                 .then(r => r.json())
                 .then(product => {
                     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-                    
                     let existing = cart.find(i => i.id === productId);
                     if (existing) {
                         existing.qty = (existing.qty || 1) + 1;
@@ -373,11 +393,63 @@
                             qty: 1
                         });
                     }
-
                     localStorage.setItem('cart', JSON.stringify(cart));
-                    openCart(); 
+                    localStorage.removeItem('buyNowItem');
+                    openCart();
                     updateCartCount();
                 });
         }
+    </script>
+
+    <script>
+        (function () {
+            const track = document.querySelector('.testi-marquee-track');
+            const nextBtn = document.querySelector('.testi-next');
+            const prevBtn = document.querySelector('.testi-prev');
+            if (!track || !nextBtn || !prevBtn) return;
+
+            
+            track.innerHTML = track.innerHTML.repeat(3);
+
+            let busy = false;
+
+            function stepSize() {
+                const c = track.children;
+                return c[1].offsetLeft - c[0].offsetLeft;
+            }
+
+            function next() {
+                if (busy) return;
+                busy = true;
+                track.style.transition = 'transform 0.5s ease';
+                track.style.transform = `translateX(-${stepSize()}px)`;
+
+                setTimeout(() => {
+                    track.style.transition = 'none';
+                    track.appendChild(track.firstElementChild);
+                    track.style.transform = 'translateX(0)';
+                    busy = false;
+                }, 520);
+            }
+
+            function prev() {
+                if (busy) return;
+                busy = true;
+                const s = stepSize();
+
+                track.style.transition = 'none';
+                track.insertBefore(track.lastElementChild, track.firstElementChild);
+                track.style.transform = `translateX(-${s}px)`;
+                track.offsetWidth;
+
+                track.style.transition = 'transform 0.5s ease';
+                track.style.transform = 'translateX(0)';
+
+                setTimeout(() => { busy = false; }, 520);
+            }
+
+            nextBtn.addEventListener('click', next);
+            prevBtn.addEventListener('click', prev);
+        })();
     </script>
 }

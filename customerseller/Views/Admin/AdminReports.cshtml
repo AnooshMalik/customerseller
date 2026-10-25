@@ -326,6 +326,11 @@
             gap: 10px;
         }
     }
+        @@media (max-width: 900px) {
+        .content-area {
+            padding-bottom: 130px !important;
+        }
+    }
 </style>
 
 <div class="page-header">
@@ -434,10 +439,10 @@
                         <div class="ptitle">@p.Title</div>
                         <div class="pcat">@p.Category &nbsp;|&nbsp; Rs. @p.Price</div>
                     </div>
-                    <div class="product-stock">Stock: @p.Stock</div>
+                                     <div class="product-stock">Sold: @p.TotalSold</div>
                 </div>
                 rank++;
             }
         }
-
+    </div>
 </div>

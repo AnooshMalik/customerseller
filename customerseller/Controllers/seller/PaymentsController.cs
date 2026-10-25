@@ -20,7 +20,8 @@ namespace customerseller.Controllers.seller
             var email = HttpContext.Session.GetString("UserEmail");
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Login", "Account");
-
+            if (HttpContext.Session.GetString("UserRole") != "Seller")
+                return RedirectToAction("Index", "Home");
             var sellerProductIds = _context.Products
                 .Where(p => p.SellerEmail == email)
                 .Select(p => p.Id)
@@ -28,21 +29,23 @@ namespace customerseller.Controllers.seller
 
             var orders = _context.Orders
                 .Include(o => o.Items)
-                .Where(o => o.Items != null && o.Items.Any(i => sellerProductIds.Contains(i.ProductId)))
+                .Where(o => o.Items != null && o.Items.Any(i => sellerProductIds.Contains(i.ProductId))
+                       && o.Status != "Cancelled")
                 .OrderByDescending(o => o.OrderDate)
                 .ToList();
 
             decimal cashInHand = 0;
             decimal inTransitCash = 0;
+            decimal pendingCash = 0;
             decimal totalCodSales = 0;
             var transactions = new List<Payments>();
 
             foreach (var order in orders)
             {
-                var sellerItem = order.Items.FirstOrDefault(i => sellerProductIds.Contains(i.ProductId));
-                if (sellerItem == null) continue;
+                var sellerItems = order.Items.Where(i => sellerProductIds.Contains(i.ProductId)).ToList();
+                if (!sellerItems.Any()) continue;
 
-                decimal amount = sellerItem.Price * sellerItem.Quantity;
+                decimal amount = sellerItems.Sum(i => i.Price * i.Quantity);
                 string customerName = order.CustomerName ?? $"{order.FirstName} {order.LastName}".Trim();
 
                 if (order.Status == "Delivered" && order.PaymentReceived == true)
@@ -57,9 +60,22 @@ namespace customerseller.Controllers.seller
                         Status = "Collected"
                     });
                 }
-                else if (order.CourierStatus == "Assigned" || order.CourierStatus == "PickedUp")
+                else if (order.Status == "Delivered")
                 {
                     inTransitCash += amount;
+                    totalCodSales += amount;
+                    transactions.Add(new Payments
+                    {
+                        OrderId = order.OrderId,
+                        CustomerName = customerName,
+                        Amount = amount,
+                        Status = "Delivered, awaiting cash"
+                    });
+                }
+                else if (order.RiderStatus == "Assigned" || order.RiderStatus == "PickedUp")
+                {
+                    inTransitCash += amount;
+                    totalCodSales += amount;
                     transactions.Add(new Payments
                     {
                         OrderId = order.OrderId,
@@ -68,12 +84,25 @@ namespace customerseller.Controllers.seller
                         Status = "In-Transit"
                     });
                 }
+                else
+                {
+                    pendingCash += amount;
+                    totalCodSales += amount;
+                    transactions.Add(new Payments
+                    {
+                        OrderId = order.OrderId,
+                        CustomerName = customerName,
+                        Amount = amount,
+                        Status = "Processing"
+                    });
+                }
             }
 
             var viewModel = new PaymentViewModel
             {
                 CashInHand = cashInHand,
                 InTransitCash = inTransitCash,
+                PendingCash = pendingCash,
                 TotalCODSales = totalCodSales,
                 Transactions = transactions
             };

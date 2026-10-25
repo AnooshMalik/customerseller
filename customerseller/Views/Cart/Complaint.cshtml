@@ -152,7 +152,17 @@
             background: #fdedec;
             color: #c0392b;
         }
-
+        .field-error {
+    color: #c62828;
+    font-size: 0.8rem;
+    min-height: 0;
+}
+.form-field input.invalid,
+.form-field select.invalid,
+.form-field textarea.invalid {
+    border-color: #c62828;
+    background: #fff8f8;
+}
     .submit-btn {
         width: 100%;
         padding: 14px;
@@ -283,110 +293,294 @@
                     <label>Seller / Shop Name <span>*</span></label>
                     <input type="text" id="cf-seller" placeholder="e.g. Khan Crafts">
                 </div>
-                <div class="form-field">
+                               <div class="form-field">
                     <label>Purchase Date</label>
                     <input type="date" id="cf-date">
                 </div>
-                
                 <div class="form-field full">
-                    <label>Priority Level <span>*</span></label>
-                    <div class="priority-row">
-                        <button type="button" class="p-btn low" onclick="setPrio(this)">🟢 Low</button>
-                        <button type="button" class="p-btn medium active" onclick="setPrio(this)">🟡 Medium</button>
-                        <button type="button" class="p-btn high" onclick="setPrio(this)">🔴 High</button>
-                    </div>
+                    <label>Complaint Type <span>*</span></label>
+                    <select id="cf-type">
+                        <option value="" disabled selected>Select a reason...</option>
+                        <option>Wrong / Damaged product received</option>
+                        <option>Product never arrived</option>
+                        <option>Delivery was very late</option>
+                        <option>Seller fraud / scam</option>
+                        <option>Rude or unprofessional seller</option>
+                        <option>Return / Refund not processed</option>
+                        <option>Other issue</option>
+                    </select>
                 </div>
-                <div class="form-field full">
+                               <div class="form-field full">
                     <label>Describe Your Complaint <span>*</span></label>
                     <textarea id="cf-desc" placeholder="What happened, when it happened, and what the seller said..."></textarea>
                 </div>
                 <div class="form-field full">
-                    <label>Attach Evidence (photos / screenshots) <span>*</span></label>
-                    <input type="file" id="cf-files" accept="image/*,.pdf" multiple style="display:none;">
-                    <label for="cf-files" style="color:#a64d79; text-decoration:underline; cursor:pointer; font-weight:600; font-size:0.9rem; width:fit-content;">
-                        📎 Choose files to attach
-                    </label>
+                   <label>Attach Evidence (photo / screenshot) <span>*</span></label>
+<input type="file" id="cf-files" accept="image/jpeg,image/png,image/webp,.pdf" style="display:none;">
+<label for="cf-files" style="color:#a64d79; text-decoration:underline; cursor:pointer; font-weight:600; font-size:0.9rem; width:fit-content;">
+    📎 Choose a file to attach
+</label>
                     <span id="fileNameDisplay" style="color:#888; font-size:0.82rem;"></span>
                 </div>
             </div>
-            <button class="submit-btn" id="submitBtn" onclick="submitComplaint()">
+                       <button class="submit-btn" id="submitBtn" onclick="submitComplaint()">
                 Submit Complaint →
             </button>
+
+            <div style="text-align:center; margin-top:24px; padding-top:18px; border-top:1px solid #f1e1e9;">
+                <p style="color:#888; font-size:0.88rem; margin-bottom:10px;">Already submitted a complaint?</p>
+                <a href="/Complaint/Track"
+                   style="display:inline-block; color:#a64d79; font-weight:600; font-size:0.92rem;
+                          text-decoration:none; border:2px solid #a64d79; padding:10px 22px; border-radius:10px;">
+                    🔍 Track Existing Complaint
+                </a>
+            </div>
         </div>
 
         <div class="success-box" id="successBox">
             <div class="s-icon">✅</div>
             <h2>Complaint Submitted!</h2>
             <p>We will review your complaint within 24 hours<br>and contact you via phone or email.</p>
-            <div class="ticket-badge" id="ticketNum">Ticket #CMP-0000</div>
+                      <div class="ticket-badge" id="ticketNum">Ticket #CMP-0000</div>
             <br>
-            <a href="/" class="back-btn">Back to Home</a>
+            <a href="/Complaint/Track" id="trackLink" class="back-btn">Track This Complaint</a>
+            <br>
+            <a href="/" style="display:inline-block; margin-top:14px; color:#a64d79; font-size:0.88rem; font-weight:600; text-decoration:none;">Back to Home</a>
         </div>
     </div>
 </div>
 
 <script>
-    function setPrio(btn) {
-        document.querySelectorAll('.p-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+    const PHONE_RE = /^(\+92|0)3\d{9}$/;
+    const NAME_RE  = /^[A-Za-z\s.'-]+$/;
+    const ORDER_RE = /^[A-Za-z0-9-]{3,30}$/;
+        const MAX_FILE_MB = 5;
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    const validators = {
+        'cf-name': v => {
+            if (!v) return 'Your name is required';
+            if (v.length < 3 || v.length > 50) return 'Name must be between 3 and 50 characters';
+            if (!NAME_RE.test(v)) return 'Name can only contain letters, no numbers or symbols';
+            return '';
+        },
+        'cf-phone': v => {
+            if (!v) return 'Phone number is required';
+            if (!PHONE_RE.test(v)) return 'Enter a valid number (e.g. 03001234567 or +923001234567)';
+            return '';
+        },
+        'cf-orderid': v => {
+            if (!v) return 'Order ID is required';
+            if (!ORDER_RE.test(v)) return 'Order ID can only contain letters, numbers and hyphens (3-30 characters)';
+            return '';
+        },
+        'cf-amount': v => {
+            if (!v) return '';
+            if (!/^\d+(\.\d{1,2})?$/.test(v)) return 'Amount must be a valid number';
+            if (parseFloat(v) <= 0 || parseFloat(v) > 10000000) return 'Enter a valid amount';
+            return '';
+        },
+        'cf-seller': v => {
+            if (!v) return 'Seller / shop name is required';
+            if (v.length < 2 || v.length > 80) return 'Seller name must be between 2 and 80 characters';
+            if (!/^[A-Za-z0-9\s.'&-]+$/.test(v)) return 'Seller name contains invalid characters';
+            return '';
+        },
+        'cf-date': v => {
+            if (!v) return '';
+            const d = new Date(v);
+            const today = new Date(); today.setHours(23, 59, 59, 999);
+            if (isNaN(d)) return 'Enter a valid date';
+            if (d > today) return 'Purchase date cannot be in the future';
+            const oneYearAgo = new Date(); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            if (d < oneYearAgo) return 'Purchase date cannot be older than 1 year';
+            return '';
+        },
+        'cf-type': v => v ? '' : 'Please select a complaint type',
+        'cf-desc': v => {
+            if (!v) return 'Please describe your complaint';
+            if (v.length < 20) return 'Description must be at least 20 characters';
+            if (v.length > 1000) return 'Description cannot exceed 1000 characters';
+            return '';
+        }
+    };
+
+    function getErrorSpan(el) {
+        let span = document.getElementById('err-' + el.id);
+        if (!span) {
+            span = document.createElement('span');
+            span.className = 'field-error';
+            span.id = 'err-' + el.id;
+            el.parentElement.appendChild(span);
+        }
+        return span;
     }
+
+    function showError(el, msg) {
+        getErrorSpan(el).textContent = msg;
+        el.classList.toggle('invalid', !!msg);
+    }
+
+    function validateField(id) {
+        const el = document.getElementById(id);
+        const msg = validators[id](el.value.trim());
+        showError(el, msg);
+        return !msg;
+    }
+
+    function validateFiles() {
+        const input = document.getElementById('cf-files');
+        const display = document.getElementById('fileNameDisplay');
+        let span = document.getElementById('err-cf-files');
+        if (!span) {
+            span = document.createElement('span');
+            span.className = 'field-error';
+            span.id = 'err-cf-files';
+            display.parentElement.appendChild(span);
+        }
+        let msg = '';
+        const files = Array.from(input.files);
+        if (files.length === 0) msg = 'Please attach at least one photo/screenshot as evidence';
+else if (files.some(f => !ALLOWED_TYPES.includes(f.type))) msg = 'Only JPG, PNG, WEBP images or PDF files are allowed';
+        else if (files.some(f => f.size > MAX_FILE_MB * 1024 * 1024)) msg = 'Each file must be smaller than ' + MAX_FILE_MB + ' MB';
+        span.textContent = msg;
+        return !msg;
+    }
+
+    
+    document.getElementById('cf-name').addEventListener('input', function () {
+        this.value = this.value.replace(/[^A-Za-z\s.'-]/g, '');
+    });
+    document.getElementById('cf-phone').addEventListener('input', function () {
+        this.value = this.value.replace(/[^0-9+]/g, '');
+    });
+    document.getElementById('cf-amount').addEventListener('input', function () {
+        this.value = this.value.replace(/[^0-9.]/g, '');
+    });
+    document.getElementById('cf-orderid').addEventListener('input', function () {
+        this.value = this.value.replace(/[^A-Za-z0-9-]/g, '');
+    });
+
+    
+    document.getElementById('cf-name').maxLength = 50;
+    document.getElementById('cf-phone').maxLength = 13;
+    document.getElementById('cf-orderid').maxLength = 30;
+    document.getElementById('cf-amount').maxLength = 10;
+    document.getElementById('cf-seller').maxLength = 80;
+    document.getElementById('cf-desc').maxLength = 1000;
+    document.getElementById('cf-date').max = new Date().toISOString().split('T')[0];
+
+    Object.keys(validators).forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('blur', () => validateField(id));
+        el.addEventListener('input', () => { if (el.classList.contains('invalid')) validateField(id); });
+        el.addEventListener('change', () => validateField(id));
+    });
+
+    document.getElementById('cf-files').addEventListener('change', function () {
+        const names = Array.from(this.files).map(f => f.name).join(', ');
+        document.getElementById('fileNameDisplay').textContent = names || '';
+        validateFiles();
+    });
+
+        let orderVerified = false;
+
+    function setOrderFieldsLocked(locked) {
+        ['cf-seller', 'cf-amount', 'cf-date'].forEach(id => {
+            document.getElementById(id).readOnly = locked;
+        });
+    }
+
+    async function lookupOrder() {
+        const idEl = document.getElementById('cf-orderid');
+        const id = idEl.value.trim();
+
+        orderVerified = false;
+        setOrderFieldsLocked(false);
+        ['cf-seller', 'cf-amount', 'cf-date'].forEach(f => {
+            document.getElementById(f).value = '';
+            showError(document.getElementById(f), '');
+        });
+
+        if (!ORDER_RE.test(id)) return;
+
+        try {
+            const res = await fetch('/Cart/GetOrderForComplaint?orderId=' + encodeURIComponent(id), { cache: 'no-store' });
+            const data = await res.json();
+
+            if (data.found) {
+                idEl.value = data.orderId;
+                              document.getElementById('cf-seller').value = data.shopName;
+                document.getElementById('cf-amount').value = data.amount;
+                document.getElementById('cf-date').value = data.date;
+                setOrderFieldsLocked(true);
+                ['cf-seller', 'cf-amount', 'cf-date'].forEach(f => showError(document.getElementById(f), ''));
+                orderVerified = true;
+                showError(idEl, '');
+            } else {
+                showError(idEl, data.message || 'Order not found.');
+            }
+        } catch (e) {
+            showError(idEl, 'Could not verify the order. Please try again.');
+        }
+    }
+
+    document.getElementById('cf-orderid').addEventListener('change', lookupOrder);
+    if (document.getElementById('cf-orderid').value.trim()) lookupOrder();
 
     async function submitComplaint() {
-        const name   = document.getElementById('cf-name').value.trim();
-        const phone  = document.getElementById('cf-phone').value.trim();
-        const seller = document.getElementById('cf-seller').value.trim();
-       
-        const desc   = document.getElementById('cf-desc').value.trim();
-        const email  = document.getElementById('cf-email').value.trim();
-        const orderId  = document.getElementById('cf-orderid').value.trim();
-        const amount   = document.getElementById('cf-amount').value.trim();
-        const fileInput = document.getElementById('cf-files');
-
-           if (!name || !phone || !seller || !desc) {
-        alert('Please fill in all required fields (*).');
-        return;
-    }
-
-    if (fileInput.files.length === 0) {
-        alert('Please attach at least one photo/screenshot as evidence.');
-        return;
-    }
-
-        const activePrio = document.querySelector('.p-btn.active');
-        const priority = activePrio ? activePrio.textContent.trim().replace(/[^a-zA-Z]/g, '') : 'Medium';
+                if (!orderVerified) await lookupOrder();
+        if (!orderVerified) {
+            const idEl = document.getElementById('cf-orderid');
+            if (!idEl.classList.contains('invalid'))
+                showError(idEl, 'Please enter a valid Order ID from your account.');
+            idEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+        let allValid = true;
+        let firstInvalid = null;
+        Object.keys(validators).forEach(id => {
+            if (!validateField(id)) {
+                allValid = false;
+                if (!firstInvalid) firstInvalid = document.getElementById(id);
+            }
+        });
+        if (!validateFiles()) {
+            allValid = false;
+            if (!firstInvalid) firstInvalid = document.getElementById('cf-files').parentElement;
+        }
+        if (!allValid) {
+            firstInvalid?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
 
         const formData = new FormData();
-        formData.append('customerName',  name);
-        formData.append('customerPhone', phone);
-        formData.append('customerEmail', email);
-        formData.append('orderId',       orderId);
-        formData.append('amountPaid',    amount);
-        formData.append('sellerName',    seller);
-        
-        formData.append('priority',      priority);
-        formData.append('description',   desc);
-
-        if (fileInput.files.length > 0) {
-            formData.append('evidenceFile', fileInput.files[0]);
-        }
+        formData.append('customerName',  document.getElementById('cf-name').value.trim());
+        formData.append('customerPhone', document.getElementById('cf-phone').value.trim());
+        formData.append('customerEmail', document.getElementById('cf-email').value.trim());
+        formData.append('orderId',       document.getElementById('cf-orderid').value.trim());
+        formData.append('amountPaid',    document.getElementById('cf-amount').value.trim());
+        formData.append('sellerName',    document.getElementById('cf-seller').value.trim());
+        formData.append('complaintType', document.getElementById('cf-type').value);
+        formData.append('priority',      'Medium');
+        formData.append('description',   document.getElementById('cf-desc').value.trim());
+        formData.append('evidenceFile',  document.getElementById('cf-files').files[0]);
 
         const btn = document.getElementById('submitBtn');
         btn.textContent = 'Submitting...';
         btn.disabled = true;
 
         try {
-            const res = await fetch('/Complaint/Submit', {
-                method: 'POST',
-                body: formData
-            });
+            const res = await fetch('/Complaint/Submit', { method: 'POST', body: formData });
             const data = await res.json();
 
-            if (data.success) {
+                       if (data.success) {
                 document.getElementById('ticketNum').textContent = 'Ticket #' + data.ticket;
+                document.getElementById('trackLink').href = '/Complaint/Track?ticket=' + encodeURIComponent(data.ticket);
                 document.getElementById('formSection').style.display = 'none';
                 document.getElementById('successBox').style.display = 'block';
-            } else {
-                alert('Something went wrong. Please try again.');
+            }
+            else {
+                alert(data.message || 'Something went wrong. Please try again.');
                 btn.textContent = 'Submit Complaint →';
                 btn.disabled = false;
             }
@@ -396,8 +590,4 @@
             btn.disabled = false;
         }
     }
-        document.getElementById('cf-files').addEventListener('change', function() {
-        const names = Array.from(this.files).map(f => f.name).join(', ');
-        document.getElementById('fileNameDisplay').textContent = names || '';
-    });
 </script>

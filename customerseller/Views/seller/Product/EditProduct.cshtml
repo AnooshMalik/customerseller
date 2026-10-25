@@ -166,32 +166,32 @@
                 <label>Stock *</label>
                 <input type="number" name="Stock" value="@Model.Stock" min="1" required />
             </div>
-            <div class="form-group">
+                      <div class="form-group" id="editSizesGroup">
                 <label>Sizes (optional)</label>
-                <input type="text" name="Sizes" value="@Model.Sizes" placeholder="e.g. S, M, L, XL" />
+                <input type="text" id="editSizesInput" name="Sizes" value="@Model.Sizes" placeholder="e.g. S, M, L, XL" />
             </div>
         </div>
 
         <div class="form-row">
             <div class="form-group">
                 <label>Main Category</label>
-                <select id="editMainCategory" onchange="loadEditSubCategories()">
+                               <select id="editMainCategory" onchange="loadEditSubCategories()">
                     <option value="">-- Select Category --</option>
-                    <option value="FabricTextile" selected=@(Model.Category is "CushionCovers" or "PrintedKurtas" or "TieDyeDupattas" or "FabricToteBags" or "FabricTextile" ? "selected" : "")>🧵 Fabric &amp; Textile</option>
-                    <option value="WoolYarn" selected=@(Model.Category is "Sweaters" or "CrochetBags" or "StorageBaskets" or "Beanies" or "WoolYarn" ? "selected" : "")>🧶 Wool &amp; Yarn</option>
-                    <option value="Leather" selected=@(Model.Category is "LeatherHandbags" or "Wallets" or "Belts" or "LeatherKeychains" or "Journals" or "Leather" ? "selected" : "")>👜 Leather</option>
-                    <option value="Wood" selected=@(Model.Category is "PhotoFrames" or "WoodNecklaces" or "WoodToys" or "ServingTrays" or "WoodShowpieces" or "WoodKeychains" or "Wood" ? "selected" : "")>🪵 Wood</option>
-                    <option value="ClayPottery" selected=@(Model.Category is "FlowerPots" or "CoffeeMugs" or "ClayVases" or "ClayEarrings" or "ClayFigurines" or "ClayPottery" ? "selected" : "")>🏺 Clay &amp; Pottery</option>
-                    <option value="Jewels" selected=@(Model.Category is "Necklaces" or "Bracelets" or "Rings" or "Bangles" or "JewelEarrings" or "Jewels" ? "selected" : "")>💎 Jewels</option>
-                    <option value="PaperCards" selected=@(Model.Category is "GreetingCards" or "GiftBoxes" or "PaperFlowers" or "PaperShowpieces" or "Scrapbooks" or "PaperCards" ? "selected" : "")>📄 Paper &amp; Cards</option>
-                    <option value="JuteNatural" selected=@(Model.Category is "JuteBags" or "Baskets" or "Trays" or "DriedBouquets" or "Paintings" or "JuteNatural" ? "selected" : "")>🌿 Jute &amp; Natural</option>
-                    <option value="ResinEpoxy" selected=@(Model.Category is "Coasters" or "ResinEarrings" or "ResinKeychains" or "WallArt" or "ResinServingTrays" or "ResinEpoxy" ? "selected" : "")>🔮 Resin &amp; Epoxy</option>
-                    <option value="MetalWire" selected=@(Model.Category is "MetalEarrings" or "MetalVases" or "MetalFigurines" or "MetalWallArt" or "CandleHolders" or "MetalWire" ? "selected" : "")>⚙️ Metal &amp; Wire</option>
+                    <option value="FabricTextile" selected="@(Model.Category is "CushionCovers" or "PrintedKurtas" or "TieDyeDupattas" or "FabricToteBags" or "FabricTextile")">🧵 Fabric &amp; Textile</option>
+                    <option value="WoolYarn" selected="@(Model.Category is "Sweaters" or "CrochetBags" or "StorageBaskets" or "Beanies" or "WoolYarn")">🧶 Wool &amp; Yarn</option>
+                    <option value="Leather" selected="@(Model.Category is "LeatherHandbags" or "Wallets" or "Belts" or "LeatherKeychains" or "Journals" or "Leather")">👜 Leather</option>
+                    <option value="Wood" selected="@(Model.Category is "PhotoFrames" or "WoodNecklaces" or "WoodToys" or "ServingTrays" or "WoodShowpieces" or "WoodKeychains" or "Wood")">🪵 Wood</option>
+                    <option value="ClayPottery" selected="@(Model.Category is "FlowerPots" or "CoffeeMugs" or "ClayVases" or "ClayEarrings" or "ClayFigurines" or "ClayPottery")">🏺 Clay &amp; Pottery</option>
+                    <option value="Jewels" selected="@(Model.Category is "Necklaces" or "Bracelets" or "Rings" or "Bangles" or "JewelEarrings" or "Jewels")">💎 Jewels</option>
+                    <option value="PaperCards" selected="@(Model.Category is "GreetingCards" or "GiftBoxes" or "PaperFlowers" or "PaperShowpieces" or "Scrapbooks" or "PaperCards")">📄 Paper &amp; Cards</option>
+                    <option value="JuteNatural" selected="@(Model.Category is "JuteBags" or "Baskets" or "Trays" or "DriedBouquets" or "Paintings" or "JuteNatural")">🌿 Jute &amp; Natural</option>
+                    <option value="ResinEpoxy" selected="@(Model.Category is "Coasters" or "ResinEarrings" or "ResinKeychains" or "WallArt" or "ResinServingTrays" or "ResinEpoxy")">🔮 Resin &amp; Epoxy</option>
+                    <option value="MetalWire" selected="@(Model.Category is "MetalEarrings" or "MetalVases" or "MetalFigurines" or "MetalWallArt" or "CandleHolders" or "MetalWire")">⚙️ Metal &amp; Wire</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>Sub Category</label>
-                <select id="editSubCategory" name="Category">
+                              <select id="editSubCategory" name="Category" onchange="toggleEditSizesField()">
                     <option value="@Model.Category" selected>@Model.Category (current)</option>
                 </select>
             </div>
@@ -306,7 +306,20 @@
         ]
     };
 
-    var currentSubCat = '@Model.Category';
+       var currentSubCat = '@Model.Category';
+    var SIZEABLE_SUBCATS = ['PrintedKurtas', 'Sweaters', 'Beanies', 'Belts'];
+
+    function toggleEditSizesField() {
+        var subCat = document.getElementById('editSubCategory').value;
+        var group = document.getElementById('editSizesGroup');
+        var input = document.getElementById('editSizesInput');
+        if (SIZEABLE_SUBCATS.includes(subCat)) {
+            group.style.display = '';
+        } else {
+            group.style.display = 'none';
+            input.value = '';
+        }
+    }
     var sellerCats = @Html.Raw(
                 System.Text.Json.JsonSerializer.Serialize(
                         ViewBag.SellerCategories ?? new System.Collections.Generic.List<string>()
@@ -341,6 +354,7 @@
             if (!hasMatch) opt.style.display = 'none';
         });
 
-        loadEditSubCategories();
+            loadEditSubCategories();
+        toggleEditSizesField();
     });
 </script>

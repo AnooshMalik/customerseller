@@ -20,6 +20,8 @@ namespace customerseller.Controllers.seller
             var email = HttpContext.Session.GetString("UserEmail");
             if (string.IsNullOrEmpty(email))
                 return RedirectToAction("Login", "Account");
+            if (HttpContext.Session.GetString("UserRole") != "Seller")
+                return RedirectToAction("Index", "Home");
 
             var shop = _context.SellerShops.FirstOrDefault(s => s.SellerEmail == email);
 
@@ -52,12 +54,17 @@ namespace customerseller.Controllers.seller
                 order.CustomerAddress = (order.Address ?? "").Replace("'", " ");
             }
 
-            ViewBag.Couriers = _context.CourierCompanies
-                .Where(c => c.IsActive)
-                .ToList();
+			ViewBag.Riders = _context.RiderCompanies
+	 .Where(c => c.IsActive)
+	 .ToList();
 
-            ViewBag.SellerShop = shop;
+			ViewBag.SellerShop = shop;
 
+            if (shop != null)
+            {
+                shop.OrdersLastSeenAt = DateTime.Now;
+                _context.SaveChanges();
+            }
             return View("~/Views/Seller/Orders/Order.cshtml", orders);
         }
 
@@ -70,16 +77,25 @@ namespace customerseller.Controllers.seller
 
             var order = _context.Orders.FirstOrDefault(o => o.OrderId == orderId);
             if (order == null) return Json(new { error = "Order not found" });
+            if (HttpContext.Session.GetString("UserRole") != "Seller")
+                return Json(new { error = "Unauthorized" });
+
+            var sellerOwnsOrder = _context.Orders
+                .Where(o => o.OrderId == orderId)
+                .SelectMany(o => o.Items)
+                .Any(i => _context.Products.Any(p => p.Id == i.ProductId && p.SellerEmail == email));
+            if (!sellerOwnsOrder)
+                return Json(new { error = "This order does not belong to your shop" });
 
             var shop = _context.SellerShops.FirstOrDefault(s => s.SellerEmail == email);
-            var courier = _context.CourierCompanies.FirstOrDefault(c => c.Id == courierId);
+            var courier = _context.RiderCompanies.FirstOrDefault(c => c.Id == courierId);
 
             if (shop == null || courier == null)
                 return Json(new { error = "Shop or Courier not found" });
 
-            order.CourierCompanyId = courierId;
-            order.CourierStatus = "Assigned";
-            order.CourierAssignedAt = DateTime.Now;
+            order.RiderCompanyId = courierId;
+            order.RiderStatus = "Assigned";
+            order.RiderAssignedAt = DateTime.Now;
             order.SellerPickupAddress = $"{shop.SellerAddress}, {shop.SellerArea}";
             order.SellerPhone = shop.SellerPhone;
             order.CustomerPhone = customerPhone;
@@ -139,7 +155,6 @@ Thank you for shopping with Artisan Valley! 🌸";
 
             return Json(new { success = true });
         }
-
         public IActionResult GetOrderCount()
         {
             Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate";
@@ -154,10 +169,14 @@ Thank you for shopping with Artisan Valley! 🌸";
                 .Select(p => p.Id)
                 .ToList();
 
+            var shop = _context.SellerShops.FirstOrDefault(s => s.SellerEmail == email);
+            var lastSeen = shop?.OrdersLastSeenAt ?? DateTime.MinValue;
+
             var count = _context.Orders
                 .Where(o => o.Items != null
                          && o.Items.Any(i => sellerProductIds.Contains(i.ProductId))
-                         && o.Status == "Placed")
+                         && o.Status != "Cancelled"
+                         && o.OrderDate > lastSeen)
                 .Count();
 
             return Json(new { count = count });

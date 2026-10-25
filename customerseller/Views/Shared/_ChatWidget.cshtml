@@ -18,12 +18,19 @@
             border: none;
             box-shadow: 0 6px 20px rgba(166,77,121,0.4);
             font-size: 1.5rem;
-            cursor: pointer;
+                       cursor: grab;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: transform 0.2s ease;
+            touch-action: none;
+            user-select: none;
         }
+
+            .cw-toggle.dragging {
+                cursor: grabbing;
+                transition: none;
+            }
 
             .cw-toggle:hover {
                 transform: scale(1.06);
@@ -507,7 +514,7 @@
         }
     </style>
 
-    <button class="cw-toggle" id="cwToggle" onclick="cwOpen()" aria-label="Open chat">
+       <button class="cw-toggle" id="cwToggle" aria-label="Open chat">
         <i class="fa-solid fa-comment-dots"></i>
     </button>
     <div class="cw-panel" id="cwPanel">
@@ -527,7 +534,6 @@
             <div id="cwBotView" style="display:flex; flex-direction:column; flex:1; min-height:0;">
                 <div class="cw-messages" id="cwBotMessages"></div>
                 <div class="cw-input-area">
-                    <i class="fa-solid fa-bars cw-hamburger" onclick="cwShowChatList()" title="My Chats"></i>
                     <label for="cwBotInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Write your message</label>
                     <input type="text" id="cwBotInput" placeholder="Write your message" onkeypress="if(event.key==='Enter') cwBotSend()" />
                     <button class="cw-send" onclick="cwBotSend()" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i></button>
@@ -580,7 +586,6 @@
                 </div>
                 <div class="cw-messages" id="cwMessages"></div>
                 <div class="cw-input-area">
-                    <i class="fa-solid fa-bars cw-hamburger" onclick="cwShowChatList()" title="My Chats"></i>
                     <label for="cwMsgInput" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Write your message</label>
                     <input type="text" id="cwMsgInput" placeholder="Write your message" onkeypress="if(event.key==='Enter') cwSendMessage()" />
                     <button class="cw-send" onclick="cwSendMessage()" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i></button>
@@ -589,33 +594,9 @@
         </div>
     </div>
 
-    <div class="cw-modal-overlay" id="cwNewChatModal">
-        <div class="cw-modal-box">
-            <div class="cw-modal-head">
-                <h4>Select a Seller</h4>
-                <span class="cw-modal-close" onclick="cwCloseNewChat()" role="button" tabindex="0" aria-label="Close">&times;</span>
-            </div>
-            <div class="cw-modal-list" id="cwPartnersList">
-                <div class="cw-empty">Loading...</div>
-            </div>
-        </div>
-    </div>
+    
 
-    <div class="cw-modal-overlay" id="cwClearChatModal">
-        <div class="cw-modal-box" style="width:300px;">
-            <div class="cw-modal-head">
-                <h4>Clear Chat</h4>
-                <span class="cw-modal-close" onclick="cwCloseClearChatModal()" role="button" tabindex="0" aria-label="Close">&times;</span>
-            </div>
-            <div style="padding:16px 18px;">
-                <p style="font-size:0.85rem; color:#444;">Are you sure you want to clear this chat?</p>
-                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
-                    <button onclick="cwCloseClearChatModal()" style="background:#f0f0f0; color:#333; border:none; border-radius:8px; padding:8px 14px; font-size:0.8rem; font-weight:600; cursor:pointer;">Cancel</button>
-                    <button onclick="cwConfirmClearChat()" style="background:#dc2626; color:#fff; border:none; border-radius:8px; padding:8px 14px; font-size:0.8rem; font-weight:600; cursor:pointer;">Clear Chat</button>
-                </div>
-            </div>
-        </div>
-    </div>
+   
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
     <script>
         (function() {
@@ -697,10 +678,10 @@
                 const parts = name.trim().split(" ");
                 return parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
             }
-            function cwEsc(str) {
+                       function cwEsc(str) {
                 const d = document.createElement('div');
                 d.textContent = str || '';
-                return d.innerHTML;
+                return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
             }
             function cwTime(dateStr) {
                 return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -882,26 +863,17 @@
                 }, 300);
             };
 
-            window.cwOpenSellerSelect = async function() {
-                document.getElementById('cwNewChatModal').classList.add('show');
-                const res = await fetch('/Chat/GetChatPartners');
-                const data = await res.json();
-                const sellers = data.filter(p => p.role === 'Seller');
-                const list = document.getElementById('cwPartnersList');
-                if (!sellers.length) {
-                    list.innerHTML = '<div class="cw-empty">No sellers available right now.</div>';
-                    return;
-                }
-                list.innerHTML = sellers.map(p => `
-                                    <div class="cw-modal-item" onclick="cwStartChat('${p.email}','${p.role}','${cwEsc(p.name)}')">
-                                        <div class="cw-avatar">${cwInitials(p.name)}</div>
-                                        <div>
-                                            <div class="cw-conv-name">${cwEsc(p.name)}</div>
-                                            <div class="cw-conv-role">${p.role}</div>
-                                        </div>
-                                    </div>
-                                `).join('');
-            };
+           window.cwOpenSellerSelect = function() {
+    cwAppendBotBubble("To chat with a seller, open the product you're interested in and tap \"Message\" next to the shop name. Your existing chats are always available under My Chats.");
+    cwAppendPills(['Open My Chats', 'Back to Menu'], (choice) => {
+        cwAppendMineBubble(choice);
+        if (choice === 'Open My Chats') {
+            cwShowChatList();
+        } else {
+            cwShowCategoryMenu();
+        }
+    });
+};
             window.cwCloseNewChat = function() {
                 document.getElementById('cwNewChatModal').classList.remove('show');
             };
@@ -926,12 +898,12 @@
                 data = data.filter(c => c.otherRole !== 'Moderator');
                 const list = document.getElementById('cwConvList');
                 if (!data.length) {
-                    list.innerHTML = '<div class="cw-empty">No conversations yet. Tap "+ New" to start one.</div>';
+                    list.innerHTML = '<div class="cw-empty">No conversations yet. Open a product and tap "Message" to chat with its seller.</div>';
                     return;
                 }
                 list.innerHTML = data.map(c => `
-                                            <div class="cw-conv-item" onclick="cwOpenConversation(${c.conversationId}, '${cwEsc(c.otherName)}', '${c.otherRole}')">
-                                                <div class="cw-avatar">${cwInitials(c.otherName)}</div>
+                                                            <div class="cw-conv-item" data-id="${c.conversationId}" data-name="${cwEsc(c.otherName)}" data-role="${c.otherRole}" onclick="cwOpenConversation(parseInt(this.dataset.id), this.dataset.name, this.dataset.role)">                           
+                <div class="cw-avatar">${cwInitials(c.otherName)}</div>
                                                 <div class="cw-conv-info">
                                                     <div class="cw-conv-name">${cwEsc(c.otherName)}</div>
                                                     <div class="cw-conv-role">${c.otherRole}</div>
@@ -1046,14 +1018,105 @@
                 }
             });
 
-           if (cwCurrentEmail) {
+                   if (cwCurrentEmail) {
     cwSetupSignalR();
     cwLoadUnread();
     setInterval(cwLoadUnread, 10000);
 }
+
+            // ===== Draggable chat icon =====
+            (function () {
+                const btn = document.getElementById('cwToggle');
+                const panel = document.getElementById('cwPanel');
+                if (!btn) return;
+
+                let startX, startY, startLeft, startTop, moved = false, dragging = false;
+
+                function placePanel() {
+                    const r = btn.getBoundingClientRect();
+                    const pw = panel.offsetWidth || 370;
+                    const ph = panel.offsetHeight || 540;
+                    let left = r.right - pw;
+                    let top = r.top - ph - 12;
+                    if (top < 8) top = r.bottom + 12;
+                    left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+                    top = Math.max(8, Math.min(top, window.innerHeight - ph - 8));
+                    panel.style.setProperty('left', left + 'px', 'important');
+                    panel.style.setProperty('top', top + 'px', 'important');
+                    panel.style.right = 'auto';
+                    panel.style.bottom = 'auto';
+                }
+
+                function onDown(e) {
+                    const p = e.touches ? e.touches[0] : e;
+                    const r = btn.getBoundingClientRect();
+                    startX = p.clientX; startY = p.clientY;
+                    startLeft = r.left; startTop = r.top;
+                    moved = false; dragging = true;
+                    btn.classList.add('dragging');
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onUp);
+                    document.addEventListener('touchmove', onMove, { passive: false });
+                    document.addEventListener('touchend', onUp);
+                }
+
+                function onMove(e) {
+                    if (!dragging) return;
+                    const p = e.touches ? e.touches[0] : e;
+                    const dx = p.clientX - startX, dy = p.clientY - startY;
+                    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+                    if (!moved) return;
+                    e.preventDefault();
+                    let left = startLeft + dx, top = startTop + dy;
+                    left = Math.max(0, Math.min(left, window.innerWidth - btn.offsetWidth));
+                    top = Math.max(0, Math.min(top, window.innerHeight - btn.offsetHeight));
+                    btn.style.left = left + 'px';
+                    btn.style.top = top + 'px';
+                    btn.style.right = 'auto';
+                    btn.style.bottom = 'auto';
+                    if (panel.classList.contains('show')) placePanel();
+                }
+
+                function onUp() {
+                    dragging = false;
+                    btn.classList.remove('dragging');
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('touchend', onUp);
+                    if (!moved) {
+                        cwOpen();
+                        if (panel.classList.contains('show')) placePanel();
+                    } else {
+                        try {
+                            localStorage.setItem('cwPos', JSON.stringify({
+                                left: btn.style.left, top: btn.style.top
+                            }));
+                        } catch (e) {}
+                    }
+                }
+
+                btn.addEventListener('mousedown', onDown);
+                btn.addEventListener('touchstart', onDown, { passive: true });
+
+                
+                try {
+                    const saved = JSON.parse(localStorage.getItem('cwPos'));
+                    if (saved && saved.left && saved.top) {
+                        const l = Math.min(parseFloat(saved.left), window.innerWidth - 70);
+                        const t = Math.min(parseFloat(saved.top), window.innerHeight - 70);
+                        btn.style.left = Math.max(0, l) + 'px';
+                        btn.style.top = Math.max(0, t) + 'px';
+                        btn.style.right = 'auto';
+                        btn.style.bottom = 'auto';
+                    }
+                } catch (e) {}
+
+                window.addEventListener('resize', function () {
+                    if (panel.classList.contains('show')) placePanel();
+                });
+            })();
         })();
-
-
        
     </script>
 }

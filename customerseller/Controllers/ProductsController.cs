@@ -1,4 +1,4 @@
-﻿using customerseller.Models; 
+﻿using customerseller.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using ClosedXML.Excel;
 using customerseller.Helpers;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace customerseller.Controllers
 {
@@ -23,27 +26,40 @@ namespace customerseller.Controllers
             _context = context;
             _config = config;
         }
+        private static async Task<string> SaveResizedImageAsync(Stream input, string imagesDir)
+        {
+            using var image = await Image.LoadAsync(input);
+            image.Mutate(x => x.Resize(new ResizeOptions
+            {
+                Mode = ResizeMode.Max,
+                Size = new Size(900, 900)
+            }));
 
-       
+            var fileName = Guid.NewGuid().ToString() + ".jpg";
+            var path = Path.Combine(imagesDir, fileName);
+            await image.SaveAsJpegAsync(path, new JpegEncoder { Quality = 80 });
+            return "/images/" + fileName;
+        }
+
         public IActionResult FabricCushionCovers() => CategoryView("CushionCovers", "Cushion Covers");
         public IActionResult FabricKurtas() => CategoryView("PrintedKurtas", "Printed Kurtas");
         public IActionResult FabricDupattas() => CategoryView("TieDyeDupattas", "Tie-Dye Dupattas");
         public IActionResult FabricToteBags() => CategoryView("FabricToteBags", "Tote Bags");
 
-       
+
         public IActionResult WoolSweaters() => CategoryView("Sweaters", "Sweaters");
         public IActionResult WoolCrochetBags() => CategoryView("CrochetBags", "Crochet Bags");
         public IActionResult WoolStorageBaskets() => CategoryView("StorageBaskets", "Storage Baskets");
         public IActionResult WoolBeanies() => CategoryView("Beanies", "Beanies");
 
-        
+
         public IActionResult LeatherHandbags() => CategoryView("LeatherHandbags", "Handbags");
         public IActionResult LeatherWallets() => CategoryView("Wallets", "Wallets");
         public IActionResult LeatherBelts() => CategoryView("Belts", "Belts");
         public IActionResult LeatherKeychains() => CategoryView("LeatherKeychains", "Keychains");
         public IActionResult LeatherJournals() => CategoryView("Journals", "Journals");
 
-        
+
         public IActionResult WoodPhotoFrames() => CategoryView("PhotoFrames", "Photo Frames");
         public IActionResult WoodNecklaces() => CategoryView("WoodNecklaces", "Necklaces");
         public IActionResult WoodToys() => CategoryView("WoodToys", "Toys");
@@ -51,42 +67,42 @@ namespace customerseller.Controllers
         public IActionResult WoodShowpieces() => CategoryView("WoodShowpieces", "Showpieces");
         public IActionResult WoodKeychains() => CategoryView("WoodKeychains", "Keychains");
 
-        
+
         public IActionResult ClayFlowerPots() => CategoryView("FlowerPots", "Flower Pots");
         public IActionResult ClayCoffeeMugs() => CategoryView("CoffeeMugs", "Coffee Mugs");
         public IActionResult ClayVases() => CategoryView("ClayVases", "Vases");
         public IActionResult ClayEarrings() => CategoryView("ClayEarrings", "Earrings");
         public IActionResult ClayFigurines() => CategoryView("ClayFigurines", "Figurines");
 
-        
+
         public IActionResult JewelsNecklaces() => CategoryView("Necklaces", "Necklaces");
         public IActionResult JewelsBracelets() => CategoryView("Bracelets", "Bracelets");
         public IActionResult JewelsRings() => CategoryView("Rings", "Rings");
         public IActionResult JewelsBangles() => CategoryView("Bangles", "Bangles");
         public IActionResult JewelsEarrings() => CategoryView("JewelEarrings", "Earrings");
 
-       
+
         public IActionResult PaperGreetingCards() => CategoryView("GreetingCards", "Greeting Cards");
         public IActionResult PaperGiftBoxes() => CategoryView("GiftBoxes", "Gift Boxes");
         public IActionResult PaperFlowers() => CategoryView("PaperFlowers", "Paper Flowers");
         public IActionResult PaperShowpieces() => CategoryView("PaperShowpieces", "Showpieces");
         public IActionResult PaperScrapbooks() => CategoryView("Scrapbooks", "Scrapbooks");
 
-       
+
         public IActionResult JuteBags() => CategoryView("JuteBags", "Bags");
         public IActionResult JuteBaskets() => CategoryView("Baskets", "Baskets");
         public IActionResult JuteTrays() => CategoryView("Trays", "Trays");
         public IActionResult JuteDriedBouquets() => CategoryView("DriedBouquets", "Dried Bouquets");
         public IActionResult JutePaintings() => CategoryView("Paintings", "Paintings");
 
-        
+
         public IActionResult ResinCoasters() => CategoryView("Coasters", "Coasters");
         public IActionResult ResinEarrings() => CategoryView("ResinEarrings", "Earrings");
         public IActionResult ResinKeychains() => CategoryView("ResinKeychains", "Keychains");
         public IActionResult ResinWallArt() => CategoryView("WallArt", "Wall Art");
         public IActionResult ResinServingTrays() => CategoryView("ResinServingTrays", "Serving Trays");
 
-        
+
         public IActionResult MetalEarrings() => CategoryView("MetalEarrings", "Earrings");
         public IActionResult MetalVases() => CategoryView("MetalVases", "Vases");
         public IActionResult MetalFigurines() => CategoryView("MetalFigurines", "Figurines");
@@ -117,7 +133,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-       
+
         public IActionResult WoolYarn()
         {
             var products = _context.Products
@@ -129,7 +145,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-        
+
         public IActionResult Leather()
         {
             var products = _context.Products
@@ -142,7 +158,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-        
+
         public IActionResult Wood()
         {
             var products = _context.Products
@@ -155,7 +171,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-       
+
         public IActionResult Jewels()
         {
             var products = _context.Products
@@ -168,7 +184,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-       
+
         public IActionResult PaperCards()
         {
             var products = _context.Products
@@ -181,7 +197,7 @@ namespace customerseller.Controllers
             return View("CategoryPage", products);
         }
 
-     
+
         public IActionResult JuteNatural()
         {
             var products = _context.Products
@@ -219,9 +235,10 @@ namespace customerseller.Controllers
         private IActionResult CategoryView(string category, string title)
         {
             var products = _context.Products
+                .AsNoTracking()
                 .Where(p => p.Category == category
                        && p.VideoStatus == "Approved"
-                       && p.IsAdminApproved == true) 
+                       && p.IsAdminApproved == true)
                 .ToList();
             ViewBag.CategoryTitle = title;
             return View("CategoryPage", products);
@@ -230,16 +247,18 @@ namespace customerseller.Controllers
         public IActionResult AllProducts()
         {
             var products = _context.Products
-     .Where(p => p.VideoStatus == "Approved"
-            && p.IsAdminApproved == true)
-     .ToList();
+    .AsNoTracking()
+    .Where(p => p.VideoStatus == "Approved"
+           && p.IsAdminApproved == true)
+    .ToList();
             ViewBag.CategoryTitle = "All Products";
             return View("CategoryPage", products);
         }
 
         public IActionResult Details(string id)
         {
-            var product = _context.Products.FirstOrDefault(p => p.Id == id);
+            var product = _context.Products.FirstOrDefault(p => p.Id == id
+                && p.VideoStatus == "Approved" && p.IsAdminApproved == true);
             if (product == null) return NotFound();
 
             var reviewCtrl = new customerseller.Controllers.seller.ReviewController(_config);
@@ -249,10 +268,56 @@ namespace customerseller.Controllers
             ViewBag.ShopName = shop?.ShopName ?? product.SellerName ?? "Artisan Valley Seller";
 
             
+            var related = _context.Products
+                .AsNoTracking()
+                .Where(p => p.Id != id
+                         && p.Category == product.Category
+                         && p.VideoStatus == "Approved"
+                         && p.IsAdminApproved == true)
+                .Take(4)
+                .ToList();
+
+            if (related.Count < 4)
+            {
+                var existingIds = related.Select(r => r.Id).ToList();
+                var more = _context.Products
+                    .AsNoTracking()
+                    .Where(p => p.Id != id
+                             && !existingIds.Contains(p.Id)
+                             && p.VideoStatus == "Approved"
+                             && p.IsAdminApproved == true)
+                    .Take(4 - related.Count)
+                    .ToList();
+                related.AddRange(more);
+            }
+
+            ViewBag.RelatedProducts = related;
 
             return View("Details", product);
         }
 
+        [HttpGet]
+        public IActionResult SearchSuggestions(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
+                return Json(new List<object>());
+
+            var q = query.ToLower().Trim();
+
+            var matches = _context.Products
+                .Where(p => p.VideoStatus == "Approved" && p.IsAdminApproved == true
+                       && p.Title.ToLower().Contains(q))
+                .Take(6)
+                .Select(p => new
+                {
+                    name = p.Title,
+                    url = "/Products/Details/" + p.Id,
+                    category = p.Category
+                })
+                .ToList();
+
+            return Json(matches);
+        }
         public IActionResult Search(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -265,61 +330,61 @@ namespace customerseller.Controllers
 
             var categoryMap = new Dictionary<string, string>
     {
-       
+
         { "fabric", "FabricTextile" }, { "textile", "FabricTextile" },
         { "cushion", "FabricCushionCovers" }, { "cushion cover", "FabricCushionCovers" },
         { "kurta", "FabricKurtas" }, { "kurtas", "FabricKurtas" },
         { "dupatta", "FabricDupattas" }, { "dupattas", "FabricDupattas" },
         { "tote", "FabricToteBags" }, { "tote bag", "FabricToteBags" },
-       
+
         { "wool", "WoolYarn" }, { "yarn", "WoolYarn" },
         { "sweater", "WoolSweaters" }, { "sweaters", "WoolSweaters" },
         { "crochet", "WoolCrochetBags" }, { "crochet bag", "WoolCrochetBags" },
         { "storage basket", "WoolStorageBaskets" }, { "storage", "WoolStorageBaskets" },
         { "beanie", "WoolBeanies" }, { "beanies", "WoolBeanies" },
-       
+
         { "leather", "Leather" },
         { "handbag", "LeatherHandbags" }, { "handbags", "LeatherHandbags" },
         { "wallet", "LeatherWallets" }, { "wallets", "LeatherWallets" },
         { "belt", "LeatherBelts" }, { "belts", "LeatherBelts" },
         { "keychain", "LeatherKeychains" }, { "keychains", "LeatherKeychains" },
         { "journal", "LeatherJournals" }, { "journals", "LeatherJournals" },
-        
+
         { "wood", "Wood" },
         { "photo frame", "WoodPhotoFrames" }, { "frame", "WoodPhotoFrames" },
         { "toy", "WoodToys" }, { "toys", "WoodToys" },
         { "serving tray", "WoodServingTrays" }, { "tray", "WoodServingTrays" },
         { "showpiece", "WoodShowpieces" }, { "showpieces", "WoodShowpieces" },
-       
+
         { "clay", "ClayPottery" }, { "pottery", "ClayPottery" },
         { "flower pot", "ClayFlowerPots" }, { "pot", "ClayFlowerPots" },
         { "coffee mug", "ClayCoffeeMugs" }, { "mug", "ClayCoffeeMugs" },
         { "vase", "ClayVases" }, { "vases", "ClayVases" },
         { "figurine", "ClayFigurines" }, { "figurines", "ClayFigurines" },
-       
+
         { "jewel", "Jewels" }, { "jewelry", "Jewels" }, { "jewels", "Jewels" },
         { "necklace", "JewelsNecklaces" }, { "necklaces", "JewelsNecklaces" },
         { "bracelet", "JewelsBracelets" }, { "bracelets", "JewelsBracelets" },
         { "ring", "JewelsRings" }, { "rings", "JewelsRings" },
         { "bangle", "JewelsBangles" }, { "bangles", "JewelsBangles" },
         { "earring", "JewelsEarrings" }, { "earrings", "JewelsEarrings" },
-     
+
         { "paper", "PaperCards" },
         { "greeting card", "PaperGreetingCards" }, { "card", "PaperGreetingCards" },
         { "gift box", "PaperGiftBoxes" }, { "gift", "PaperGiftBoxes" },
         { "paper flower", "PaperFlowers" },
         { "scrapbook", "PaperScrapbooks" },
-       
+
         { "jute", "JuteNatural" }, { "natural", "JuteNatural" },
         { "bag", "JuteBags" }, { "bags", "JuteBags" },
         { "basket", "JuteBaskets" }, { "baskets", "JuteBaskets" },
         { "bouquet", "JuteDriedBouquets" },
         { "painting", "JutePaintings" }, { "paintings", "JutePaintings" },
-       
+
         { "resin", "ResinEpoxy" }, { "epoxy", "ResinEpoxy" },
         { "coaster", "ResinCoasters" }, { "coasters", "ResinCoasters" },
         { "wall art", "ResinWallArt" }, { "wall hanging", "ResinWallArt" },
-       
+
         { "metal", "MetalWire" }, { "wire", "MetalWire" },
         { "candle holder", "MetalCandleHolders" }, { "candle", "MetalCandleHolders" },
 
@@ -330,11 +395,11 @@ namespace customerseller.Controllers
 { "lakri", "Wood" }, { "lakdi", "Wood" },
     };
 
-            
+
             if (categoryMap.ContainsKey(query))
                 return RedirectToAction(categoryMap[query]);
 
-           
+
             foreach (var key in categoryMap.Keys)
             {
                 if (query.Contains(key) || key.Contains(query))
@@ -375,7 +440,21 @@ namespace customerseller.Controllers
         }
         public IActionResult Filter()
         {
-            var products = _context.Products.ToList();
+            var products = _context.Products
+                .Where(p => p.VideoStatus == "Approved" && p.IsAdminApproved == true)
+                .Select(p => new Product
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Price = p.Price,
+                    ImageUrl = p.ImageUrl,
+                    Category = p.Category,
+                    Sizes = p.Sizes,
+                    Color = p.Color,
+                    SellerEmail = p.SellerEmail,
+                    AdminApprovedAt = p.AdminApprovedAt
+                })
+                .ToList();
             return View(products);
         }
 
@@ -383,12 +462,12 @@ namespace customerseller.Controllers
         {
             var email = HttpContext.Session.GetString("UserEmail");
 
-            
+
             var products = _context.Products
                 .Where(p => p.SellerEmail == email)
                 .ToList();
 
-           
+
             using var con = new Microsoft.Data.SqlClient.SqlConnection(
                 _context.Database.GetConnectionString());
             con.Open();
@@ -421,34 +500,50 @@ namespace customerseller.Controllers
 
             return View("~/Views/seller/Product/AddProduct.cshtml");
         }
-
         [HttpPost]
         public async Task<IActionResult> AddProduct(Product product, IFormFile ImageFile, IFormFile VideoFile)
         {
-           
-            product.SellerEmail = HttpContext.Session.GetString("UserEmail");
+            var sellerEmail = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrEmpty(sellerEmail))
+            {
+                TempData["Error"] = "Session expired. Please login again.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            using (var checkCon = new Microsoft.Data.SqlClient.SqlConnection(_context.Database.GetConnectionString()))
+            {
+                checkCon.Open();
+                var approvalCmd = new Microsoft.Data.SqlClient.SqlCommand(
+                    "SELECT IsApproved FROM SellerShops WHERE SellerEmail = @email", checkCon);
+                approvalCmd.Parameters.AddWithValue("@email", sellerEmail);
+                var approvalResult = approvalCmd.ExecuteScalar();
+                bool shopApproved = approvalResult != null && approvalResult != DBNull.Value && (bool)approvalResult;
+
+                if (!shopApproved)
+                {
+                    TempData["Error"] = "Your shop is not approved yet. You cannot add products.";
+                    return RedirectToAction("AddProduct");
+                }
+            }
+
+            product.SellerEmail = sellerEmail;
             product.SellerName = HttpContext.Session.GetString("UserName");
             product.VideoStatus = "Pending";
             product.IsAdminApproved = false;
             product.Id = Guid.NewGuid().ToString();
 
-           
+
             if (ImageFile != null && ImageFile.Length > 0)
             {
-                
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
-                var imagePath = Path.Combine(Directory.GetCurrentDirectory(),
-                    "wwwroot", "images", fileName);
 
-               
-                Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images"));
+                var imagesDirAdd = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                Directory.CreateDirectory(imagesDirAdd);
+                using var imageStream = ImageFile.OpenReadStream();
+                product.ImageUrl = await SaveResizedImageAsync(imageStream, imagesDirAdd);
 
-                using var imageStream = new FileStream(imagePath, FileMode.Create);
-                await ImageFile.CopyToAsync(imageStream);
-                product.ImageUrl = "/images/" + fileName;
             }
 
-           
+
             if (VideoFile != null && VideoFile.Length > 0)
             {
                 var fileName = Guid.NewGuid().ToString() + Path.GetExtension(VideoFile.FileName);
@@ -461,7 +556,7 @@ namespace customerseller.Controllers
                 await VideoFile.CopyToAsync(videoStream);
                 product.VideoUrl = "/videos/" + fileName;
 
-               
+
                 using var con2 = new Microsoft.Data.SqlClient.SqlConnection(
                     _context.Database.GetConnectionString());
                 con2.Open();
@@ -482,7 +577,7 @@ namespace customerseller.Controllers
                     insertCmd.ExecuteNonQuery();
                 }
             }
-            
+
             var recentDuplicate = _context.Products.FirstOrDefault(p =>
                 p.SellerEmail == product.SellerEmail &&
                 p.Title == product.Title &&
@@ -494,8 +589,7 @@ namespace customerseller.Controllers
                 return RedirectToAction("SellerProduct");
             }
 
-            _context.Products.Add(product);
-            _context.SaveChanges();
+            
 
             _context.Products.Add(product);
             _context.SaveChanges();
@@ -508,7 +602,7 @@ namespace customerseller.Controllers
 
         }
 
-        
+
         public IActionResult CheckSubCategoryVideo(string subCategory)
         {
             var email = HttpContext.Session.GetString("UserEmail");
@@ -587,9 +681,9 @@ namespace customerseller.Controllers
 
             return Json(new { categories });
         }
-        
 
-        
+
+
 
         [HttpGet]
         public IActionResult EditProduct(string id)
@@ -674,7 +768,7 @@ namespace customerseller.Controllers
                 return RedirectToAction("UploadSubCategoryVideo", new { subcategory = subcategory });
             }
 
-           
+
             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(videoFile.FileName);
             var videoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "videos", fileName);
             Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "videos"));
@@ -684,7 +778,7 @@ namespace customerseller.Controllers
                 await videoFile.CopyToAsync(stream);
             }
 
-            
+
             using var con = new Microsoft.Data.SqlClient.SqlConnection(
                 _context.Database.GetConnectionString());
             con.Open();
@@ -696,7 +790,7 @@ namespace customerseller.Controllers
             cmd.Parameters.AddWithValue("@sub", subcategory);
             cmd.ExecuteNonQuery();
 
-            
+
             var resetProducts = new Microsoft.Data.SqlClient.SqlCommand(
                 @"UPDATE Products 
       SET VideoStatus = 'Pending', 
@@ -710,7 +804,7 @@ namespace customerseller.Controllers
             TempData["Success"] = "Video re-uploaded! Awaiting moderator review.";
             return RedirectToAction("Dashboard", "Dashboard");
         }
-       
+
 
         [HttpPost]
         public async Task<IActionResult> EditProduct(string id, [FromForm] Product model, IFormFile newImage)
@@ -721,29 +815,23 @@ namespace customerseller.Controllers
             if (product == null)
                 return RedirectToAction("SellerProduct");
 
-            
+
             product.Title = model.Title;
             product.Description = model.Description;
             product.Price = model.Price;
             product.Category = model.Category;
             product.Stock = model.Stock;
 
-           
+
             if (newImage != null && newImage.Length > 0)
             {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(newImage.FileName);
-                var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", fileName);
-                Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images"));
-
-                using (var stream = new FileStream(imagePath, FileMode.Create))
-                {
-                    await newImage.CopyToAsync(stream);
-                }
-
-                product.ImageUrl = "/images/" + fileName;
+                var imagesDirEdit = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images");
+                Directory.CreateDirectory(imagesDirEdit);
+                using var editStream = newImage.OpenReadStream();
+                product.ImageUrl = await SaveResizedImageAsync(editStream, imagesDirEdit);
             }
 
-            
+
             product.IsAdminApproved = false;
             product.AdminRejectionReason = null;
 
@@ -765,7 +853,7 @@ namespace customerseller.Controllers
         {
             var email = HttpContext.Session.GetString("UserEmail");
 
-           
+
             using var con = new Microsoft.Data.SqlClient.SqlConnection(
                 _context.Database.GetConnectionString());
             con.Open();
@@ -775,7 +863,7 @@ namespace customerseller.Controllers
             var result = cmd.ExecuteScalar()?.ToString() ?? "";
             var sellerSubCats = result.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
 
-           
+
             var grouped = CategoryMap.MainToSub
                 .Select(kv => new
                 {
@@ -842,7 +930,7 @@ namespace customerseller.Controllers
             ws.Cell(2, 6).Value = "S, M, L";
             ws.Cell(2, 7).Value = "This row is just an example, delete it";
 
-           
+
             var ws2 = wb.Worksheets.Add("ValidSubCategories");
             ws2.Cell(1, 1).Value = "SubCategory Code";
             ws2.Cell(1, 1).Style.Font.Bold = true;
@@ -855,7 +943,7 @@ namespace customerseller.Controllers
             ws2.Column(1).Width = 30;
             ws2.Visibility = ClosedXML.Excel.XLWorksheetVisibility.VeryHidden;
 
-          
+
             var dataRange = ws.Range("D2:D500");
             var validationSourceRange = $"ValidSubCategories!$A$2:$A${sellerSubCats.Count + 1}";
             dataRange.SetDataValidation().List(validationSourceRange, true);
@@ -878,7 +966,7 @@ namespace customerseller.Controllers
             if (excelFile == null || excelFile.Length == 0)
                 return Json(new { success = false, message = "Excel file select karein." });
 
-           
+
             using var con = new Microsoft.Data.SqlClient.SqlConnection(
                 _context.Database.GetConnectionString());
             con.Open();
@@ -906,7 +994,7 @@ namespace customerseller.Controllers
 
             var errors = new List<string>();
             var toInsert = new List<Product>();
-            var subCatsHandledThisBatch = new HashSet<string>(); 
+            var subCatsHandledThisBatch = new HashSet<string>();
 
             using var excelStream = excelFile.OpenReadStream();
             using var wb = new ClosedXML.Excel.XLWorkbook(excelStream);
@@ -930,9 +1018,9 @@ namespace customerseller.Controllers
             for (int row = 2; row <= lastRow; row++)
             {
                 var title = ws.Cell(row, 1).GetString().Trim();
-                if (string.IsNullOrWhiteSpace(title)) continue; 
+                if (string.IsNullOrWhiteSpace(title)) continue;
 
-                if (title.StartsWith("Example:")) continue; 
+                if (title.StartsWith("Example:")) continue;
 
                 var priceCell = ws.Cell(row, 2);
                 var stockCell = ws.Cell(row, 3);
@@ -941,7 +1029,7 @@ namespace customerseller.Controllers
                 var sizes = ws.Cell(row, 6).GetString().Trim();
                 var description = ws.Cell(row, 7).GetString().Trim();
 
-                
+
                 if (!decimal.TryParse(priceCell.GetString(), out var price) || price <= 0)
                 {
                     errors.Add($"Row {row}: Price is invalid.");
@@ -960,7 +1048,7 @@ namespace customerseller.Controllers
                     errors.Add($"Row {row}: '{subCategory}' is not a valid SubCategory for your shop.");
                     continue;
                 }
-                subCategory = matchedSubCat; 
+                subCategory = matchedSubCat;
                 if (!picturesByRow.ContainsKey(row))
                 {
                     errors.Add($"Row {row}: No picture was inserted in the Image column.");
@@ -983,7 +1071,7 @@ namespace customerseller.Controllers
                         continue;
                     }
 
-                   
+
                     var vFileName = Guid.NewGuid().ToString() + Path.GetExtension(matchedVideo.FileName);
                     var vPath = Path.Combine(videosDir, vFileName);
                     using (var vStream = new FileStream(vPath, FileMode.Create))
@@ -1003,9 +1091,11 @@ namespace customerseller.Controllers
                 }
 
                 var imgBytes = picturesByRow[row];
-                var imgFileName = Guid.NewGuid().ToString() + ".png";
-                var imgPath = Path.Combine(imagesDir, imgFileName);
-                await System.IO.File.WriteAllBytesAsync(imgPath, imgBytes);
+                string savedImageUrl;
+                using (var imgMs = new MemoryStream(imgBytes))
+                {
+                    savedImageUrl = await SaveResizedImageAsync(imgMs, imagesDir);
+                }
                 var product = new Product
                 {
                     Id = Guid.NewGuid().ToString(),
@@ -1016,7 +1106,7 @@ namespace customerseller.Controllers
                     Color = string.IsNullOrWhiteSpace(color) ? null : color,
                     Sizes = string.IsNullOrWhiteSpace(sizes) ? null : sizes,
                     Description = string.IsNullOrWhiteSpace(description) ? null : description,
-                    ImageUrl = "/images/" + imgFileName,
+                    ImageUrl = savedImageUrl,
                     VideoUrl = videoUrlForThisProduct,
                     VideoStatus = "Pending",
                     IsAdminApproved = false,

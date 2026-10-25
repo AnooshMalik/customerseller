@@ -46,14 +46,12 @@
         align-items: center;
         gap: 7px;
     }
-
     .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 18px;
-        margin-bottom: 25px;
-    }
-
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 25px;
+}
     .stat-card {
         background: #fff;
         padding: 22px;
@@ -458,9 +456,20 @@
         <div class="stat-card">
             <div class="stat-icon pink"><i class="fas fa-coins"></i></div>
             <div>
-                <div class="stat-number">Rs. @Model.NetRevenue</div>
+               <div class="stat-number">Rs. @Model.NetRevenue.ToString("N0")</div>
                 <div class="stat-label">Net Revenue</div>
-                <div class="stat-sub">↑ @Model.RevenueGrowth% this month</div>
+               @if (Model.RevenueGrowth > 0)
+{
+    <div class="stat-sub">↑ @Model.RevenueGrowth% this month</div>
+}
+else if (Model.RevenueGrowth < 0)
+{
+    <div class="stat-sub" style="color:#c62828;">↓ @Math.Abs(Model.RevenueGrowth)% this month</div>
+}
+else
+{
+    <div class="stat-sub" style="color:#888;">No change this month</div>
+}
             </div>
         </div>
         <div class="stat-card" style="border-left-color:#1565c0;">
@@ -484,18 +493,11 @@
                 </div>
             </div>
         </div>
-        <div class="stat-card" style="border-left-color:#2e7d32;">
-            <div class="stat-icon green"><i class="fas fa-users"></i></div>
-            <div>
-                <div class="stat-number">@Model.LiveVisitors</div>
-                <div class="stat-label">Live Visitors</div>
-                <div class="stat-sub"><span class="live-dot"></span> Active now</div>
-            </div>
-        </div>
+       
     </div>
 
     <div class="activity-card">
-        <div class="activity-header">Recent Sales Activity</div>
+        <div class="activity-header">Recent Activity</div>
         @if (Model.RecentSales != null && Model.RecentSales.Any())
         {
             @foreach (var sale in Model.RecentSales)
@@ -515,8 +517,9 @@
                     <span>All systems operational</span>
                 </div>
             </div>
-        }
+               }
     </div>
+</div>
 
 <div class="modal-overlay" id="confirmModal">
     <div class="modal-box">

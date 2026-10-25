@@ -263,6 +263,28 @@
             gap: 0;
         }
     }
+    .address-wrap { position: relative; margin-bottom: 8px; }
+.area-suggestions {
+    display: none;
+    position: absolute;
+    left: 0; right: 0; top: 100%;
+    background: #fff;
+    border: 1px solid #e0d3da;
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(160, 50, 95, 0.15);
+    z-index: 50;
+    max-height: 220px;
+    overflow-y: auto;
+}
+.area-suggestions.show { display: block; }
+.area-suggestions .sg-head {
+    font-size: 0.75rem; color: #999; padding: 6px 12px;
+    border-bottom: 1px solid #f0e8ec;
+}
+.area-suggestions .sg-item {
+    padding: 9px 12px; cursor: pointer; font-size: 0.95rem; color: #3b3542;
+}
+.area-suggestions .sg-item:hover { background: #f8eef3; color: #a64d79; }
 </style>
 
 <div class="checkout-wrapper">
@@ -282,33 +304,37 @@
             <input type="hidden" name="deliveryFee" id="deliveryFeeInput" value="0" />
 
             <div class="section-title">Contact</div>
-            <input type="text" asp-for="Email" id="phoneInput" placeholder="03XX-XXXXXXX" maxlength="12" />
-
-            <div class="section-title">Delivery</div>
+            <input type="text" asp-for="Phone" id="phoneInput" placeholder="03XX-XXXXXXX" maxlength="12" />
+                      <div class="section-title">Delivery</div>
+            <div style="background:#fff3cd; border:1.5px solid #ffc107; border-radius:8px; padding:9px 14px; margin-bottom:14px; font-size:0.88rem; color:#856404;">
+                📍 We currently deliver within <strong>Rawalpindi only</strong>.
+            </div>
             <select asp-for="Country" class="country-select">
                 <option value="Pakistan" selected>Pakistan, Rawalpindi</option>
             </select>
 
-            <div class="inline-inputs">
-                <input type="text" id="FirstName" name="FirstName" placeholder="First name">
-                <input type="text" id="LastName" name="LastName" placeholder="Last name">
-            </div>
-
+           <div class="inline-inputs">
+    <input type="text" id="FirstName" name="FirstName" placeholder="First name" maxlength="30" autocomplete="given-name">
+    <input type="text" id="LastName" name="LastName" placeholder="Last name" maxlength="30" autocomplete="family-name">
+</div>
            
-            
-            <textarea asp-for="Address" id="addressInput" rows="3"
-                      placeholder="Full address (e.g. Shop 5, behind KFC, Saddar, Rawalpindi)" required
-                      style="width:100%; padding:9px 12px; font-size:1rem; font-family:inherit; border:1px solid #e0e0e0; border-radius:4px; margin-bottom:8px; box-sizing:border-box; background:#faf8fa; resize:none; line-height:1.4;"></textarea>
-
-           
-            <small style="color:#888; font-size:0.82rem; display:block; margin-top:0; margin-bottom:12px;">
-                📍 Delivery charge will be auto-detected from your address
+                                  <label for="areaSelect" style="font-size:0.9rem; font-weight:600; display:block; margin-bottom:6px;">Select your area <span style="color:red">*</span></label>
+            <select id="areaSelect" name="selectedArea">
+                <option value="">-- Select your area --</option>
+            </select>
+            <small style="color:#888; font-size:0.82rem; display:block; margin-top:-8px; margin-bottom:12px;">
+                📍 Delivery charge is calculated from the area you select
             </small>
+
+            <textarea asp-for="Address" id="addressInput" rows="3"
+                      placeholder="House / shop no, street, landmark (e.g. House 5, Street 3, near KFC)" required
+                      style="width:100%; padding:9px 12px; font-size:1rem; font-family:inherit; border:1px solid #e0e0e0; border-radius:4px; margin-bottom:16px; box-sizing:border-box; background:#faf8fa; resize:none; line-height:1.4;"></textarea>         
+    
             <input type="hidden" asp-for="City" id="cityHidden" value="Rawalpindi" />
 
             <div id="areaNotFound" style="display:none; background:#fff3cd; border:1.5px solid #ffc107; border-radius:8px; padding:10px 16px; margin-bottom:16px; font-size:0.88rem; color:#856404;">
-                ⚠️ Area not recognized. We deliver within Rawalpindi only. Please include your area name in the address.
-            </div>
+                ⚠️ Please select your area from the list above. We deliver within Rawalpindi only.              
+   </div>
 
             <div class="section-title">Shipping method</div>
             <div class="shipping-box">
@@ -352,21 +378,56 @@
 
 @section Scripts {
     <script>
-        let deliveryFee = 0;      // final delivery charge actually charged (base + extra items)
-        let baseDeliveryFee = 0;  // flat charge for the detected area, before the extra-items surcharge
+        let deliveryFee = 0;      
+        let baseDeliveryFee = 0;  
         let subtotal = 0;
         let displayItems = [];
         let isSubmitting = false;
-        let isBuyNow = false; // true when this checkout came from "Buy Now" (single item, not the cart)
+        let isBuyNow = false; 
+        let allAreas = [];
 
-        // Rs. added per EXTRA product that comes from the SAME shop (i.e.
-        // it still ships in the same parcel as another item you ordered).
+        function getAreaSuggestions(addr) {
+            if (!addr || addr.length < 3) return [];
+            const words = normWords(addr);
+            const last = words[words.length - 1] || '';
+            return allAreas.filter(name => {
+                if (addressMatchesArea(addr, name)) return true;
+                const aw = normWords(name);
+                return last.length >= 3 && aw.some(w => w.startsWith(last));
+            }).slice(0, 6);
+        }
+
+        function showAreaSuggestions(addr) {
+            const box = document.getElementById('areaSuggestions');
+            const current = document.getElementById('areaSelect').value;
+            const list = getAreaSuggestions(addr).filter(n => n !== current);
+            if (!list.length) { box.classList.remove('show'); box.innerHTML = ''; return; }
+
+                       box.innerHTML = '<div class="sg-head">Did you mean this area?</div>' +
+                list.map(n => `<div class="sg-item" data-area="${escapeHtml(n)}">${escapeHtml(n)}</div>`).join('');
+            box.classList.add('show');
+
+            box.querySelectorAll('.sg-item').forEach(el => {
+                el.addEventListener('mousedown', function (e) {
+                    e.preventDefault();
+                    pickArea(this.getAttribute('data-area'));
+                });
+            });
+        }
+
+        function pickArea(name) {
+            const sel = document.getElementById('areaSelect');
+            const addrEl = document.getElementById('addressInput');
+            sel.value = name;
+            applyDeliveryZone(name);
+
+            if (!addressMatchesArea(addrEl.value, name)) {
+                addrEl.value = (addrEl.value.trim().replace(/[,\s]+$/, '') + ', ' + name).slice(0, 200);
+            }
+            document.getElementById('areaSuggestions').classList.remove('show');
+        }        
         const SAME_SHOP_EXTRA_CHARGE = 20;
 
-        // Groups the cart items by shop. Two products only "combine" into
-        // one cheaper parcel if they're from the same seller; items with no
-        // shopId (older cart entries) are each treated as their own single-
-        // item shop so they never get wrongly merged with someone else's.
         function groupItemsByShop(items) {
             const groups = new Map();
             items.forEach(item => {
@@ -377,15 +438,14 @@
             return Array.from(groups.values());
         }
 
-        // Recomputes the final delivery fee: each shop's parcel costs the
-        // area's base delivery fee, plus Rs.20 for every EXTRA product from
-        // that same shop. Different shops' parcels are simply added together
-        // (each priced as if it were its own single-product order).
         function recalcDeliveryFee() {
-            if (baseDeliveryFee <= 0 || displayItems.length === 0) {
-                deliveryFee = 0;
-                return;
-            }
+                   if (baseDeliveryFee <= 0 || displayItems.length === 0) {
+            deliveryFee = 0;
+            document.getElementById('deliveryFeeInput').value = 0;
+            document.getElementById('shippingDisplay').textContent = 'Select your area';
+            return;
+        }
+            
 
             const shopGroups = groupItemsByShop(displayItems);
             let total = 0;
@@ -402,9 +462,20 @@
 
             document.getElementById('shippingDisplay').textContent = 'Rs. ' + deliveryFee.toLocaleString();
         }
-
+                function escapeHtml(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
         function showCustomModal(icon, title, msg, callback) {
-            document.getElementById('customModalIcon').textContent = icon;
+                        const iconMap = {
+                Warning: '\u26A0\uFE0F',
+                Pin: '\uD83D\uDCCD',
+                Cart: '\uD83D\uDED2',
+                Block: '\uD83D\uDEAB',
+                Error: '\u274C'
+            };
+            document.getElementById('customModalIcon').textContent = iconMap[icon] || icon;
             document.getElementById('customModalTitle').textContent = title;
             document.getElementById('customModalMsg').textContent = msg;
             document.getElementById('customModal').classList.add('show');
@@ -458,10 +529,43 @@
             if (typeof updateCartCount === 'function') updateCartCount();
 
             const payBtn = document.getElementById('payBtn');
-            if (payBtn) payBtn.disabled = displayItems.length === 0;
+                       if (payBtn) payBtn.disabled = displayItems.length === 0;
 
             updateSummary();
         }
+
+        // Increments/decrements one line item's quantity by delta. Hitting
+        // zero removes the item entirely (same as clicking the x button).
+        function changeSummaryQty(index, delta) {
+            if (index < 0 || index >= displayItems.length) return;
+
+            let newQty = (parseInt(displayItems[index].qty) || 1) + delta;
+            if (newQty <= 0) {
+                removeItem(index);
+                return;
+            }
+            displayItems[index].qty = newQty;
+
+            subtotal = 0;
+            displayItems.forEach(item => {
+                subtotal += (parseFloat(item.price) || 0) * (parseInt(item.qty) || 1);
+            });
+
+            if (isBuyNow) {
+                localStorage.setItem('buyNowItem', JSON.stringify(displayItems[0]));
+            } else {
+                localStorage.setItem('cart', JSON.stringify(displayItems));
+            }
+
+            syncCartDataInput();
+            recalcDeliveryFee();
+
+            if (typeof updateCartCount === 'function') updateCartCount();
+
+            updateSummary();
+        }
+
+        
 
         function updateSummary() {
             const summaryDiv = document.getElementById('orderSummary');
@@ -473,14 +577,21 @@
                 return;
             }
 
-            displayItems.forEach((item, index) => {
+                       displayItems.forEach((item, index) => {
                 let price = parseFloat(item.price) || 0;
                 let qty = parseInt(item.qty) || 1;
                 html += `
                             <div style="display:flex; justify-content:space-between; margin-bottom:15px; align-items:center;">
                                 <div style="display:flex; align-items:center; gap:10px;">
                                     <img src="${item.img}" style="width:50px; border-radius:5px; object-fit:cover;">
-                                    <div style="font-weight:600;">${item.title} (x${qty})</div>
+                                    <div>
+<div style="font-weight:600;">${escapeHtml(item.title)}</div>
+                                        <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                                            <button type="button" class="qty-btn-summary" data-index="${index}" data-delta="-1" style="width:24px;height:24px;border:none;border-radius:4px;background:#f2e9ef;color:#a64d79;font-weight:bold;cursor:pointer;">-</button>
+                                            <span>${qty}</span>
+                                            <button type="button" class="qty-btn-summary" data-index="${index}" data-delta="1" style="width:24px;height:24px;border:none;border-radius:4px;background:#f2e9ef;color:#a64d79;font-weight:bold;cursor:pointer;">+</button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <div style="color:#a64d79; font-weight:bold;">Rs.${(price * qty).toLocaleString()}</div>
@@ -504,14 +615,21 @@
                         </div>`;
             summaryDiv.innerHTML = html;
 
-            summaryDiv.querySelectorAll('.remove-item-btn').forEach(btn => {
+                     summaryDiv.querySelectorAll('.remove-item-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     removeItem(parseInt(this.getAttribute('data-index'), 10));
+                });
+            });
+
+            summaryDiv.querySelectorAll('.qty-btn-summary').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    changeSummaryQty(parseInt(this.getAttribute('data-index'), 10), parseInt(this.getAttribute('data-delta'), 10));
                 });
             });
         }
 
         async function detectAreaFromAddress(address) {
+                        if (document.getElementById('areaSelect') && document.getElementById('areaSelect').value) return;
             if (address.length < 4) return;
             const words = address.split(/[\s,]+/).filter(w => w.length > 2);
             for (let word of words) {
@@ -547,6 +665,65 @@
                 console.error('Delivery charge error:', err);
             }
         }
+                // ---- Area match with small spelling mistakes allowed ----
+        function normWords(s) {
+            return (s || '').toLowerCase()
+                .replace(/([a-z])(\d)/g, '$1 $2')
+                .replace(/(\d)([a-z])/g, '$1 $2')
+                .split(/[^a-z0-9]+/)
+                .filter(Boolean);
+        }
+
+        // Edit distance (ek letter ghalat/kam/zyada, ya do letters ulte = 1 ghalti)
+        function editDistance(a, b) {
+            const d = [];
+            for (let i = 0; i <= a.length; i++) d[i] = [i];
+            for (let j = 1; j <= b.length; j++) d[0][j] = j;
+            for (let i = 1; i <= a.length; i++) {
+                for (let j = 1; j <= b.length; j++) {
+                    const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+                    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + cost);
+                    if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+                        d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+                    }
+                }
+            }
+            return d[a.length][b.length];
+        }
+
+        function wordMatches(areaWord, addrWords) {
+            if (/^\d+$/.test(areaWord)) return addrWords.includes(areaWord); // numbers bilkul sahi hon
+            const maxErr = areaWord.length <= 3 ? 0 : (areaWord.length <= 6 ? 1 : 2);
+            return addrWords.some(w => !/^\d+$/.test(w) && editDistance(areaWord, w) <= maxErr);
+        }
+
+               function addressMatchesArea(addr, area) {
+            const addrWords = normWords(addr);
+            const areaWords = normWords(area).filter(w => w.length > 1 || /\d/.test(w));
+            if (!areaWords.length) return true;
+
+            // "bahriatown" jaisa jura hua likha ho to bhi theek
+            if (addrWords.join('').includes(areaWords.join(''))) return true;
+
+            // 1) area ke saare numbers exact hon (Phase 1 != Phase 2)
+            const numbers = areaWords.filter(w => /^\d+$/.test(w));
+            if (!numbers.every(n => addrWords.includes(n))) return false;
+
+            // 2) sab se ahem (sab se lamba) lafz thori ghalti ke saath match ho
+            const letters = areaWords.filter(w => !/^\d+$/.test(w));
+            if (!letters.length) return true;
+            const keyWord = letters.slice().sort((a, b) => b.length - a.length)[0];
+            return wordMatches(keyWord, addrWords);
+        }
+                function isValidAddress(a) {
+            if (a.length < 10 || a.length > 200) return false;
+            if (!/^[A-Za-z0-9\s,.\-\/#]+$/.test(a)) return false;
+            if (/[^A-Za-z0-9\s]{2,}/.test(a)) return false;
+            if ((a.match(/[A-Za-z]/g) || []).length < 6) return false;
+            if (a.split(/\s+/).filter(w => /[A-Za-z0-9]/.test(w)).length < 3) return false;
+            if (/(.)\1{3,}/.test(a)) return false;
+            return true;
+        }
 
         async function submitOrder(event) {
             event.preventDefault();
@@ -574,9 +751,39 @@
                 return;
             }
 
+
+            const fn = (document.getElementById('FirstName').value || '').trim();
+const ln = (document.getElementById('LastName').value || '').trim();
+if (fn.length < 2 || ln.length < 2) {
+    showCustomModal('Warning', 'Invalid Name',
+        'Please enter your first and last name (letters only, at least 2 characters).');
+    isSubmitting = false;
+    payBtn.disabled = false;
+    payBtn.textContent = 'Complete Order';
+    return;
+}
+
+const addr = addressInput.value.trim();
+        if (!isValidAddress(addr)) {
+    showCustomModal('Warning', 'Invalid Address',
+                      'Please enter a full address with house/shop, street and area (e.g. House 12, Street 4, Saddar). Avoid repeated symbols.');
+    isSubmitting = false;
+    payBtn.disabled = false;
+    payBtn.textContent = 'Complete Order';
+    return;
+}
+        const selArea = (document.getElementById('areaSelect').value || '').trim();
+                                      if (!selArea) {
+                showCustomModal('Pin', 'Select Area', 'Please select your delivery area from the list.');
+                isSubmitting = false;
+                payBtn.disabled = false;
+                payBtn.textContent = 'Complete Order';
+                return;
+            }
+
             if (deliveryFee === 0) {
                 showCustomModal('Pin', 'Area Not Detected',
-                    'Please include your area name in the address (e.g. Saddar, DHA Phase 1, Westridge).');
+                                    'Please select your delivery area from the list.');   
                 isSubmitting = false;
                 payBtn.disabled = false;
                 payBtn.textContent = 'Complete Order';
@@ -593,15 +800,16 @@
             }
 
             const formData = new FormData();
-            formData.append('Email', phoneInput.value);
-            formData.append('FirstName', document.querySelector('[name="FirstName"]')?.value || '');
-            formData.append('LastName', document.querySelector('[name="LastName"]')?.value || '');
-            formData.append('Address', addressInput.value);
+           formData.append('Phone', phoneInput.value);
+                 formData.append('FirstName', fn);
+        formData.append('LastName', ln);
+        formData.append('Address', addr);
             formData.append('City', 'Rawalpindi');
             formData.append('Country', 'Pakistan');
             formData.append('PaymentMethod', 'COD');
             formData.append('cartData', cartDataInput.value);
-            formData.append('deliveryFee', deliveryFee.toString());
+                       formData.append('deliveryFee', deliveryFee.toString());
+            formData.append('selectedArea', document.getElementById('areaSelect')?.value || '');
 
             try {
                 const response = await fetch('/Cart/ProcessOrder', {
@@ -644,6 +852,31 @@
             const addressInput = document.getElementById('addressInput');
             const phoneInput = document.getElementById('phoneInput');
             const payBtn = document.getElementById('payBtn');
+                                  const areaSelect = document.getElementById('areaSelect');
+            if (areaSelect) {
+                fetch('/Cart/GetAreaList')
+                    .then(r => r.json())
+                    .then(list => {
+                        list.forEach(a => {
+                            allAreas.push(a.name);
+                            const opt = document.createElement('option');
+                            opt.value = a.name;
+                            opt.textContent = a.name;
+                            areaSelect.appendChild(opt);
+                        });
+                    })
+                    .catch(err => console.error('Area list error:', err));
+                areaSelect.addEventListener('change', function () {
+                    if (this.value) {
+                        applyDeliveryZone(this.value);
+                    } else {
+                        baseDeliveryFee = 0;
+                        deliveryFee = 0;
+                        document.getElementById('shippingDisplay').textContent = 'Select your area';
+                        updateSummary();
+                    }
+                });
+            }
 
             let buyNowData = localStorage.getItem('buyNowItem');
             let cartData = localStorage.getItem('cart');
@@ -683,15 +916,24 @@
                 });
             }
 
-            let detectTimeout;
-            if (addressInput) {
-                addressInput.addEventListener('input', function() {
-                    clearTimeout(detectTimeout);
-                    detectTimeout = setTimeout(() => {
-                        detectAreaFromAddress(this.value.trim());
-                    }, 600);
-                });
-            }
+            ['FirstName', 'LastName'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', function () {
+            this.value = this.value.replace(/[^A-Za-z\s]/g, '');
+        });
+    }
+});
+
+if (addressInput) {
+    addressInput.setAttribute('maxlength', '200');
+    addressInput.addEventListener('input', function () {
+               this.value = this.value
+            .replace(/[^A-Za-z0-9\s,.\-\/#]/g, '')
+            .replace(/([^A-Za-z0-9\s])[^A-Za-z0-9\s]+/g, '$1')
+            .replace(/(.)\1{3,}/g, '$1$1$1');
+    });
+}
 
             if (payBtn) {
                 payBtn.addEventListener('click', submitOrder);

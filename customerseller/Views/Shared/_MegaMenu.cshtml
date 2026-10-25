@@ -175,7 +175,7 @@
 
  
   .mega-col {
-  padding: 0 8px;
+  padding: 0 14px;
   border-right: 1px solid #f0f0f0;
   min-width: 0;           
   height: auto;
@@ -185,13 +185,13 @@
   .mega-col:first-child { padding-left: 0; }
   .mega-col:last-child  { padding-right: 0; border-right: none; }
  
-  .mega-heading {
-    font-size: 0.72rem !important;
+    .mega-heading {
+    font-size: 0.88rem !important;
     font-weight: 700;
     color: #222;
     text-transform: capitalize;
-    margin: 0 0 4px !important;
-    padding: 0 0 3px !important;
+    margin: 0 0 8px !important;
+    padding: 0 0 6px !important;
     border-bottom: 2px solid #a64d79;
     white-space: normal;
     word-break: break-word;
@@ -231,10 +231,9 @@
     box-shadow: none !important;
   }
 
-  
-.mega-panel .mega-link {
+  .mega-panel .mega-link {
   display: block !important;
-  font-size: 0.72rem !important;
+  font-size: 0.84rem !important;
   font-weight: 400 !important;
   color: #555 !important;
   text-decoration: none !important;
@@ -242,9 +241,8 @@
   margin: 0 !important;
   white-space: normal !important;
   word-break: break-word !important;
-  line-height: 1.75 !important;
+  line-height: 2.3 !important;
 }
-
 .mega-panel .mega-link:hover {
   color: #a64d79 !important;
 }
@@ -360,50 +358,7 @@
       document.body.classList.remove('menu-open');
     }
   });
-      megaItem.addEventListener('mouseenter', () => {
-      clearTimeout(hideTimer);
-
-      const navbarEl = megaItem.closest('header') || megaItem.closest('nav');
-      if (navbarEl) {
-        const rect = navbarEl.getBoundingClientRect();
-        megaPanel.style.top    = rect.bottom + 'px';
-        megaPanel.style.position = 'fixed';
-        megaPanel.style.left   = '0';
-        megaPanel.style.right  = '0';
-        megaPanel.style.width  = '100%';
-        megaPanel.style.height = 'auto';
-      }
-
-      megaPanel.classList.add('active');
-      document.body.classList.add('menu-open');
-      document.documentElement.classList.add('menu-open');   
-    });
-
-    megaItem.addEventListener('mouseleave', () => {
-      hideTimer = setTimeout(() => {
-        megaPanel.classList.remove('active');
-        document.body.classList.remove('menu-open');
-        document.documentElement.classList.remove('menu-open');   
-      }, 150);
-    });
-
-    megaPanel.addEventListener('mouseenter', () => clearTimeout(hideTimer));
-    megaPanel.addEventListener('mouseleave', () => {
-      hideTimer = setTimeout(() => {
-        megaPanel.classList.remove('active');
-        document.body.classList.remove('menu-open');
-        document.documentElement.classList.remove('menu-open');   
-      }, 150);
-    });
-
-    megaNavLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      megaPanel.classList.toggle('active');
-      const isActive = megaPanel.classList.contains('active');
-      document.body.classList.toggle('menu-open', isActive);
-      document.documentElement.classList.toggle('menu-open', isActive);   
-    });
-
+     
     document.addEventListener('click', (e) => {
       if (!megaItem.contains(e.target)) {
         megaPanel.classList.remove('active');

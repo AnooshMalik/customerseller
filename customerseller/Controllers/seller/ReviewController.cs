@@ -19,11 +19,47 @@ namespace customerseller.Controllers.seller
         [HttpPost]
         public IActionResult Submit(Review review)
         {
+            var customerEmail = HttpContext.Session.GetString("UserEmail");
+            var sessionName = HttpContext.Session.GetString("UserName");
+
+            if (string.IsNullOrWhiteSpace(review.ProductId))
+            {
+                TempData["ReviewError"] = "Invalid product.";
+                return RedirectToAction("Index", "Home");
+            }
+
+            string backUrl = "/Products/Details/" + review.ProductId + "#reviews";
+
+            if (string.IsNullOrEmpty(customerEmail))
+            {
+                TempData["ReviewError"] = "Please login to submit a review.";
+                return Redirect(backUrl);
+            }
+
+            if (review.Rating < 1 || review.Rating > 5)
+            {
+                TempData["ReviewError"] = "Rating must be between 1 and 5.";
+                return Redirect(backUrl);
+            }
+
             using (var con = new SqlConnection(_conn))
             {
                 con.Open();
 
-               
+                var purchaseCheckCmd = new SqlCommand(@"
+                    SELECT COUNT(*) FROM Orders o
+                    INNER JOIN CartItems ci ON ci.OrderId = o.OrderId
+                    WHERE o.Email = @email AND ci.ProductId = @pid AND o.Status = 'Delivered'", con);
+                purchaseCheckCmd.Parameters.AddWithValue("@email", customerEmail);
+                purchaseCheckCmd.Parameters.AddWithValue("@pid", review.ProductId);
+                int purchaseCount = (int)purchaseCheckCmd.ExecuteScalar();
+
+                if (purchaseCount == 0)
+                {
+                    TempData["ReviewError"] = "You can only review products you have purchased and received.";
+                    return Redirect(backUrl);
+                }
+
                 var sellerCmd = new SqlCommand(
                     "SELECT SellerEmail FROM Products WHERE Id = @pid", con);
                 sellerCmd.Parameters.AddWithValue("@pid", review.ProductId ?? "");
@@ -34,16 +70,16 @@ namespace customerseller.Controllers.seller
                     con);
 
                 cmd.Parameters.AddWithValue("@pid", review.ProductId ?? "");
-                cmd.Parameters.AddWithValue("@user", review.UserName ?? "");
+                cmd.Parameters.AddWithValue("@user", sessionName ?? "Customer");
                 cmd.Parameters.AddWithValue("@rating", review.Rating);
                 cmd.Parameters.AddWithValue("@comment", review.Comment ?? "");
                 cmd.Parameters.AddWithValue("@created", DateTime.Now);
                 cmd.Parameters.AddWithValue("@sellerEmail", sellerEmail);
                 cmd.ExecuteNonQuery();
             }
-            return RedirectToAction("Details", "Products", new { id = review.ProductId });
-        }
 
+            return Redirect(backUrl);
+        }
         public List<Review> GetByProduct(string productId)
         {
             var list = new List<Review>();

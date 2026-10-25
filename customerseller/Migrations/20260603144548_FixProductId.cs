@@ -12,19 +12,19 @@ namespace customerseller.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
-                name: "CourierAssignedAt",
+                name: "RiderAssignedAt",
                 table: "Orders",
                 type: "datetime2",
                 nullable: true);
 
             migrationBuilder.AddColumn<int>(
-                name: "CourierCompanyId",
+                name: "RiderCompanyId",
                 table: "Orders",
                 type: "int",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
-                name: "CourierStatus",
+                name: "RiderStatus",
                 table: "Orders",
                 type: "nvarchar(max)",
                 nullable: false,
@@ -44,7 +44,7 @@ namespace customerseller.Migrations
                 defaultValue: "");
 
             migrationBuilder.CreateTable(
-                name: "CourierCompanies",
+                name: "",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -57,7 +57,7 @@ namespace customerseller.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CourierCompanies", x => x.Id);
+                    table.PrimaryKey("PK_", x => x.Id);
                 });
         }
 
@@ -65,18 +65,18 @@ namespace customerseller.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CourierCompanies");
+                name: "");
 
             migrationBuilder.DropColumn(
-                name: "CourierAssignedAt",
+                name: "RiderAssignedAt",
                 table: "Orders");
 
             migrationBuilder.DropColumn(
-                name: "CourierCompanyId",
+                name: "RiderCompanyId",
                 table: "Orders");
 
             migrationBuilder.DropColumn(
-                name: "CourierStatus",
+                name: "RiderStatus",
                 table: "Orders");
 
             migrationBuilder.DropColumn(

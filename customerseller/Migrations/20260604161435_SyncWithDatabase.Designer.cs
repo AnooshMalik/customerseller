@@ -91,7 +91,7 @@ namespace customerseller.Migrations
                     b.ToTable("CartItems");
                 });
 
-            modelBuilder.Entity("customerseller.Models.CourierCompany", b =>
+            modelBuilder.Entity("customerseller.Models.RiderCompany", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -120,7 +120,7 @@ namespace customerseller.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CourierCompanies");
+                    b.ToTable("");
                 });
 
             modelBuilder.Entity("customerseller.Models.ModeratorSetting", b =>
@@ -170,13 +170,13 @@ namespace customerseller.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("CourierAssignedAt")
+                    b.Property<DateTime?>("RiderAssignedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("CourierCompanyId")
+                    b.Property<int?>("RiderCompanyId")
                         .HasColumnType("int");
 
-                    b.Property<string>("CourierStatus")
+                    b.Property<string>("RiderStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

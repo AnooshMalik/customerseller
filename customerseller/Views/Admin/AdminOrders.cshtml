@@ -169,7 +169,7 @@
     <div class="filter-bar">
         <div class="filter-btns">
             <button class="filter-btn active" onclick="filterTable('all', this)">All</button>
-            <button class="filter-btn" onclick="filterTable('Placed', this)">Placed</button>
+                       <button class="filter-btn" onclick="filterTable('Processing', this)">Processing</button>
             <button class="filter-btn" onclick="filterTable('Shipped', this)">Shipped</button>
             <button class="filter-btn" onclick="filterTable('Delivered', this)">Delivered</button>
             <button class="filter-btn" onclick="filterTable('Cancelled', this)">Cancelled</button>
@@ -242,11 +242,12 @@
                             </td>
                             <td>
                                 @{
-                                    var statusClass = o.Status switch
+                                                                       var statusClass = o.Status switch
                                     {
-                                        "Placed" => "badge-placed",
+                                        "Processing" => "badge-placed",
                                         "Shipped" => "badge-shipped",
                                         "Delivered" => "badge-delivered",
+                                        "Delivered - Payment Issue" => "badge-cancelled",
                                         "Cancelled" => "badge-cancelled",
                                         _ => "badge-pending"
                                     };

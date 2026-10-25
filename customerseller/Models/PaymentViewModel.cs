@@ -16,5 +16,6 @@ namespace customerseller.Models
         public decimal InTransitCash { get; set; }
         public decimal TotalCODSales { get; set; }
         public List<Payments> Transactions { get; set; }
+        public decimal PendingCash { get; set; }
     }
 }

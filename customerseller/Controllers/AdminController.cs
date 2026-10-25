@@ -3,22 +3,21 @@ using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Net.WebRequestMethods;
+
 
 namespace customerseller.Controllers
 {
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
-       
+        private readonly IConfiguration _configuration;
 
-        public AdminController(ApplicationDbContext context)
+        public AdminController(ApplicationDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
 
-        
         [HttpGet]
         public IActionResult Login()
         {
@@ -31,10 +30,25 @@ namespace customerseller.Controllers
         [HttpPost]
         public IActionResult Login(string email, string password)
         {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrEmpty(password))
+            {
+                TempData["AdminError"] = "Invalid email or password.";
+                return View();
+            }
+
             var admin = _context.AdminSettings.FirstOrDefault(a =>
                 a.Email.ToLower() == email.ToLower());
 
-            if (admin != null && admin.Password == password)
+            bool valid = false;
+            try
+            {
+                valid = admin != null
+                        && !string.IsNullOrEmpty(admin.Password)
+                        && BCrypt.Net.BCrypt.Verify(password, admin.Password);
+            }
+            catch (BCrypt.Net.SaltParseException) { }
+
+            if (valid)
             {
                 var otp = new Random().Next(100000, 999999).ToString();
                 HttpContext.Session.SetString("AdminOtp", otp);
@@ -60,8 +74,7 @@ namespace customerseller.Controllers
                     using var client = new MailKit.Net.Smtp.SmtpClient();
                     client.Connect("smtp.gmail.com", 587,
                         MailKit.Security.SecureSocketOptions.StartTls);
-                    client.Authenticate("artisanvalley.store@gmail.com",
-                        "esphtmdtnnptlhuo");
+                    client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
                     client.Send(message);
                     client.Disconnect(true);
                 }
@@ -108,9 +121,13 @@ namespace customerseller.Controllers
 
             if (otp == savedOtp)
             {
+                var pendingEmail = HttpContext.Session.GetString("AdminEmailPending");
+                if (string.IsNullOrEmpty(pendingEmail))
+                    return RedirectToAction("Login");
+
                 HttpContext.Session.Clear();
-               
-                HttpContext.Session.SetString("AdminEmail", "artisanvalley.store@gmail.com");
+
+                HttpContext.Session.SetString("AdminEmail", pendingEmail);
                 HttpContext.Session.SetString("AdminRole", "Admin");
 
                 
@@ -157,7 +174,7 @@ namespace customerseller.Controllers
 
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
+                client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
                 client.Send(message);
                 client.Disconnect(true);
             }
@@ -195,16 +212,52 @@ namespace customerseller.Controllers
                 .Where(o => o.Status == "Delivered")
                 .Sum(o => (decimal?)o.Total) ?? 0;
 
-            var recentOrders = _context.Orders
+            var since = DateTime.Now.AddDays(-7);
+
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+
+            var orderItems = _context.Orders
+                .Where(o => o.Status != "Cancelled")
                 .OrderByDescending(o => o.OrderDate)
                 .Take(5)
+                .ToList()
+                .Select(o => new
+                {
+                    When = o.OrderDate,
+                    Item = new customerseller.Models.SaleActivity
+                    {
+                        Detail = $"🛒 Order #{o.OrderId} — {o.CustomerName ?? (o.FirstName + " " + o.LastName)} · {o.Status} · {o.OrderDate.ToString("dd MMM, h:mm tt", inv)}",
+                        Amount = $"Rs. {o.Total:N0}"
+                    }
+                });
+
+            var complaintItems = _context.Complaints
+                .Where(c => c.Status != "Fake")
+                .OrderByDescending(c => c.CreatedAt)
+                .Take(5)
+                .ToList()
+                .Select(c => new
+                {
+                    When = c.CreatedAt,
+                    Item = new customerseller.Models.SaleActivity
+                    {
+                        Detail = $"🚩 Complaint {c.TicketNumber} — {c.CustomerName} · {c.Status} · {c.CreatedAt.ToString("dd MMM, h:mm tt", inv)}",
+                        Amount = c.Status == "Resolved" ? "Resolved" : "Needs attention"
+                    }
+                });
+
+            var recentSales = orderItems
+                .Concat(complaintItems)
+                .OrderByDescending(x => x.When)
+                .Take(8)
+                .Select(x => x.Item)
                 .ToList();
 
-            var recentSales = recentOrders.Select(o => new customerseller.Models.SaleActivity
-            {
-                Detail = $"Order #{o.OrderId} — {o.CustomerName ?? (o.FirstName + " " + o.LastName)}",
-                Amount = $"Rs. {o.Total:N0}"
-            }).ToList();
+            double avgRating = 0;
+            var ratingCmd = new Microsoft.Data.SqlClient.SqlCommand("SELECT AVG(CAST(Rating AS FLOAT)) FROM Reviews", con);
+            var ratingResult = ratingCmd.ExecuteScalar();
+            if (ratingResult != null && ratingResult != DBNull.Value)
+                avgRating = Convert.ToDouble(ratingResult);
 
             var model = new customerseller.Models.DashboardViewModel
             {
@@ -215,7 +268,7 @@ namespace customerseller.Controllers
                 RevenueGrowth = 0,
                 TotalOrders = totalOrders,
                 PendingOrders = pendingOrders,
-                Rating = 0,
+                Rating = Math.Round(avgRating, 1),
                 LiveVisitors = 0,
                 RecentSales = recentSales
             };
@@ -264,7 +317,6 @@ namespace customerseller.Controllers
             HttpContext.Session.Remove("AdminRole");
             return RedirectToAction("Login");
         }
-
         
         public IActionResult GetPendingProducts()
         {
@@ -353,8 +405,8 @@ namespace customerseller.Controllers
 
             var stats = new
             {
-                users = _context.Users.Count(u => u.Role == "Buyer"),
-                sellers = _context.Users.Count(u => u.Role == "Seller"),
+                users = _context.Users.Count(u => u.Role == "Customer"),
+                sellers = _context.Users.Count(u => u.Role == "Seller" || u.IsSeller),
                 products = _context.Products.Count(),
                 orders = _context.Orders.Count()
             };
@@ -368,8 +420,8 @@ namespace customerseller.Controllers
                 return Json(new { error = "Unauthorized" });
 
             var users = _context.Users
-                .Where(u => u.Role == "Buyer")
-                .Select(u => new {
+    .Where(u => u.Role == "Customer")
+    .Select(u => new {
                     u.Id,
                     u.FirstName,
                     u.LastName,
@@ -419,13 +471,13 @@ namespace customerseller.Controllers
                 return Json(new { error = "Unauthorized" });
 
             var orders = _context.Orders
-    .Select(o => new {
-        o.OrderId,
-        o.CustomerName,
-        Total = o.Price,
-        Status = o.Status,
-        OrderDate = o.OrderDate
-    }).ToList();
+.Select(o => new {
+o.OrderId,
+o.CustomerName,
+Total = o.Total,
+Status = o.Status,
+OrderDate = o.OrderDate
+}).ToList();
             return Json(orders);
         }
         [HttpPost]
@@ -519,7 +571,7 @@ namespace customerseller.Controllers
                 };
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
+                client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
                 client.Send(message);
                 client.Disconnect(true);
             }
@@ -561,8 +613,12 @@ namespace customerseller.Controllers
                 TempData["ResetError"] = "Invalid or expired reset link.";
                 return RedirectToAction("Login");
             }
-
-            admin.Password = newPassword; 
+            if (string.IsNullOrEmpty(newPassword) || newPassword.Length < 8)
+            {
+                TempData["ResetError"] = "Password must be at least 8 characters.";
+                return RedirectToAction("ResetPassword", new { token });
+            }
+            admin.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
             admin.ResetToken = null;
             admin.ResetTokenExpiry = null;
             _context.SaveChanges();
@@ -586,13 +642,13 @@ namespace customerseller.Controllers
         [HttpPost]
         public IActionResult AdminApproveShop([FromBody] ShopActionModel model)
         {
+            if (HttpContext.Session.GetString("AdminEmail") == null)
+                return Json(new { error = "Unauthorized" });
+
             var shop = _context.SellerShops.Find(model.Id);
             if (shop == null) return Json(new { error = "Not found" });
 
             shop.IsApproved = true;
-            shop.AdminStatus = "Approved";
-            shop.ApprovedAt = DateTime.Now;
-            _context.SaveChanges();
             shop.AdminStatus = "Approved";
             shop.ApprovedAt = DateTime.Now;
             _context.SaveChanges();
@@ -613,7 +669,7 @@ namespace customerseller.Controllers
                 };
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
+                client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
                 client.Send(message);
                 client.Disconnect(true);
             }
@@ -624,6 +680,9 @@ namespace customerseller.Controllers
         [HttpPost]
         public IActionResult AdminRejectShop([FromBody] ShopActionModel model)
         {
+            if (HttpContext.Session.GetString("AdminEmail") == null)
+                return Json(new { error = "Unauthorized" });
+
             var shop = _context.SellerShops.Find(model.Id);
             if (shop == null) return Json(new { error = "Not found" });
 
@@ -648,7 +707,7 @@ namespace customerseller.Controllers
                 };
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
+                client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
                 client.Send(message);
                 client.Disconnect(true);
             }
@@ -743,7 +802,7 @@ namespace customerseller.Controllers
             ViewBag.ProductMap = productMap;
 
             ViewBag.Total = orders.Count;
-            ViewBag.Pending = orders.Count(o => o.Status == "Pending" || o.Status == "Placed");
+            ViewBag.Pending = orders.Count(o => o.Status == "Pending" || o.Status == "Placed" || o.Status == "Processing");
             ViewBag.Delivered = orders.Count(o => o.Status == "Delivered");
 
             return View("AdminOrders", orders);
@@ -758,7 +817,7 @@ namespace customerseller.Controllers
       .Sum(o => (decimal?)o.Total) ?? 0;
 
             ViewBag.TotalOrders = _context.Orders.Count();
-            ViewBag.TotalSellers = _context.Users.Count(u => u.Role == "Seller");
+            ViewBag.TotalSellers = _context.Users.Count(u => u.Role == "Seller" || u.IsSeller);
             ViewBag.TotalCustomers = _context.Users.Count(u => u.Role == "Customer");
             ViewBag.TotalProducts = _context.Products.Count(p => p.IsAdminApproved == true);
             ViewBag.TotalComplaints = _context.Complaints.Count();
@@ -767,12 +826,43 @@ namespace customerseller.Controllers
 
             var deliveredOrders = _context.Orders.Where(o => o.Status == "Delivered").ToList();
             ViewBag.AvgOrderValue = deliveredOrders.Any() ? deliveredOrders.Average(o => o.Total) : 0;
-            ViewBag.TopProducts = _context.Products
-                .Where(p => p.IsAdminApproved == true)
-                .OrderByDescending(p => p.Stock)
-                .Take(5)
+            var approvedIds = _context.Products
+     .Where(p => p.IsAdminApproved == true)
+     .Select(p => p.Id)
+     .ToList();
+
+           
+
+            var soldQuantities = _context.Orders
+                  .Where(o => o.Status != "Cancelled" && o.Status != "Return Requested")
+                  .SelectMany(o => o.Items)
+                 .Where(i => approvedIds.Contains(i.ProductId))
+                 .GroupBy(i => i.ProductId)
+                 .Select(g => new { ProductId = g.Key, TotalSold = g.Sum(i => i.Quantity) })
+                 .OrderByDescending(x => x.TotalSold)
+                 .Take(5)
+                 .ToList();
+
+            var topProductIds = soldQuantities.Select(x => x.ProductId).ToList();
+            var topProductsUnordered = _context.Products
+                .Where(p => topProductIds.Contains(p.Id))
                 .ToList();
 
+            ViewBag.TopProducts = soldQuantities
+                .Select(sq =>
+                {
+                    var p = topProductsUnordered.FirstOrDefault(x => x.Id == sq.ProductId);
+                    return p == null ? null : new
+                    {
+                        p.Title,
+                        p.Category,
+                        p.Price,
+                        p.ImageUrl,
+                        TotalSold = sq.TotalSold
+                    };
+                })
+                .Where(p => p != null)
+                .ToList();
             return View("AdminReports");
         }
 
@@ -792,6 +882,8 @@ namespace customerseller.Controllers
             ViewBag.Forwarded = complaints.Count(c => c.Status == "Forwarded");
             ViewBag.Resolved = complaints.Count(c => c.Status == "Resolved");
             ViewBag.Escalated = complaints.Count(c => c.Status == "Escalated");
+            ViewBag.SellerResponded = complaints.Count(c => c.Status == "SellerResponded");
+            ViewBag.Fake = complaints.Count(c => c.Status == "Fake");
 
             return View(complaints);
         }
@@ -859,6 +951,9 @@ namespace customerseller.Controllers
         [HttpPost]
         public IActionResult ApproveSubCategory([FromBody] SubCategoryRejectModel model)
         {
+            if (HttpContext.Session.GetString("AdminEmail") == null)
+                return Json(new { error = "Unauthorized" });
+
             var shop = _context.SellerShops.Find(model.ShopId);
             if (shop == null) return Json(new { error = "Shop not found" });
 
@@ -928,7 +1023,7 @@ namespace customerseller.Controllers
 
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
+                client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
                 client.Send(message);
                 client.Disconnect(true);
             }

@@ -101,8 +101,25 @@ namespace customerseller.Controllers
         {
             var (email, role) = GetCurrentUser();
 
-            if (role == "Admin")
+			if (string.IsNullOrEmpty(email))
+				return Json(new List<object>());
+
+            
+            if (role == "Customer")
+                return Json(new List<object>());
+
+           
+            if (role == "Seller")
             {
+                var sellerResult = new List<object>();
+                var sellerCouriers = _context.RiderCompanies.Where(c => c.Email != email).ToList();
+                sellerResult.AddRange(sellerCouriers.Select(c => new { email = c.Email, role = "Rider", name = c.CompanyName }));
+                sellerResult.Add(new { email = "artisanvalley.store@gmail.com", role = "Admin", name = "Admin Support" });
+                return Json(sellerResult);
+            }
+
+            if (role == "Admin")
+			{
                 var adminResult = new List<object>();
 
                 var sellerEmails = _context.SellerShops.Select(s => s.SellerEmail).Distinct().Where(e => e != email).ToList();
@@ -112,8 +129,8 @@ namespace customerseller.Controllers
                     name = GetDisplayName(e, "Seller")
                 }));
                 
-                var couriers = _context.CourierCompanies.Where(c => c.Email != email).ToList();
-                adminResult.AddRange(couriers.Select(c => new { email = c.Email, role = "Courier", name = c.CompanyName }));
+                var couriers = _context.RiderCompanies.Where(c => c.Email != email).ToList();
+                adminResult.AddRange(couriers.Select(c => new { email = c.Email, role = "Rider", name = c.CompanyName }));
 
                 var mods = _context.ModeratorSettings
                     .Where(m => m.Email != email)
@@ -155,10 +172,10 @@ namespace customerseller.Controllers
             }
 
 
-            if (allowedRoles.Contains("Courier"))
+            if (allowedRoles.Contains("Rider"))
             {
-                var couriers = _context.CourierCompanies.Where(c => c.Email != email).ToList();
-                result.AddRange(couriers.Select(c => new { email = c.Email, role = "Courier", name = c.CompanyName }));
+                var couriers = _context.RiderCompanies.Where(c => c.Email != email).ToList();
+                result.AddRange(couriers.Select(c => new { email = c.Email, role = "Rider", name = c.CompanyName }));
             }
 
           
@@ -238,18 +255,40 @@ namespace customerseller.Controllers
             return Json(result);
         }
 
-
         [HttpPost]
-        public IActionResult StartConversation(string otherEmail, string otherRole, string productId = null)
+        public IActionResult StartConversation(string productId, string otherRole, string otherEmail)
         {
             var (email, role) = GetCurrentUser();
 
             if (string.IsNullOrEmpty(email))
                 return Json(new { success = false, message = "Login required." });
 
-            if (!ChatPermissions.IsAllowed(role, otherRole))
-                return Json(new { success = false, message = "This chat is not allowed." });
+            if (!string.IsNullOrEmpty(productId))
+            {
+                var product = _context.Products.FirstOrDefault(p => p.Id == productId);
+                if (product == null || string.IsNullOrEmpty(product.SellerEmail))
+                    return Json(new { success = false, message = "Seller not found." });
 
+                otherEmail = product.SellerEmail;
+            }
+            else if (string.IsNullOrEmpty(otherEmail))
+            {
+                return Json(new { success = false, message = "No recipient specified." });
+            }
+            if (string.IsNullOrEmpty(productId))
+            {
+                bool isSeller = _context.SellerShops.Any(s => s.SellerEmail == otherEmail);
+                bool isCourier = _context.RiderCompanies.Any(c => c.Email == otherEmail);
+                bool isMod = _context.ModeratorSettings.Any(m => m.Email == otherEmail);
+                bool isAdmin = otherEmail == "artisanvalley.store@gmail.com";
+
+                otherRole = isAdmin ? "Admin" : isMod ? "Moderator" : isCourier ? "Rider" : isSeller ? "Seller" : otherRole;
+            }
+            else
+            {
+                otherRole = "Seller";
+            }
+            if (!ChatPermissions.IsAllowed(role, otherRole)) return Json(new { success = false, message = "This chat is not allowed." });
             var existing = _context.Conversations.FirstOrDefault(c =>
                 (c.User1Email == email && c.User2Email == otherEmail) ||
                 (c.User1Email == otherEmail && c.User2Email == email));
@@ -347,11 +386,18 @@ namespace customerseller.Controllers
             if (string.IsNullOrEmpty(email) || msg.SenderEmail != email)
                 return Json(new { success = false, message = "You can only delete your own messages." });
 
+            int conversationId = msg.ConversationId;
             _context.Messages.Remove(msg);
             await _context.SaveChangesAsync();
+
+            await _hubContext.Clients.Group("conv_" + conversationId).SendAsync("MessageDeleted", new
+            {
+                messageId,
+                conversationId
+            });
+
             return Json(new { success = true });
         }
-
         [HttpPost]
         public async Task<IActionResult> EditMessage(int messageId, string newText)
         {
@@ -362,15 +408,25 @@ namespace customerseller.Controllers
             if (string.IsNullOrEmpty(email) || msg.SenderEmail != email)
                 return Json(new { success = false, message = "You can only edit your own messages." });
 
-            if (string.IsNullOrWhiteSpace(newText))
-                return Json(new { success = false, message = "Message cannot be empty." });
+			if (string.IsNullOrWhiteSpace(newText))
+				return Json(new { success = false, message = "Message cannot be empty." });
 
-            if ((DateTime.Now - msg.SentAt).TotalMinutes > 5)
-                return Json(new { success = false, message = "" });
-
+			newText = newText.Trim();
+			if (newText.Length > 2000)
+				return Json(new { success = false, message = "Message is too long." });
+			if ((DateTime.Now - msg.SentAt).TotalMinutes > 5)
+                return Json(new { success = false, message = "This message can no longer be edited (5-minute limit passed)." });
             msg.MessageText = newText;
             msg.IsEdited = true;
             await _context.SaveChangesAsync();
+
+            await _hubContext.Clients.Group("conv_" + msg.ConversationId).SendAsync("MessageEdited", new
+            {
+                messageId = msg.Id,
+                conversationId = msg.ConversationId,
+                newText = msg.MessageText
+            });
+
             return Json(new { success = true });
         }
 
@@ -400,9 +456,9 @@ namespace customerseller.Controllers
 
         private string GetDisplayName(string email, string role)
         {
-            if (role == "Courier")
+            if (role == "Rider")
             {
-                var courier = _context.CourierCompanies.FirstOrDefault(c => c.Email == email);
+                var courier = _context.RiderCompanies.FirstOrDefault(c => c.Email == email);
                 if (courier != null && !string.IsNullOrEmpty(courier.CompanyName))
                     return courier.CompanyName;
                 return "Rider";
@@ -430,15 +486,6 @@ namespace customerseller.Controllers
         }
         private (string Email, string Role) GetCurrentUser()
         {
-            var email = HttpContext.Session.GetString("UserEmail");
-            var role = HttpContext.Session.GetString("UserRole");
-            if (!string.IsNullOrEmpty(email))
-                return (email, role);
-
-            var courierEmail = HttpContext.Session.GetString("CourierEmail");
-            if (!string.IsNullOrEmpty(courierEmail))
-                return (courierEmail, "Courier");
-
             var adminEmail = HttpContext.Session.GetString("AdminEmail");
             if (!string.IsNullOrEmpty(adminEmail))
                 return (adminEmail, "Admin");
@@ -447,6 +494,15 @@ namespace customerseller.Controllers
             var modRole = HttpContext.Session.GetString("ModeratorRole");
             if (!string.IsNullOrEmpty(modEmail))
                 return (modEmail, modRole ?? "Moderator");
+
+            var courierEmail = HttpContext.Session.GetString("CourierEmail");
+            if (!string.IsNullOrEmpty(courierEmail))
+                return (courierEmail, "Rider");
+
+            var email = HttpContext.Session.GetString("UserEmail");
+            var role = HttpContext.Session.GetString("UserRole");
+            if (!string.IsNullOrEmpty(email))
+                return (email, role);
 
             return (null, null);
         }

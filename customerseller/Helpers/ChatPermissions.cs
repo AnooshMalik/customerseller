@@ -2,35 +2,31 @@
 
 namespace customerseller.Helpers
 {
-    
     public static class ChatPermissions
     {
-        private static readonly HashSet<(string, string)> AllowedPairs = new()
-{
-    ("Customer", "Seller"), ("Seller", "Customer"),
-    ("Seller", "Admin"),    ("Admin", "Seller"),
-    ("Admin", "Moderator"), ("Moderator", "Admin"),
-    ("Courier", "Admin"),   ("Admin", "Courier"),
-    ("Courier", "Seller"),  ("Seller", "Courier"),
-};
-
-        public static bool IsAllowed(string role1, string role2)
-        {
-            if (string.IsNullOrWhiteSpace(role1) || string.IsNullOrWhiteSpace(role2))
-                return false;
-
-            return AllowedPairs.Contains((role1, role2));
-        }
+        private static readonly Dictionary<string, List<string>> Allowed =
+            new Dictionary<string, List<string>>
+            {
+                { "Customer",  new List<string> { "Seller", "Admin" } },
+                { "Seller",    new List<string> { "Customer", "Admin", "Rider" } },
+                { "Rider",   new List<string> { "Admin", "Seller" } },
+                { "Moderator", new List<string> { "Admin" } },
+                { "Admin",     new List<string> { "Seller", "Rider", "Moderator", "Customer" } }
+            };
 
         public static List<string> GetAllowedRolesFor(string role)
         {
-            var result = new List<string>();
-            foreach (var pair in AllowedPairs)
-            {
-                if (pair.Item1 == role)
-                    result.Add(pair.Item2);
-            }
-            return result;
+            if (role != null && Allowed.TryGetValue(role, out var list))
+                return list;
+            return new List<string>();
+        }
+
+        public static bool IsAllowed(string role, string otherRole)
+        {
+            if (role == null || otherRole == null) return false;
+
+            return GetAllowedRolesFor(role).Contains(otherRole)
+                && GetAllowedRolesFor(otherRole).Contains(role);
         }
     }
 }

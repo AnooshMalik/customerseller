@@ -485,7 +485,7 @@
                 <h3>Chats</h3>
                 <div style="position:relative;">
                     <i class="fas fa-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:0.75rem; color:#999;"></i>
-                    <input type="text" id="adminSearchInput" placeholder="Search..." oninput="onAdminSearch(this.value)"
+                    <input type="text" id="adminSearchInput" placeholder="Search sellers..." oninput="onAdminSearch(this.value)"
                            style="padding:7px 10px 7px 28px; border:1px solid #e0e0e0; border-radius:20px; font-size:0.8rem; width:140px; outline:none; font-family:inherit;" />
                 </div>
             </div>
@@ -552,15 +552,15 @@
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.0/signalr.min.js"></script>
     <script>
-            const currentUserEmail = '@Html.Raw(ViewBag.CurrentEmail)';
-            const isAdmin = @(cwCurrentRole == "Admin" ? "true" : "false");
+        const currentUserEmail = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)ViewBag.CurrentEmail ?? ""));   
+        const isAdmin = @(cwCurrentRole == "Admin" ? "true" : "false");
             let currentConversationId = null;
             let connection = null;
             let connectionReadyPromise = null;
             let adminContacts = [];
-            let adminSearchTerm = '';
- const AUTO_REPLY_TEXT = "Hi! I am the Artisan Valley seller. I'll reply as soon as I'm free ";
-
+                        let adminSearchTerm = '';
+            let focusConversationId = parseInt(new URLSearchParams(window.location.search).get('open')) || null;
+            const AUTO_REPLY_TEXT = "Hi! I am the Artisan Valley seller. I'll reply as soon as I'm free \uD83D\uDE0A";           
             function initials(name) {
                 if (!name) return "?";
                 const parts = name.trim().split(" ");
@@ -626,23 +626,33 @@
                     document.getElementById('convList').innerHTML = '<div class="empty-state">Could not load contacts.</div>';
                 }
             }
-
             function renderAdminContactList() {
                 const list = document.getElementById('convList');
-                let filtered = adminContacts;
-                if (adminSearchTerm.trim()) {
-                    const term = adminSearchTerm.trim().toLowerCase();
-                    filtered = adminContacts.filter(c => (c.otherName || '').toLowerCase().includes(term) || (c.otherRole || '').toLowerCase().includes(term));
+                const term = adminSearchTerm.trim().toLowerCase();
+                let filtered;
+
+                if (term) {
+                    filtered = adminContacts.filter(c =>
+                        (c.otherName || '').toLowerCase().includes(term) ||
+                        (c.otherRole || '').toLowerCase().includes(term));
+                } else if (focusConversationId) {
+                    // Product page se aaye hain: sirf usi seller ki chat
+                    filtered = adminContacts.filter(c => c.conversationId === focusConversationId);
+                } else {
+                    filtered = adminContacts.filter(c => c.hasConversation);
                 }
 
                 if (!filtered.length) {
-                    list.innerHTML = '<div class="empty-state">No contacts found.</div>';
+                    list.innerHTML = term
+                        ? '<div class="empty-state">No contacts found.</div>'
+                        : '<div class="empty-state">No conversations yet.<br>Use search to start a new chat.</div>';
                     return;
                 }
 
                 list.innerHTML = filtered.map(c => `
                     <div class="conv-item ${c.conversationId === currentConversationId ? 'active' : ''}"
-                         onclick="openAdminContact('${escapeHtml(c.otherEmail)}', '${c.otherRole}', '${escapeHtml(c.otherName)}', ${c.conversationId != null ? c.conversationId : 'null'})">
+                    data-email="${escapeHtml(c.otherEmail)}" data-role="${escapeHtml(c.otherRole)}" data-name="${escapeHtml(c.otherName)}"
+                         onclick="openAdminContact(this.dataset.email, this.dataset.role, this.dataset.name, ${c.conversationId != null ? c.conversationId : 'null'})">
                     <div class="conv-avatar">${initials(c.otherName)}</div>
                     <div class="conv-info">
                     <div class="conv-name">${escapeHtml(c.otherName)}</div>
@@ -653,7 +663,6 @@
                     </div>
                     `).join('');
             }
-
             function onAdminSearch(value) {
                 adminSearchTerm = value;
                 renderAdminContactList();
@@ -787,23 +796,64 @@
                     }
                 });
 
-                connection.on('NewMessageNotification', () => {
+                               connection.on('NewMessageNotification', () => {
                     loadConversations();
+                });
+
+                connection.on('MessageDeleted', (data) => {
+                    if (data.conversationId === currentConversationId) {
+                        const bubble = document.querySelector(`[data-msg-id="${data.messageId}"]`);
+                        if (bubble) bubble.remove();
+                    }
+                });
+
+                connection.on('MessageEdited', (data) => {
+                    if (data.conversationId === currentConversationId) {
+                        const bubble = document.querySelector(`[data-msg-id="${data.messageId}"] .msg-text`);
+                        if (bubble) bubble.textContent = data.newText;
+                        const timeSpan = document.querySelector(`[data-msg-id="${data.messageId}"] .msg-time`);
+                        if (timeSpan && !timeSpan.querySelector('.msg-edited-tag')) {
+                            timeSpan.innerHTML += '<span class="msg-edited-tag">(edited)</span>';
+                        }
+                    }
                 });
 
                 connectionReadyPromise = connection.start();
                 await connectionReadyPromise;
             }
-            async function checkAutoOpen() {
+                       async function checkAutoOpen() {
                 const params = new URLSearchParams(window.location.search);
-                const openId = params.get('open');
+                let openId = parseInt(params.get('open')) || null;
+
+                // Product page se aaye hain (URL mein ?open= nahi) -> us product ke seller ki chat
+                if (!openId) {
+                    const m = document.referrer.match(/\/Products\/Details\/([^/?#]+)/i);
+                    if (m) {
+                        try {
+                            const fd = new FormData();
+                            fd.append('productId', m[1]);
+                            const r = await fetch('/Chat/StartConversation', { method: 'POST', body: fd });
+                            const d = await r.json();
+                            if (d.success) openId = d.conversationId;
+                        } catch (e) {
+                            console.error('Auto start chat failed:', e);
+                        }
+                    }
+                }
+
                 if (!openId) return;
+
+                focusConversationId = openId;
+                await loadConversations();
 
                 const res = await fetch('/Chat/GetConversations');
                 const data = await res.json();
-                const match = data.find(c => c.conversationId === parseInt(openId));
-                if (match) {
+                const match = data.find(c => c.conversationId === openId);
+                                             if (match) {
                     openConversation(match.conversationId, match.otherName, match.otherRole);
+                } else {
+                    focusConversationId = null;
+                    renderAdminContactList();
                 }
             }
 
@@ -839,18 +889,26 @@
                 deletingMsgId = null;
             }
 
-            async function confirmDeleteMessage() {
+                       async function confirmDeleteMessage() {
                 if (deletingMsgId === null) return;
+                const id = deletingMsgId;
+                closeDeleteModal(); // pehle modal band: double click ka masla khatam
+
                 const formData = new FormData();
-                formData.append('messageId', deletingMsgId);
-                const res = await fetch('/Chat/DeleteMessage', { method: 'POST', body: formData });
-                const data = await res.json();
-                if (data.success) {
-                    document.querySelector(`[data-msg-id="${deletingMsgId}"]`).remove();
-                    loadConversations();
-                    closeDeleteModal();
-                } else {
-                    alert(data.message || 'Could not delete message.');
+                formData.append('messageId', id);
+                try {
+                    const res = await fetch('/Chat/DeleteMessage', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.success || data.message === 'Message not found.') {
+                        const bubble = document.querySelector(`[data-msg-id="${id}"]`);
+                        if (bubble) bubble.remove();
+                        loadConversations();
+                    } else {
+                        alert(data.message || 'Could not delete message.');
+                    }
+                } catch (err) {
+                    console.error('Delete error:', err);
+                    alert('Error: ' + err.message);
                 }
             }
 

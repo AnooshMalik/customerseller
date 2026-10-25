@@ -549,6 +549,7 @@
         }
 
     .product-img-wrap {
+         position: relative;
         width: 150px;
         height: 150px;
         border-radius: 8px;
@@ -614,8 +615,8 @@
 
     .product-cart-btn {
         position: absolute;
-        bottom: 12px;
-        right: 12px;
+                bottom: 8px;
+        right: 8px;
         width: 34px;
         height: 34px;
         border-radius: 50%;
@@ -643,13 +644,15 @@
         transform: translateY(0);
     }
 
-    @@media (max-width: 900px) {
+       @@media (max-width: 900px) {
         .product-cart-btn {
             opacity: 1;
             transform: translateY(0);
+            width: 30px;
+            height: 30px;
+            font-size: 0.85rem;
         }
     }
-
     .no-results {
         text-align: center;
         padding: 60px 20px;
@@ -788,9 +791,9 @@
                 <button onclick="closeMobileFilter()" id="mobileCloseBtn">&times;</button>
             </div>
         </div>
-        <div class="filter-section">
+        <div class="filter-section" id="sizeSection">
             <div class="filter-section-header" onclick="toggleSection(this)">
-                <span>Category</span><i class="fa-solid fa-chevron-down"></i>
+                <span>Size</span><i class="fa-solid fa-chevron-down"></i>
             </div>
             <div class="filter-section-body" id="categoryFilter">
                 <label class="filter-option"><input type="checkbox" value="FabricTextile" onchange="onCategoryChange()"> Fabric & Textile</label>
@@ -894,9 +897,7 @@
                     <option value="price-low">Price: Low to High</option>
                     <option value="price-high">Price: High to Low</option>
                     <option value="newest">Newest</option>
-                    <option value="best-selling">Best Selling</option>
-                    <option value="rating">Top Rated</option>
-                </select>
+                    </select>
             </div>
         </div>
 
@@ -992,7 +993,11 @@
 
     console.log('✅ Products loaded:', allProducts.length);
 
-    
+           function escapeHtml(str) {
+           return String(str == null ? '' : str)
+               .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+               .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+       }
     function renderProducts(products) {
         const grid = document.getElementById('productsGrid');
         document.getElementById('productCount').textContent = products.length;
@@ -1002,22 +1007,20 @@
             return;
         }
 
-        grid.innerHTML = products.map(p => `
+               grid.innerHTML = products.map(p => `
                 <div class="product-card" onclick="goToProductDetails('${p.id}')">
                   <div class="product-img-wrap">
-                    <img src="${p.imageUrl || 'https://via.placeholder.com/150'}" alt="${p.title}" onerror="this.src='https://via.placeholder.com/150'" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="${escapeHtml(p.imageUrl) || 'https://via.placeholder.com/150'}" alt="${escapeHtml(p.title)}" loading="lazy" decoding="async" onerror="this.src='https://via.placeholder.com/150'" style="width:100%;height:100%;object-fit:cover;">
+                    <button type="button" class="product-cart-btn" title="Add to cart" onclick="event.stopPropagation(); addToCart('${p.id}')">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
                   </div>
-                  <div class="product-title">${p.title}</div>
+                  <div class="product-title">${escapeHtml(p.title)}</div>
                   <div class="product-price-row">
                     <span class="product-price">Rs. ${p.price?.toLocaleString() || '0'}</span>
                   </div>
-                  <button type="button" class="product-cart-btn" title="Add to cart" onclick="event.stopPropagation(); addToCart('${p.id}')">
-                    <i class="fa-solid fa-plus"></i>
-                  </button>
                 </div>
               `).join('');
-    }
-
     
     function toggleSection(header) {
         const body = header.nextElementSibling;
@@ -1090,7 +1093,30 @@
         return Array.from(document.querySelectorAll('#' + containerId + ' input[type="checkbox"]:checked'))
             .map(cb => cb.value);
     }
-    function applyFilters() {
+           function updateSizeSectionVisibility() {
+           const selectedCategories = getCheckedValues('categoryFilter');
+           const selectedSubs = getCheckedValues('subCategoryFilter');
+
+           let scope = allProducts;
+           if (selectedSubs.length > 0) {
+               scope = allProducts.filter(p => selectedSubs.includes(p.category));
+           } else if (selectedCategories.length > 0) {
+               let codes = [];
+               selectedCategories.forEach(c => {
+                   if (subCategoryMap[c]) codes = codes.concat(subCategoryMap[c].map(s => s.val));
+               });
+               scope = allProducts.filter(p => codes.includes(p.category));
+           }
+
+           const hasSizes = scope.some(p => (p.sizes || '').trim() !== '');
+           document.getElementById('sizeSection').style.display = hasSizes ? '' : 'none';
+
+           if (!hasSizes) {
+               document.querySelectorAll('#sizeFilter input:checked').forEach(cb => cb.checked = false);
+           }
+       }
+          function applyFilters() {
+           updateSizeSectionVisibility();
         const selectedCategories = getCheckedValues('categoryFilter');
         const selectedSubCategories = getCheckedValues('subCategoryFilter');
         const selectedSizes = getCheckedValues('sizeFilter');
@@ -1110,7 +1136,7 @@
 
             if (selectedSizes.length > 0) {
                 const productSizes = (p.sizes || '').split(',').map(s => norm(s));
-                const matches = selectedSizes.some(sz => productSizes.includes(norm(sz)));
+                                 const matches = selectedSizes.some(sz => productSizes.some(ps => ps === norm(sz) || (norm(sz) === 'free' && ps.startsWith('free'))));
                 if (!matches) return false;
             }
 
@@ -1134,16 +1160,12 @@
 
         const sortVal = document.getElementById('sortSelect').value;
         if (sortVal === 'price-low') filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
-        else if (sortVal === 'price-high') filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
-
+               else if (sortVal === 'price-high') filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+        else if (sortVal === 'newest') filtered.sort((a, b) => new Date(b.adminApprovedAt || 0) - new Date(a.adminApprovedAt || 0));
         renderProducts(filtered);
         renderActiveFilters();
     }
-
-    // Builds the removable "chips" shown above the grid (e.g. "Blue x",
-    // "M x", "\"lamp\" x") so active filters are actually visible/removable,
-    // and lets each chip clear just that one filter.
-    function renderActiveFilters() {
+ function renderActiveFilters() {
         const container = document.getElementById('activeFilters');
         const chips = [];
 
@@ -1185,33 +1207,24 @@
         document.getElementById('searchInput').value = '';
         document.getElementById('sortSelect').value = 'default';
         document.getElementById('minPrice').value = '0';
-        document.getElementById('maxPrice').value = '20000';
-        document.getElementById('priceSlider').value = '20000';
-        document.getElementById('priceSliderMaxLabel').textContent = 'Rs. 20,000';
+                  initPriceRange();
         document.getElementById('subCategorySection').style.display = 'none';
         document.getElementById('subCategoryFilter').innerHTML = '';
         hideSuggestions();
         applyFilters();
     }
 
-    // Opens the real product detail page (ProductsController.Details).
     function goToProductDetails(id) {
         window.location.href = '/Products/Details/' + id;
     }
 
-    // Adds a product to the same localStorage-based cart used across the
-    // rest of the site (see the cart script in _Layout.cshtml).
     function addToCart(id) {
         const product = allProducts.find(p => p.id === id);
         if (!product) return;
 
         let cart = JSON.parse(localStorage.getItem('cart')) || [];
         const existingIndex = cart.findIndex(item => item.id === id);
-
-        // NOTE: assumes the JSON serializer camelCases property names
-        // (Product.SellerEmail -> product.sellerEmail). If your product
-        // JSON uses different casing, adjust this line to match.
-        const shopId = product.sellerEmail || product.SellerEmail || '';
+ const shopId = product.sellerEmail || product.SellerEmail || '';
         const shopName = product.shopName || product.ShopName || '';
 
         if (existingIndex > -1) {
@@ -1266,7 +1279,7 @@
         box.innerHTML = currentSuggestions.map((p, i) => `
                 <div class="search-suggestion-item" onclick="selectSuggestion(${i})">
                   <img src="${p.imageUrl || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'">
-                  <span>${p.title}</span>
+                <span>${escapeHtml(p.title)}</span>
                 </div>
               `).join('');
         box.classList.add('active');
@@ -1289,7 +1302,14 @@
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.search-wrapper')) hideSuggestions();
     });
-
+           function initPriceRange() {
+           const highest = Math.max(0, ...allProducts.map(p => parseFloat(p.price) || 0));
+           const top = Math.max(500, Math.ceil(highest / 500) * 500);
+           document.getElementById('priceSlider').max = top;
+           document.getElementById('priceSlider').value = top;
+           document.getElementById('maxPrice').value = top;
+           document.getElementById('priceSliderMaxLabel').textContent = 'Rs. ' + top.toLocaleString();
+       }
     function updatePriceSlider(value) {
         document.getElementById('maxPrice').value = value;
         document.getElementById('priceSliderMaxLabel').textContent = 'Rs. ' + Number(value).toLocaleString();
@@ -1307,5 +1327,7 @@
     }
 
     document.getElementById('sidebarOverlay').addEventListener('click', closeMobileFilter);
-    renderProducts(allProducts);
+       initPriceRange();
+       updateSizeSectionVisibility();
+       renderProducts(allProducts);
 </script>

@@ -1,17 +1,22 @@
 ﻿using customerseller.Models;
-using Microsoft.AspNetCore.Mvc;
-using MimeKit;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MimeKit;
+using System.Net;
+using System.Text.RegularExpressions;
 
 namespace customerseller.Controllers
 {
     public class ComplaintController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _config;
 
-        public ComplaintController(ApplicationDbContext context)
+        public ComplaintController(ApplicationDbContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
         [HttpGet]
@@ -25,51 +30,143 @@ namespace customerseller.Controllers
             var complaint = _context.Complaints
                 .FirstOrDefault(c => c.TicketNumber.Trim().ToUpper() == searchTicket);
 
-            if (complaint == null)
+            var sessionEmail = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrEmpty(sessionEmail))
+                return RedirectToAction("Index", "Home", new { returnUrl = "/Complaint/Track?ticket=" + Uri.EscapeDataString(ticket) });
+            if (_context.SellerShops.Any(s => s.SellerEmail.ToLower() == sessionEmail.ToLower()))
+                return RedirectToAction("Index", "Home");
+            if (complaint == null ||
+                !string.Equals(complaint.CustomerEmail?.Trim(), sessionEmail.Trim(), StringComparison.OrdinalIgnoreCase))
             {
-                TempData["TrackError"] = $"No complaint found with ticket: {ticket}. Please check and try again.";
+                TempData["TrackError"] = "No complaint found with this ticket on your account.";
                 return View("~/Views/Complaint/Track.cshtml", null);
             }
 
             return View("~/Views/Complaint/Track.cshtml", complaint);
         }
         [HttpPost]
+        [RequestSizeLimit(10 * 1024 * 1024)]
         public async Task<IActionResult> Submit(
-            string customerName, string customerPhone, string customerEmail,
-            string orderId, string amountPaid, string sellerName,
-            string complaintType, string priority, string description,
-            IFormFile? evidenceFile)
+    string customerName, string customerPhone, string customerEmail,
+    string orderId, string amountPaid, string sellerName,
+    string complaintType, string priority, string description,
+    IFormFile? evidenceFile)
         {
-            if (string.IsNullOrWhiteSpace(complaintType))
-            {
-                return Json(new { success = false, message = "Please select a complaint type." });
-            }
-            var ticket = "CMP-" + new Random().Next(1000, 9999).ToString();
+            var sessionEmail = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrEmpty(sessionEmail))
+                return Json(new { success = false, message = "Please login first." });
 
-            string? imageUrl = null;
+            if (HttpContext.Session.GetString("UserRole") == "Seller" ||
+     _context.SellerShops.Any(s => s.SellerEmail.ToLower() == sessionEmail.ToLower()))
+                return Json(new { success = false, message = "Sellers cannot file complaints." });
+            customerEmail = sessionEmail;
+            customerName = (customerName ?? "").Trim();
+            customerPhone = (customerPhone ?? "").Trim();
+            customerEmail = (customerEmail ?? "").Trim();
+            orderId = (orderId ?? "").Replace("#", "").Trim();
+            amountPaid = (amountPaid ?? "").Trim();
+            sellerName = (sellerName ?? "").Trim();
+            complaintType = (complaintType ?? "").Trim();
+            description = (description ?? "").Trim();
 
             
-            if (evidenceFile != null && evidenceFile.Length > 0)
-            {
-                var fileName = Guid.NewGuid().ToString() +
-                               Path.GetExtension(evidenceFile.FileName);
-                var path = Path.Combine(Directory.GetCurrentDirectory(),
-                    "wwwroot", "complaints", fileName);
-                Directory.CreateDirectory(Path.Combine(
-                    Directory.GetCurrentDirectory(), "wwwroot", "complaints"));
+            if (customerName.Length < 3 || customerName.Length > 50 ||
+                !Regex.IsMatch(customerName, @"^[A-Za-z\s.'-]+$"))
+                return Json(new { success = false, message = "Please enter a valid name (letters only, 3-50 characters)." });
 
-                using var stream = new FileStream(path, FileMode.Create);
-                await evidenceFile.CopyToAsync(stream);
-                imageUrl = "/complaints/" + fileName;
+            
+            if (!Regex.IsMatch(customerPhone, @"^(\+92|0)3\d{9}$"))
+                return Json(new { success = false, message = "Please enter a valid phone number (e.g. 03001234567)." });
+
+            
+            if (!string.IsNullOrEmpty(customerEmail) &&
+                (customerEmail.Length > 100 || !Regex.IsMatch(customerEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")))
+                return Json(new { success = false, message = "Please enter a valid email address." });
+
+            
+            if (!Regex.IsMatch(orderId, @"^[A-Za-z0-9-]{3,30}$"))
+                return Json(new { success = false, message = "Please enter a valid Order ID." });
+
+            var verifiedOrder = _context.Orders
+     .Include(o => o.Items)
+     .AsNoTracking()
+     .FirstOrDefault(o => o.OrderId.ToUpper() == orderId.ToUpper());
+
+           
+            if (verifiedOrder == null ||
+                !string.Equals(verifiedOrder.Email?.Trim(), sessionEmail.Trim(), StringComparison.OrdinalIgnoreCase))
+                return Json(new { success = false, message = "No order found with this ID on your account." });
+
+            if (verifiedOrder.Status != "Delivered")
+                return Json(new { success = false, message = "You can only file a complaint on a delivered order." });
+
+            orderId = verifiedOrder.OrderId;
+            sellerName = verifiedOrder.Items?.FirstOrDefault()?.SellerShopName ?? sellerName;
+            amountPaid = verifiedOrder.Total.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+            if (!string.IsNullOrEmpty(amountPaid))
+            {
+                if (!decimal.TryParse(amountPaid, System.Globalization.NumberStyles.Number,
+                        System.Globalization.CultureInfo.InvariantCulture, out var amt) || amt <= 0 || amt > 10000000)
+                    return Json(new { success = false, message = "Please enter a valid amount." });
             }
+
+            
+            if (sellerName.Length < 2 || sellerName.Length > 80 ||
+                !Regex.IsMatch(sellerName, @"^[A-Za-z0-9\s.'&-]+$"))
+                return Json(new { success = false, message = "Please enter a valid seller / shop name." });
+
+            
+            var allowedTypes = new[]
+            {
+        "Wrong / Damaged product received", "Product never arrived", "Delivery was very late",
+        "Seller fraud / scam", "Rude or unprofessional seller",
+        "Return / Refund not processed", "Other issue"
+    };
+            if (!allowedTypes.Contains(complaintType))
+                return Json(new { success = false, message = "Please select a valid complaint type." });
+
+            
+            if (description.Length < 20 || description.Length > 1000)
+                return Json(new { success = false, message = "Description must be between 20 and 1000 characters." });
+
+            
+            priority = "Medium";
+
+            
+            if (evidenceFile == null || evidenceFile.Length == 0)
+                return Json(new { success = false, message = "Please attach a photo/screenshot as evidence." });
+
+            if (evidenceFile.Length > 5 * 1024 * 1024)
+                return Json(new { success = false, message = "File must be smaller than 5 MB." });
+
+            var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".webp", ".pdf" };
+            var ext = Path.GetExtension(evidenceFile.FileName).ToLowerInvariant();
+            if (!allowedExt.Contains(ext))
+                return Json(new { success = false, message = "Only JPG, PNG, WEBP or PDF files are allowed." });
+
+
+            string ticket;
+            do
+            {
+                ticket = "CMP-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
+            } while (_context.Complaints.Any(c => c.TicketNumber == ticket));
+
+            var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "complaints");
+            Directory.CreateDirectory(folder);
+            var fileName = Guid.NewGuid().ToString() + ext;
+            using (var stream = new FileStream(Path.Combine(folder, fileName), FileMode.Create))
+            {
+                await evidenceFile.CopyToAsync(stream);
+            }
+            var imageUrl = "/complaints/" + fileName;
 
             var complaint = new Complaint
             {
                 TicketNumber = ticket,
                 CustomerName = customerName,
                 CustomerPhone = customerPhone,
-                CustomerEmail = customerEmail,
-                OrderId = orderId?.Replace("#", "").Trim(),
+                CustomerEmail = string.IsNullOrEmpty(customerEmail) ? null : customerEmail,
+                OrderId = orderId,
                 AmountPaid = amountPaid,
                 SellerName = sellerName,
                 ComplaintType = complaintType,
@@ -83,140 +180,63 @@ namespace customerseller.Controllers
             _context.Complaints.Add(complaint);
             _context.SaveChanges();
 
-           
+
+            var eName = WebUtility.HtmlEncode(customerName);
+            var ePhone = WebUtility.HtmlEncode(customerPhone);
+            var eSeller = WebUtility.HtmlEncode(sellerName);
+            var eType = WebUtility.HtmlEncode(complaintType);
+            var eOrder = WebUtility.HtmlEncode(orderId);
+            var eDesc = WebUtility.HtmlEncode(description);
+
             SendEmail(
-                "artisanvalley.store@gmail.com",
+                _config["EmailSettings:FromEmail"],
                 $"New Complaint Received — {ticket}",
                 $@"<div style='font-family:sans-serif; max-width:500px; margin:auto;'>
-                    <h2 style='color:#a64d79;'>New Complaint — {ticket}</h2>
-                    <p><strong>Customer:</strong> {customerName} ({customerPhone})</p>
-                    <p><strong>Seller:</strong> {sellerName}</p>
-                    <p><strong>Type:</strong> {complaintType}</p>
-                    <p><strong>Priority:</strong> {priority}</p>
-                    <p><strong>Order ID:</strong> {orderId}</p>
-                    <p><strong>Description:</strong> {description}</p>
-                    <p>Login to admin panel to review.</p>
-                </div>"
+            <h2 style='color:#a64d79;'>New Complaint — {ticket}</h2>
+            <p><strong>Customer:</strong> {eName} ({ePhone})</p>
+            <p><strong>Seller:</strong> {eSeller}</p>
+            <p><strong>Type:</strong> {eType}</p>
+            <p><strong>Priority:</strong> {priority}</p>
+            <p><strong>Order ID:</strong> {eOrder}</p>
+            <p><strong>Description:</strong> {eDesc}</p>
+            <p>Login to admin panel to review.</p>
+        </div>"
             );
 
-           
             if (!string.IsNullOrEmpty(customerEmail))
             {
                 SendEmail(
                     customerEmail,
                     "Complaint Received — Artisan Valley",
                     $@"<div style='font-family:sans-serif; max-width:500px; margin:auto;'>
-                        <h2 style='color:#a64d79;'>Complaint Submitted ✅</h2>
-                        <p>Dear {customerName},</p>
-                        <p>Your complaint has been received.</p>
-                        <p><strong>Ticket Number:</strong> {ticket}</p>
-                        <p>We will review and respond within 24 hours.</p>
-                        <p>Artisan Valley Team</p>
-                    </div>"
+                <h2 style='color:#a64d79;'>Complaint Submitted ✅</h2>
+                <p>Dear {eName},</p>
+                <p>Your complaint has been received.</p>
+                <p><strong>Ticket Number:</strong> {ticket}</p>
+                <p>We will review and respond within 24 hours.</p>
+                <p>Artisan Valley Team</p>
+            </div>"
                 );
             }
 
             return Json(new { success = true, ticket = ticket });
         }
 
-        
-        [HttpPost]
-        public IActionResult ForwardToSeller(int complaintId, string adminNotes)
-        {
-            if (HttpContext.Session.GetString("AdminEmail") == null)
-                return Json(new { error = "Unauthorized" });
 
-            var complaint = _context.Complaints.Find(complaintId);
-            if (complaint == null) return Json(new { error = "Not found" });
 
-            complaint.Status = "Forwarded";
-            complaint.AdminNotes = adminNotes;
-            complaint.UpdatedAt = DateTime.Now;
-            _context.SaveChanges();
 
-            
-            var sellerEmail = _context.SellerShops
-                .FirstOrDefault(s => s.ShopName.ToLower() ==
-                                complaint.SellerName.ToLower())?.SellerEmail;
-
-            if (!string.IsNullOrEmpty(sellerEmail))
-            {
-                SendEmail(
-                    sellerEmail,
-                    "Customer Complaint — Action Required",
-                    $@"<div style='font-family:sans-serif; max-width:500px; margin:auto;'>
-                        <h2 style='color:#e65100;'>Complaint Forwarded to You</h2>
-                        <p><strong>Ticket:</strong> {complaint.TicketNumber}</p>
-                        <p><strong>Customer:</strong> {complaint.CustomerName}</p>
-                        <p><strong>Type:</strong> {complaint.ComplaintType}</p>
-                        <p><strong>Description:</strong> {complaint.Description}</p>
-                        <p><strong>Admin Notes:</strong> {adminNotes}</p>
-                        <p>Please login to your dashboard and respond to this complaint.</p>
-                    </div>"
-                );
-            }
-
-            return Json(new { success = true });
-        }
-
-        
-        [HttpPost]
-        public async Task<IActionResult> SellerRespond(
-            int complaintId, string response, IFormFile? proofImage)
-        {
-            var email = HttpContext.Session.GetString("UserEmail");
-            if (string.IsNullOrEmpty(email))
-                return Json(new { error = "Unauthorized" });
-
-            var complaint = _context.Complaints.Find(complaintId);
-            if (complaint == null) return Json(new { error = "Not found" });
-
-            string? proofUrl = null;
-            if (proofImage != null && proofImage.Length > 0)
-            {
-                var fileName = Guid.NewGuid().ToString() +
-                               Path.GetExtension(proofImage.FileName);
-                var path = Path.Combine(Directory.GetCurrentDirectory(),
-                    "wwwroot", "complaints", fileName);
-                Directory.CreateDirectory(Path.Combine(
-                    Directory.GetCurrentDirectory(), "wwwroot", "complaints"));
-
-                using var stream = new FileStream(path, FileMode.Create);
-                await proofImage.CopyToAsync(stream);
-                proofUrl = "/complaints/" + fileName;
-            }
-
-            complaint.SellerResponse = response;
-            complaint.SellerProofImageUrl = proofUrl;
-            complaint.Status = "SellerResponded";
-            complaint.UpdatedAt = DateTime.Now;
-            _context.SaveChanges();
-
-           
-            if (!string.IsNullOrEmpty(complaint.CustomerEmail))
-            {
-                SendEmail(
-                    complaint.CustomerEmail,
-                    "Update on Your Complaint — Artisan Valley",
-                    $@"<div style='font-family:sans-serif; max-width:500px; margin:auto;'>
-                        <h2 style='color:#a64d79;'>Complaint Update</h2>
-                        <p>Ticket: <strong>{complaint.TicketNumber}</strong></p>
-                        <p>The seller has responded to your complaint.</p>
-                        <p><strong>Seller Response:</strong> {response}</p>
-                        <p>Please login to confirm if your issue is resolved.</p>
-                    </div>"
-                );
-            }
-
-            return Json(new { success = true });
-        }
-
-       
         [HttpPost]
         public IActionResult CustomerConfirm(int complaintId, bool isResolved)
         {
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrEmpty(userEmail))
+                return Json(new { error = "Unauthorized" });
+
             var complaint = _context.Complaints.Find(complaintId);
             if (complaint == null) return Json(new { error = "Not found" });
+
+            if (!string.Equals(complaint.CustomerEmail, userEmail, StringComparison.OrdinalIgnoreCase))
+                return Json(new { error = "You are not authorized to update this complaint." });
 
             if (isResolved)
             {
@@ -235,33 +255,179 @@ namespace customerseller.Controllers
             return Json(new { success = true });
         }
 
-       
+
         [HttpPost]
-        public IActionResult MarkFake(int complaintId)
+        public IActionResult MarkFake(int complaintId, string? notes)
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
                 return Json(new { error = "Unauthorized" });
 
+            notes = (notes ?? "").Trim();
+            if (notes.Length > 1000)
+                return Json(new { error = "Notes cannot exceed 1000 characters." });
+
             var complaint = _context.Complaints.Find(complaintId);
             if (complaint == null) return Json(new { error = "Not found" });
 
+            if (complaint.Status == "Fake")
+                return Json(new { error = "This complaint is already marked as fake." });
+
+            if (complaint.Status == "Resolved")
+                return Json(new { error = "A resolved complaint cannot be marked as fake." });
+
             complaint.Status = "Fake";
-            complaint.CustomerStrike += 1;
+            if (!string.IsNullOrEmpty(notes)) complaint.AdminNotes = notes;
             complaint.UpdatedAt = DateTime.Now;
             _context.SaveChanges();
+
+           
+            var email = complaint.CustomerEmail;
+            var phone = complaint.CustomerPhone;
+            int totalStrikes = !string.IsNullOrEmpty(email)
+                ? _context.Complaints.Count(c => c.Status == "Fake" && c.CustomerEmail == email)
+                : _context.Complaints.Count(c => c.Status == "Fake" && c.CustomerPhone == phone);
+
+            complaint.CustomerStrike = totalStrikes;
+
+           
+            if (totalStrikes >= 3 && !string.IsNullOrEmpty(email))
+            {
+                var user = _context.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
+                if (user != null && !user.IsBlocked)
+                {
+                    user.IsBlocked = true;
+                    user.BlockReason = "Multiple fake complaints";
+                    user.BlockExpiry = DateTime.Now.AddDays(7);
+                }
+            }
+
+            _context.SaveChanges();
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public IActionResult ForwardToSeller(int complaintId, string adminNotes)
+        {
+            if (HttpContext.Session.GetString("AdminEmail") == null)
+                return Json(new { error = "Unauthorized" });
+
+            adminNotes = (adminNotes ?? "").Trim();
+            if (adminNotes.Length > 1000)
+                return Json(new { error = "Notes cannot exceed 1000 characters." });
+
+            var complaint = _context.Complaints.Find(complaintId);
+            if (complaint == null) return Json(new { error = "Not found" });
+            if (complaint.Status == "Fake" || complaint.Status == "Resolved")
+                return Json(new { error = "This complaint is already closed." });
+            complaint.Status = "Forwarded";
+            complaint.AdminNotes = adminNotes;
+            complaint.UpdatedAt = DateTime.Now;
+            _context.SaveChanges();
+
+            var sellerEmail = _context.SellerShops
+                .FirstOrDefault(s => s.ShopName.ToLower() ==
+                                complaint.SellerName.ToLower())?.SellerEmail;
+
+            if (!string.IsNullOrEmpty(sellerEmail))
+            {
+                SendEmail(
+                    sellerEmail,
+                    "Customer Complaint — Action Required",
+                    $@"<div style='font-family:sans-serif; max-width:500px; margin:auto;'>
+                <h2 style='color:#e65100;'>Complaint Forwarded to You</h2>
+                <p><strong>Ticket:</strong> {WebUtility.HtmlEncode(complaint.TicketNumber)}</p>
+                <p><strong>Customer:</strong> {WebUtility.HtmlEncode(complaint.CustomerName)}</p>
+                <p><strong>Type:</strong> {WebUtility.HtmlEncode(complaint.ComplaintType ?? "")}</p>
+                <p><strong>Description:</strong> {WebUtility.HtmlEncode(complaint.Description)}</p>
+                <p><strong>Admin Notes:</strong> {WebUtility.HtmlEncode(adminNotes)}</p>
+                <p>Please login to your dashboard and respond to this complaint.</p>
+            </div>"
+                );
+            }
 
             return Json(new { success = true });
         }
 
-        
+        [HttpPost]
+        public async Task<IActionResult> SellerRespond(
+            int complaintId, string response, IFormFile? proofImage)
+        {
+            var email = HttpContext.Session.GetString("UserEmail");
+            if (string.IsNullOrEmpty(email))
+                return Json(new { error = "Unauthorized" });
+
+            response = (response ?? "").Trim();
+            if (response.Length < 10 || response.Length > 1000)
+                return Json(new { error = "Response must be between 10 and 1000 characters." });
+
+            var complaint = _context.Complaints.Find(complaintId);
+            if (complaint == null) return Json(new { error = "Not found" });
+
+            var myShop = _context.SellerShops.FirstOrDefault(s => s.SellerEmail.ToLower() == email.ToLower());
+            if (myShop == null || !string.Equals(myShop.ShopName, complaint.SellerName, StringComparison.OrdinalIgnoreCase))
+                return Json(new { error = "You are not authorized to respond to this complaint." });
+
+            string? proofUrl = null;
+            if (proofImage != null && proofImage.Length > 0)
+            {
+                if (proofImage.Length > 5 * 1024 * 1024)
+                    return Json(new { error = "File must be smaller than 5 MB." });
+
+                var allowedExt = new[] { ".jpg", ".jpeg", ".png", ".webp", ".pdf" };
+                var ext = Path.GetExtension(proofImage.FileName).ToLowerInvariant();
+                if (!allowedExt.Contains(ext))
+                    return Json(new { error = "Only JPG, PNG, WEBP or PDF files are allowed." });
+
+                var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "complaints");
+                Directory.CreateDirectory(folder);
+                var fileName = Guid.NewGuid().ToString() + ext;
+
+                using (var stream = new FileStream(Path.Combine(folder, fileName), FileMode.Create))
+                {
+                    await proofImage.CopyToAsync(stream);
+                }
+                proofUrl = "/complaints/" + fileName;
+            }
+
+            complaint.SellerResponse = response;
+            complaint.SellerProofImageUrl = proofUrl;
+            complaint.Status = "SellerResponded";
+            complaint.UpdatedAt = DateTime.Now;
+            _context.SaveChanges();
+
+            if (!string.IsNullOrEmpty(complaint.CustomerEmail))
+            {
+                SendEmail(
+                    complaint.CustomerEmail,
+                    "Update on Your Complaint — Artisan Valley",
+                    $@"<div style='font-family:sans-serif; max-width:500px; margin:auto;'>
+                <h2 style='color:#a64d79;'>Complaint Update</h2>
+                <p>Ticket: <strong>{WebUtility.HtmlEncode(complaint.TicketNumber)}</strong></p>
+                <p>The seller has responded to your complaint.</p>
+                <p><strong>Seller Response:</strong> {WebUtility.HtmlEncode(response)}</p>
+                <p>Please login to confirm if your issue is resolved.</p>
+            </div>"
+                );
+            }
+
+            return Json(new { success = true });
+        }
+
         [HttpPost]
         public IActionResult AdminResolve(int complaintId, string notes)
         {
             if (HttpContext.Session.GetString("AdminEmail") == null)
                 return Json(new { error = "Unauthorized" });
 
+            notes = (notes ?? "").Trim();
+            if (notes.Length > 1000)
+                return Json(new { error = "Notes cannot exceed 1000 characters." });
+
             var complaint = _context.Complaints.Find(complaintId);
             if (complaint == null) return Json(new { error = "Not found" });
+
+            if (complaint.Status == "Fake" || complaint.Status == "Resolved")
+                return Json(new { error = "This complaint is already closed." });
 
             complaint.Status = "Resolved";
             complaint.AdminNotes = notes;
@@ -269,19 +435,18 @@ namespace customerseller.Controllers
             complaint.UpdatedAt = DateTime.Now;
             _context.SaveChanges();
 
-           
             if (!string.IsNullOrEmpty(complaint.CustomerEmail))
             {
                 SendEmail(
                     complaint.CustomerEmail,
                     "Your Complaint is Resolved — Artisan Valley",
                     $@"<div style='font-family:sans-serif; max-width:500px; margin:auto;'>
-                        <h2 style='color:#2e7d32;'>Complaint Resolved ✅</h2>
-                        <p>Ticket: <strong>{complaint.TicketNumber}</strong></p>
-                        <p>Your complaint has been resolved by admin.</p>
-                        <p><strong>Notes:</strong> {notes}</p>
-                        <p>Thank you for your patience.</p>
-                    </div>"
+                <h2 style='color:#2e7d32;'>Complaint Resolved ✅</h2>
+                <p>Ticket: <strong>{WebUtility.HtmlEncode(complaint.TicketNumber)}</strong></p>
+                <p>Your complaint has been resolved by admin.</p>
+                <p><strong>Notes:</strong> {WebUtility.HtmlEncode(notes)}</p>
+                <p>Thank you for your patience.</p>
+            </div>"
                 );
             }
 
@@ -292,23 +457,26 @@ namespace customerseller.Controllers
         {
             try
             {
+                var fromEmail = _config["EmailSettings:FromEmail"];
+                var appPassword = _config["EmailSettings:AppPassword"];
+                var smtpHost = _config["EmailSettings:SmtpHost"];
+                var smtpPort = int.Parse(_config["EmailSettings:SmtpPort"]);
+
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Artisan Valley",
-                    "artisanvalley.store@gmail.com"));
+                message.From.Add(new MailboxAddress("Artisan Valley", fromEmail));
                 message.To.Add(new MailboxAddress("", to));
                 message.Subject = subject;
                 message.Body = new TextPart("html") { Text = body };
 
                 using var client = new SmtpClient();
-                client.Connect("smtp.gmail.com", 587,
-                    MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com",
-                    "esphtmdtnnptlhuo");
+                client.Connect(smtpHost, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+                client.Authenticate(fromEmail, appPassword);
                 client.Send(message);
                 client.Disconnect(true);
             }
             catch { }
         }
+
         [HttpPost]
         public IActionResult DeleteComplaint(int complaintId)
         {
@@ -317,6 +485,9 @@ namespace customerseller.Controllers
 
             var complaint = _context.Complaints.Find(complaintId);
             if (complaint == null) return Json(new { error = "Not found" });
+
+            if (complaint.Status == "Fake")
+                return Json(new { error = "Fake complaints cannot be deleted because they count as customer strikes." });
 
             if (!string.IsNullOrEmpty(complaint.EvidenceImageUrl))
             {

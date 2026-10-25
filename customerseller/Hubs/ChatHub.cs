@@ -27,6 +27,12 @@ namespace customerseller.Hubs
 
         public async Task JoinConversation(int conversationId)
         {
+            var email = GetSessionEmail();
+            if (string.IsNullOrEmpty(email)) return;
+
+            var conv = _context.Conversations.FirstOrDefault(c => c.Id == conversationId);
+            if (conv == null || (conv.User1Email != email && conv.User2Email != email)) return;
+
             await Groups.AddToGroupAsync(Context.ConnectionId, "conv_" + conversationId);
         }
 
@@ -50,6 +56,14 @@ namespace customerseller.Hubs
             if (conversation.User1Email != senderEmail && conversation.User2Email != senderEmail)
                 return;
 
+            if (messageText.Length > 2000) return;
+
+            var otherRoleCheck = conversation.User1Email == senderEmail
+                ? conversation.User2Role
+                : conversation.User1Role;
+            if (!ChatPermissions.IsAllowed(senderRole, otherRoleCheck))
+                return;
+
             var message = new Message
             {
                 ConversationId = conversationId,
@@ -58,7 +72,6 @@ namespace customerseller.Hubs
                 MessageText = messageText.Trim(),
                 IsRead = false
             };
-
             _context.Messages.Add(message);
             conversation.LastMessageAt = System.DateTime.Now;
             _context.SaveChanges();
@@ -125,33 +138,28 @@ namespace customerseller.Hubs
             var session = Context.GetHttpContext()?.Session;
             if (session == null) return null;
 
-            var email = session.GetString("UserEmail");
+            var email = session.GetString("AdminEmail");
+            if (!string.IsNullOrEmpty(email)) return email;
+
+            email = session.GetString("ModeratorEmail");
             if (!string.IsNullOrEmpty(email)) return email;
 
             email = session.GetString("CourierEmail");
             if (!string.IsNullOrEmpty(email)) return email;
 
-            email = session.GetString("AdminEmail");
-            if (!string.IsNullOrEmpty(email)) return email;
-
-            email = session.GetString("ModeratorEmail");
-            return email;
+            return session.GetString("UserEmail");
         }
-
         private string GetSessionRole()
         {
             var session = Context.GetHttpContext()?.Session;
             if (session == null) return null;
 
-            var email = session.GetString("UserEmail");
-            if (!string.IsNullOrEmpty(email)) return session.GetString("UserRole");
-
-            if (!string.IsNullOrEmpty(session.GetString("CourierEmail"))) return "Courier";
             if (!string.IsNullOrEmpty(session.GetString("AdminEmail"))) return "Admin";
             if (!string.IsNullOrEmpty(session.GetString("ModeratorEmail")))
                 return session.GetString("ModeratorRole") ?? "Moderator";
+            if (!string.IsNullOrEmpty(session.GetString("CourierEmail"))) return "Rider";
 
-            return null;
+            return session.GetString("UserRole");
         }
     }
 }

@@ -17,9 +17,9 @@ namespace customerseller.Models
 
         public DbSet<ModeratorSetting> ModeratorSettings { get; set; }
 
-        public DbSet<CourierCompany> CourierCompanies { get; set; }
+		public DbSet<RiderCompany> RiderCompanies { get; set; }
 
-        public DbSet<SellerShop> SellerShops { get; set; }
+		public DbSet<SellerShop> SellerShops { get; set; }
         public DbSet<Complaint> Complaints { get; set; }
 
         public DbSet<SubCategoryVideo> SubCategoryVideos { get; set; }

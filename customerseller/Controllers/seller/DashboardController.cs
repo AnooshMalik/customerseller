@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace SELLERMVC.Controllers
+namespace customerseller.Controllers
 {
     public class DashboardController : Controller
     {
@@ -167,25 +167,119 @@ namespace SELLERMVC.Controllers
             }
             ordersReader.Close();
 
+            double sellerAvgRating = 0;
+            var ratingCmd = new Microsoft.Data.SqlClient.SqlCommand(
+                "SELECT AVG(CAST(Rating AS FLOAT)) FROM Reviews WHERE SellerEmail = @email", con);
+            ratingCmd.Parameters.AddWithValue("@email", email);
+            var ratingResult = ratingCmd.ExecuteScalar();
+            if (ratingResult != null && ratingResult != DBNull.Value)
+                sellerAvgRating = Convert.ToDouble(ratingResult);
+            var db = HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+            var inv = System.Globalization.CultureInfo.InvariantCulture;
+
+            var orderFeed = sellerOrders
+     .Where(o => o.Status != "Cancelled" && o.Status != "Delivered")
+     .Take(5)
+                .Select(o => new
+                {
+                    When = o.OrderDate,
+                    Item = new SaleActivity
+                    {
+                        Detail = $"🛒 Order #{o.OrderId} — {o.CustomerName} · {o.ProductTitle} x{o.Quantity} · {o.Status} · {o.OrderDate.ToString("dd MMM, h:mm tt", inv)}",
+                        Amount = $"Rs. {(o.Price * o.Quantity):N0}"
+                    }
+                })
+                .ToList();
+
+            var complaintFeed = db.Complaints
+                               .Where(c => c.SellerName.ToLower() == shopName.ToLower()
+                         && c.Status != "Open" && c.Status != "Fake"
+                         && c.Status != "Resolved")
+                .OrderByDescending(c => c.CreatedAt)
+                .Take(5)
+                .ToList()
+                .Select(c => new
+                {
+                    When = c.CreatedAt,
+                    Item = new SaleActivity
+                    {
+                        Detail = $"🚩 Complaint {c.TicketNumber} — {c.CustomerName} · {c.CreatedAt.ToString("dd MMM, h:mm tt", inv)}",
+                        Amount = c.Status == "Forwarded" ? "Response needed" : c.Status
+                    }
+                })
+                .ToList();
+
+            var recentFeed = orderFeed
+                .Concat(complaintFeed)
+                .OrderByDescending(x => x.When)
+                .Take(8)
+                .Select(x => x.Item)
+                .ToList();
             var dashboardData = new DashboardViewModel
             {
                 SellerName = HttpContext.Session.GetString("UserName") ?? "",
                 ShopName = shopName,
                 AccountStatus = categories,
-                NetRevenue = sellerOrders.Sum(o => o.Price * o.Quantity),  
+                NetRevenue = sellerOrders.Where(o => o.Status == "Delivered").Sum(o => o.Price * o.Quantity),
                 RevenueGrowth = 0,
-                TotalOrders = sellerOrders.Count,  
-                PendingOrders = sellerOrders.Count(o => o.Status == "Processing"),  
-                Rating = 0.0,
+                TotalOrders = sellerOrders.Count,
+                PendingOrders = sellerOrders.Count(o => o.Status == "Pending" || o.Status == "Placed" || o.Status == "Processing"),
+                Rating = Math.Round(sellerAvgRating, 1),
                 LiveVisitors = 0,
-                RecentSales = new List<SaleActivity>(),
+                RecentSales = recentFeed,
                 SellerOrders = sellerOrders  
             };
 
             return View("~/Views/Seller/Dashboard/Dashboard.cshtml", dashboardData);
         }
 
+        public IActionResult Customers()
+        {
+            var email = HttpContext.Session.GetString("UserEmail");
+            var role = HttpContext.Session.GetString("UserRole");
+            if (string.IsNullOrEmpty(email) || role != "Seller")
+                return RedirectToAction("Index", "Home");
 
+            var rows = new List<CustomerOrderRow>();
 
+            using var con = new Microsoft.Data.SqlClient.SqlConnection(
+                HttpContext.RequestServices
+                    .GetRequiredService<ApplicationDbContext>()
+                    .Database.GetConnectionString());
+            con.Open();
+
+            var cmd = new Microsoft.Data.SqlClient.SqlCommand(@"
+SELECT o.OrderId, o.FirstName, o.LastName, o.CustomerPhone, o.CustomerAddress, o.Address, o.Status, o.OrderDate,
+ci.Title, ci.Quantity, ci.Price
+                FROM Orders o
+                INNER JOIN CartItems ci ON o.OrderId = ci.OrderId
+                INNER JOIN Products p ON ci.ProductId = p.Id
+                WHERE p.SellerEmail = @email
+                ORDER BY o.OrderDate DESC", con);
+            cmd.Parameters.AddWithValue("@email", email);
+
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                rows.Add(new CustomerOrderRow
+                {
+                    OrderId = r["OrderId"].ToString() ?? "",
+                    CustomerName = r["FirstName"] + " " + r["LastName"],
+                    Phone = r["CustomerPhone"]?.ToString() ?? "",
+                    Address = !string.IsNullOrWhiteSpace(r["CustomerAddress"]?.ToString())
+                                ? r["CustomerAddress"].ToString()!
+                                : (r["Address"]?.ToString() ?? ""),
+                    ProductTitle = r["Title"].ToString() ?? "",
+                    Quantity = Convert.ToInt32(r["Quantity"]),
+                    Price = Convert.ToDecimal(r["Price"]),
+                    Status = r["Status"]?.ToString() ?? "",
+                    OrderDate = Convert.ToDateTime(r["OrderDate"])
+                });
+            }
+
+            return View("~/Views/Seller/Dashboard/Customers.cshtml", rows);
+        }
     }
 }
+
+    

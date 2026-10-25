@@ -6,12 +6,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Artisan Valley</title>
     <meta name="description" content="Artisan Valley — Discover handmade treasures crafted by skilled artisans. Shop fabric, wood, clay, jewels, and more." />
-    <link rel="preload" as="image" href="~/customer/images/banner1.jpeg" fetchpriority="high">
-    <link rel="icon" href="/customer/images/logoo.png" />
-    <link rel="stylesheet" href="~/customer/css/site.css" />
+   <link rel="icon" href="/customer/images/logoo.png" />
+    <link rel="stylesheet" href="~/customer/css/site.css" asp-append-version="true" />
    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"></noscript>
+<link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/webfonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+            @@font-face {
+                font-family: "Font Awesome 6 Free";
+                font-style: normal;
+                font-weight: 900;
+                font-display: swap;
+                src: url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/webfonts/fa-solid-900.woff2) format("woff2");
+            }
+
+            @@font-face {
+                font-family: "Font Awesome 6 Brands";
+                font-style: normal;
+                font-weight: 400;
+                font-display: swap;
+                src: url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/webfonts/fa-brands-400.woff2) format("woff2");
+            }
+                        @@media (max-width: 768px) {
+                .footer {
+                    padding-bottom: 110px !important;
+                }
+            }
+    </style>
+
 </head>
 <body>
     @{
@@ -24,10 +46,10 @@
                      currentPath.Contains("/account/loginverifyotp") ||
                      currentPath.Contains("/admin/") ||
                      currentPath.Contains("/moderator/") ||
-                     currentPath.Contains("/courier/");
+                    currentPath.Contains("/rider/");
     }
 
-    <div class="topbar">A valley of handmade treasures.</div>
+        <div class="topbar">A valley of handmade treasures. &nbsp;|&nbsp; 🚚 Delivering in Rawalpindi only</div>
 
     <div class="infobar">
         <div class="infobar-left">
@@ -35,12 +57,11 @@
         </div>
 
         <a asp-controller="Home" asp-action="Index" class="infobar-center" style="text-decoration: none; color: inherit;">
-            <img src="/customer/images/logoo.png" alt="Artisan Valley" style="height: 80px; width: auto;" />
+            <img src="/customer/images/logoo.png" alt="Artisan Valley" height="80" width="80" style="height: 80px; width: auto;" />
         </a>
 
         <div class="infobar-right">
-            <a href="#" id="searchIcon" aria-label="Search products"><i class="fa-solid fa-magnifying-glass"></i></a>
-
+                       <a href="#" id="searchIcon" aria-label="Search products" style="margin-right:14px;"><i class="fa-solid fa-magnifying-glass"></i></a>
             @if (Context.Session.GetString("UserEmail") != null)
             {
                 @if (Context.Session.GetString("UserRole") == "Seller")
@@ -66,7 +87,7 @@
                 <a href="#" id="loginIcon" aria-label="Login"><i class="fa-solid fa-user"></i></a>
             }
 
-            @if (Context.Session.GetString("UserEmail") != null && Context.Session.GetString("UserRole") != "Seller" && currentPath.Contains("/product/details"))
+            @if (Context.Session.GetString("UserEmail") != null && Context.Session.GetString("UserRole") != "Seller" && currentPath.Contains("/products/details"))
             {
                <a href="/Chat/Messages" onclick="return checkChatLogin(event)" aria-label="Messages" style="position:relative; margin-right:8px;">
                     <i class="fa-solid fa-comment-dots"></i>
@@ -125,13 +146,19 @@
                 <ul>
                     <li><a asp-controller="Home" asp-action="About">About us</a></li>
                     <li><a asp-controller="Home" asp-action="Contact">Contact Us</a></li>
-                    <li><a asp-controller="Cart" asp-action="OrderConfirmed">My Order</a></li>
+                   <li>
+   <a asp-controller="Cart" asp-action="TrackOrder"
+       onclick="return blockSeller(event, 'My Orders', 'Sellers cannot place orders, so there is no order history here. Please use a customer account.')">
+        My Order
+    </a>
+</li>
                     <li>
-                        <a asp-controller="Cart" asp-action="Complaint" onclick="return checkLoginRequired(event, '/Cart/Complaint')">
-                            File a Complaint
-                        </a>
+                     <a asp-controller="Cart" asp-action="Complaint"
+   onclick="return blockSeller(event, 'Complaints', 'Sellers cannot file complaints. Please use a customer account.') && checkLoginRequired(event, '/Cart/Complaint')">
+    File a Complaint
+</a>
                     </li>
-                    <li><a asp-controller="Courier" asp-action="Login">Courier Partner Login</a></li>
+                <li><a asp-controller="Rider" asp-action="Login">Rider Login</a></li>   
                 </ul>
             </div>
             <div class="footer-col">
@@ -143,26 +170,33 @@
                 </ul>
             </div>
             <div class="footer-col">
-                <form id="newsletterForm" style="display:flex; align-items:center; margin-bottom:8px; margin-top:36px;">
-                    <label for="newsletterEmail" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Newsletter email address</label>
-                    <input type="email" name="email" id="newsletterEmail" placeholder="Your email address" required
-                           style="padding:7px 10px; font-size:0.8rem; border:none; border-radius:4px 0 0 4px; outline:none; width:155px; color:#333; background:#fff; height:34px; box-sizing:border-box;">
-                <button type="submit" style="height:34px; padding:0 12px; background:#fff; color:#a64d79; border:none; border-radius:0 4px 4px 0; font-weight:700; cursor:pointer; font-size:0.8rem; box-sizing:border-box;">
-                Enter
-            </button>
-        </form>
+               <form id="newsletterForm" style="display:flex; align-items:center; margin-bottom:8px; margin-top:30px; max-width:340px;">
+    <label for="newsletterEmail" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Newsletter email address</label>
+    <input type="email" name="email" id="newsletterEmail" placeholder="Your email address" required
+           style="flex:1; min-width:0; padding:10px 14px; font-size:0.95rem; border:none; border-radius:6px 0 0 6px; outline:none; color:#333; background:#fff; height:48px; box-sizing:border-box;">
+    <button type="submit" style="height:48px; padding:0 22px; background:#fff; color:#a64d79; border:none; border-left:1px solid #eee; border-radius:0 6px 6px 0; font-weight:700; cursor:pointer; font-size:0.95rem; box-sizing:border-box;">
+        Subscribe
+    </button>
+</form>
         <div id="newsletterMsg" style="font-size:0.75rem; margin-bottom:8px; min-height:14px;"></div>
-                <div class="footer-social">
-                    <a href="https://www.facebook.com/" aria-label="Follow us on Facebook"><i class="fab fa-facebook-f"></i></a>
-<a href="https://www.instagram.com/" aria-label="Follow us on Instagram"><i class="fab fa-instagram"></i></a>
-                </div>
+<div class="footer-social">
+    <a href="https://www.facebook.com/ArtisanValley" aria-label="Follow us on Facebook" target="_blank" rel="noopener"><i class="fab fa-facebook-f"></i></a>
+<a href="https://www.instagram.com/ArtisanValley" aria-label="Follow us on Instagram" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
+</div>
             </div>
         </div>
-        <div style="border-top:1px solid rgba(255,255,255,0.4); margin-top:20px;">
-            <div style="text-align:center; padding:18px 0; font-size:0.9rem; color:#fff; width:100%;">
+               <div style="border-top:1px solid rgba(255,255,255,0.4); margin-top:20px;">
+                       <div style="text-align:center; padding:14px 0 0; font-size:0.9rem; color:#fff; width:100%;">
+                🚚 Delivery available in Rawalpindi only
+            </div>
+            <div style="text-align:center; padding:10px 0 18px; font-size:0.9rem; color:#fff; width:100%;">
                 © @DateTime.Now.Year Artisan Valley. All rights reserved.
             </div>
-        </div>
+                      <div class="footer-admin-links" style="text-align:center; padding:6px 0 14px;">
+                <a href="/Admin/Login" style="color:rgba(255,255,255,0.7); font-size:0.8rem; text-decoration:none; margin:0 10px; padding:8px 4px; display:inline-block;">Admin</a>
+                <span style="color:rgba(255,255,255,0.4);">|</span>
+                <a href="/Moderator/Login" style="color:rgba(255,255,255,0.7); font-size:0.8rem; text-decoration:none; margin:0 10px; padding:8px 4px; display:inline-block;">Moderator</a>
+            </div>
     </footer>
 
   
@@ -211,19 +245,11 @@
                 <button type="submit" class="login-btn">Login</button>
                 <p class="extra-links">
                     New customer? <a href="#" id="createAccountLink">Create your account</a><br><br>
-                    Lost password? <a href="#" id="createpasLink">Recover password</a><br><br>
-                    Are you a seller? <a href="/Account/SellerRegister" style="color:#a64d79; font-weight:700;">Login Here</a>
+                   Forgot password? <a href="#" id="createpasLink">Recover password</a><br><br>
+                Are you a seller? <a href="/Account/Login" style="color:#a64d79; font-weight:700;">Login Here</a>   
                 </p>
             </form>
-            <div style="margin-top:15px; border-top:1px solid #f0f0f0; padding-top:12px; text-align:center;">
-                <a href="/Admin/Login" style="color:#bbb; font-size:0.75rem; text-decoration:none; display:inline-block; margin:0 8px;">
-                    <i class="fa-solid fa-shield-halved" style="font-size:0.7rem;"></i> Admin
-                </a>
-                <span style="color:#eee;">|</span>
-                <a href="/Moderator/Login" style="color:#bbb; font-size:0.75rem; text-decoration:none; display:inline-block; margin:0 8px;">
-                    <i class="fa-solid fa-video" style="font-size:0.7rem;"></i> Moderator
-                </a>
-            </div>
+            
         </div>
 
       
@@ -275,7 +301,7 @@
         <div id="recoverSidebar" class="register-sidebar">
             <button id="closeRecover" class="close-register" aria-label="Close reset password">&times;</button>
             <h2>RESET YOUR PASSWORD</h2>
-            <p>Lost your password? Please enter your email address.<br><br>You will receive a link to create a new password via email.</p>
+            <p>Forgot your password? Please enter your email address.<br><br>You will receive a link to create a new password via email.</p>
             @if (resetMsgVal != null)
             {
                 bool isResetError = resetMsgVal.Contains("No account") || resetMsgVal.Contains("valid email");
@@ -300,24 +326,35 @@
     <div id="cartOverlay" class="cart-overlay"></div>
     <div id="cartSidebar" class="cart-sidebar">
         <button id="closeCart" class="close-cart" aria-label="Close cart">&times;</button>
-        <h2 style="margin-top:8px; font-size:1.22rem; font-weight:700;">Your Cart</h2>
+       <h2>Your Cart</h2>
         <div id="emptyCart" class="empty-cart">
             <p>🛒 Your cart is empty</p>
         </div>
         <div id="cartItems" style="padding:20px 0 0 0;"></div>
         <div id="cartFooter" style="margin-top: auto;">
-            <div id="cartTotal" style="font-weight:700; font-size:1.09rem; padding:16px 0 12px 0; border-top:1px solid #ececec;"></div>
+                       <div id="cartTotal" style="font-weight:700; font-size:1.09rem; padding:16px 0 6px 0; border-top:1px solid #ececec;"></div>
+            <div style="font-size:0.8rem; color:#856404; margin-bottom:10px;">📍 We deliver in Rawalpindi only</div>
             <div class="cart-buttons">
-                <a href="/Cart/Index" class="cart-btn" id="viewCartBtn" style="text-align:center; text-decoration:none; display:block;"> Cart</a>
-                <a href="/Cart/Checkout" class="cart-btn checkout" id="checkoutBtn" style="text-align:center; text-decoration:none; display:block;">Checkout</a>
+              <a href="/Cart/Index" class="cart-btn" id="viewCartBtn" style="text-align:center; text-decoration:none; display:block;">View Cart</a>
+                <a href="/Cart/Checkout" class="cart-btn checkout" id="checkoutBtn" onclick="localStorage.removeItem('buyNowItem')" style="text-align:center; text-decoration:none; display:block;">Checkout</a>
             </div>
         </div>
     </div>
-   @if (currentPath != "/" && currentPath != "/home" && currentPath != "/home/index")
+    @{
+        bool isProductArea = currentPath.StartsWith("/products");
+        bool isSellerProductPage = currentPath.Contains("/sellerproduct") ||
+                                   currentPath.Contains("/addproduct") ||
+                                   currentPath.Contains("/editproduct") ||
+                                   currentPath.Contains("/bulkupload") ||
+                                   currentPath.Contains("/uploadsubcategoryvideo") ||
+                                   currentPath.Contains("/downloadtemplate");
+        bool showChatWidget = isProductArea && !isSellerProductPage;
+    }
+    @if (showChatWidget)
     {
         @await Html.PartialAsync("_ChatWidget")
     }
-    <script src="~/customer/js/site.js"></script>
+    <script src="~/customer/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>
@@ -403,10 +440,14 @@
 
                     html += `
                     <div class="cart-item" style="display:flex; align-items:center; gap:12px; margin-bottom:15px; border-bottom:1px solid #f0f0f0; padding-bottom:12px;">
-                        <img src="${item.img}" style="width:60px; height:60px; object-fit:cover; border-radius:8px;">
-                        <div style="flex-grow:1;">
-                            <h6 style="margin:0; font-size:0.95rem; font-weight:600; color:#222;">${item.title}</h6>
-                            <p style="margin:4px 0 0; font-size:0.85rem; color:#a64d79; font-weight:700;">Rs. ${itemPrice}</p>
+                    <a href="/Products/Details/${item.id}" style="display:block; flex-shrink:0;">
+    <img src="${item.img}" style="width:60px; height:60px; object-fit:cover; border-radius:8px; display:block;">
+</a>
+<div style="flex-grow:1;">
+    <a href="/Products/Details/${item.id}" style="text-decoration:none; color:inherit;">
+        <h6 style="margin:0; font-size:0.95rem; font-weight:600; color:#222; cursor:pointer;">${item.title}</h6>
+    </a>    
+                    <p style="margin:4px 0 0; font-size:0.85rem; color:#a64d79; font-weight:700;">PKR ${itemPrice}</p>
                             <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
                                 <button onclick="changeCartQty(${index}, -1)" style="width:26px; height:26px; border-radius:4px; border:1px solid #ddd; background:#f9eef4; color:#a64d79; font-size:1rem; font-weight:700; cursor:pointer; line-height:1;">−</button>
                                 <span style="font-weight:600; font-size:0.95rem;">${itemQty}</span>
@@ -418,7 +459,7 @@
                 });
 
                 cartItemsDiv.innerHTML = html;
-                if (cartTotalDiv) cartTotalDiv.innerHTML = "Subtotal: Rs. " + total.toLocaleString();
+               if (cartTotalDiv) cartTotalDiv.innerHTML = "Subtotal: PKR " + total.toLocaleString();
                 if (typeof updateCartCount === 'function') updateCartCount();
             }
 
@@ -548,8 +589,98 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 });
-        loadChatUnreadCount();
-        setInterval(loadChatUnreadCount, 10000);
+document.addEventListener("DOMContentLoaded", function () {
+    const inp = document.getElementById('loginReturnUrl');
+    if (inp && !inp.value) {
+        var url = window.location.pathname + window.location.search;
+        if (window.location.pathname.toLowerCase().indexOf('/products/details') === 0) {
+            url += '#reviews';
+        }
+        inp.value = url;
+    }
+});
+
+           if (document.getElementById('chatUnreadCount')) {
+            loadChatUnreadCount();
+            setInterval(loadChatUnreadCount, 10000);
+        }
     </script>
-</body>
+<style>
+    .av-modal-overlay {
+        position: fixed; inset: 0; background: rgba(26, 26, 46, 0.55);
+        display: none; align-items: center; justify-content: center;
+        z-index: 100000; padding: 20px; backdrop-filter: blur(2px);
+    }
+    .av-modal-overlay.open { display: flex; animation: avFade .2s ease; }
+    .av-modal {
+        background: #fff; border-radius: 16px; width: 100%; max-width: 400px;
+        padding: 32px 28px 26px; text-align: center;
+        box-shadow: 0 20px 60px rgba(0,0,0,.25);
+        font-family: 'Segoe UI', sans-serif; animation: avPop .25s ease;
+    }
+    .av-modal-icon {
+        width: 68px; height: 68px; border-radius: 50%; background: #fdf0f5;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 16px; font-size: 1.9rem;
+    }
+    .av-modal h3 { margin: 0 0 8px; font-size: 1.2rem; font-weight: 700; color: #1a1a2e; }
+    .av-modal p  { margin: 0 0 22px; font-size: .92rem; color: #777; line-height: 1.6; }
+    .av-modal-btn {
+        width: 100%; padding: 12px; border: none; border-radius: 10px;
+        background: #a64d79; color: #fff; font-size: .95rem; font-weight: 700;
+        cursor: pointer; font-family: inherit; transition: background .2s;
+    }
+    .av-modal-btn:hover { background: #873b63; }
+    @@keyframes avFade { from { opacity: 0 } to { opacity: 1 } }
+    @@keyframes avPop  { from { transform: translateY(12px) scale(.96); opacity: 0 } to { transform: none; opacity: 1 } }
+</style>
+
+<div class="av-modal-overlay" id="avSellerModal" role="dialog" aria-modal="true" aria-labelledby="avModalTitle">
+    <div class="av-modal">
+        <div class="av-modal-icon">🏪</div>
+        <h3 id="avModalTitle">Not available for sellers</h3>
+        <p id="avModalMsg">This feature is only for customers.</p>
+        <button type="button" class="av-modal-btn" onclick="closeSellerPopup()">Got it</button>
+    </div>
+</div>
+
+<script>
+    window.IS_SELLER = @(Context.Session.GetString("UserRole") == "Seller" ? "true" : "false");
+
+    function showSellerPopup(title, msg) {
+        if (title) document.getElementById('avModalTitle').textContent = title;
+        if (msg)   document.getElementById('avModalMsg').textContent = msg;
+        document.getElementById('avSellerModal').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeSellerPopup() {
+        document.getElementById('avSellerModal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    function blockSeller(e, title, msg) {
+        if (window.IS_SELLER) {
+            e.preventDefault();
+            showSellerPopup(title, msg);
+            return false;
+        }
+        return true;
+    }
+    document.getElementById('avSellerModal').addEventListener('click', function (e) {
+        if (e.target === this) closeSellerPopup();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeSellerPopup();
+    });
+
+    @if (TempData["SellerBlockedMsg"] != null)
+    {
+        <text>
+        document.addEventListener('DOMContentLoaded', function () {
+            showSellerPopup('Not available for sellers',
+                @Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["SellerBlockedMsg"]?.ToString())));
+        });
+        </text>
+    }
+</script>
+    </body>
 </html>

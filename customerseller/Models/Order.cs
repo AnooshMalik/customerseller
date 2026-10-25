@@ -31,10 +31,10 @@ namespace customerseller.Models
         public List<CartItem> Items { get; set; } = new();
         public List<TrackingStep> TrackingTimeline { get; set; } = new();
 
-        public int? CourierCompanyId { get; set; }
+        public int? RiderCompanyId { get; set; }
         public string? TrackingNumber { get; set; }
-        public string? CourierStatus { get; set; }
-        public DateTime? CourierAssignedAt { get; set; }
+        public string? RiderStatus { get; set; }
+        public DateTime? RiderAssignedAt { get; set; }
         public DateTime? LastUpdatedAt { get; set; }
         public bool? PaymentReceived { get; set; }
         public string? PaymentNotReceivedReason { get; set; }
@@ -44,5 +44,6 @@ namespace customerseller.Models
         public string? CustomerPhone { get; set; }
         public string? CustomerAddress { get; set; }
         public decimal? DeliveryFee { get; set; }
+        public string? ParentOrderId { get; set; }
     }
 }

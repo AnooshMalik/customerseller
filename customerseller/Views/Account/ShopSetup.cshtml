@@ -21,13 +21,19 @@
         .form-group label { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #a64d79; margin-bottom: 7px; }
         .form-group input { width: 100%; padding: 11px 14px; border: 1.5px solid #ddd6fe; border-radius: 10px; font-size: 0.9rem; font-family: inherit; outline: none; background: #f5f3ff; transition: border 0.2s; }
         .form-group input:focus { border-color: #a64d79; background: #fff; }
+        .form-group input.invalid { border-color: #e74c3c; background: #fff5f5; }
+        .req { color: #e74c3c; }
+        .field-error { display: none; color: #c62828; font-size: 0.78rem; margin-top: 5px; }
+        .field-error.show { display: block; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .section-label { font-size: 0.8rem; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; margin-top: 6px; padding-bottom: 8px; border-bottom: 1px solid #ede9fe; }
         .main-cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
         .main-cat-item { background: #f5f3ff; border: 1.5px solid #ddd6fe; border-radius: 10px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; font-size: 0.82rem; color: #374151; display: flex; align-items: center; gap: 8px; user-select: none; }
         .main-cat-item.selected { border-color: #a64d79; background: #fdf0f6; color: #a64d79; font-weight: 600; }
+        .main-cat-grid.invalid .main-cat-item { border-color: #e74c3c; }
         .sub-cat-box { display: none; background: #f9f7ff; border: 1.5px solid #ddd6fe; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
         .sub-cat-box.show { display: block; }
+        .sub-cat-box.invalid { border-color: #e74c3c; background: #fff5f5; }
         .sub-cat-title { font-size: 0.78rem; font-weight: 700; color: #a64d79; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
         .sub-cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .sub-cat-item { display: flex; align-items: center; gap: 7px; background: #fff; border: 1.5px solid #e0d9f7; border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 0.78rem; color: #374151; transition: all 0.15s; }
@@ -35,18 +41,19 @@
         .sub-cat-item:has(input:checked) { border-color: #a64d79; background: #fdf0f6; color: #a64d79; font-weight: 600; }
         .btn-submit { width: 100%; padding: 13px; background: #a64d79; color: #fff; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.2s; margin-top: 6px; }
         .btn-submit:hover { background: #880e4f; }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
         .error-box { background: #ffebee; color: #c62828; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 0.85rem; border: 1px solid #ffcdd2; }
         .hint { font-size: 0.78rem; color: #6b7280; margin-bottom: 12px; }
-    
+
         @@media (max-width: 480px) {
-    body { padding: 16px 12px; }
-    .setup-header { padding: 20px 18px; }
-    .setup-body { padding: 20px 18px; }
-    .form-row { grid-template-columns: 1fr; }
-    .main-cat-grid { grid-template-columns: repeat(2, 1fr); }
-    .sub-cat-grid { grid-template-columns: repeat(2, 1fr); }
-}
-        </style>
+            body { padding: 16px 12px; }
+            .setup-header { padding: 20px 18px; }
+            .setup-body { padding: 20px 18px; }
+            .form-row { grid-template-columns: 1fr; }
+            .main-cat-grid { grid-template-columns: repeat(2, 1fr); }
+            .sub-cat-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
 </head>
 <body>
 <div class="setup-card">
@@ -98,48 +105,46 @@
         }
         else
         {
-            <div id="validationError" style="display:none;" class="error-box"></div>
-
-            <form asp-action="ShopSetup" asp-controller="Account" method="post" id="setupForm">
+            <form asp-action="ShopSetup" asp-controller="Account" method="post" id="setupForm" novalidate>
                 <div class="section-label">Personal Information</div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Full Name *</label>
-                        <input type="text" name="OwnerName" placeholder="Your full name" value="@userName" required/>
+                        <label for="ownerName">Full Name <span class="req">*</span></label>
+                        <input type="text" name="OwnerName" id="ownerName" placeholder="Your full name" value="@userName" maxlength="50" autocomplete="off" />
+                        <div class="field-error" id="err-ownerName"></div>
                     </div>
                     <div class="form-group">
-                        <label>CNIC *</label>
-                     <input type="text" name="CNIC" id="cnicInput"
-       placeholder="12345-1234567-1" required maxlength="15"
-       pattern="^\d{5}-\d{7}-\d{1}$"
-       title="Format must be: 12345-1234567-1"/>
+                        <label for="cnicInput">CNIC <span class="req">*</span></label>
+                        <input type="text" name="CNIC" id="cnicInput"
+                               placeholder="12345-1234567-1" maxlength="15" inputmode="numeric" autocomplete="off" />
+                        <div class="field-error" id="err-cnicInput"></div>
                     </div>
                 </div>
-                <div class="form-group">
-    <label>Shop Address <span class="req">*</span></label>
-    <input type="text" name="SellerAddress" 
-           placeholder="e.g. Shop 5, Street 3, Raja Bazaar" 
-           required />
-</div>
 
-
-<div class="form-group">
-    <label>Phone Number <span class="req">*</span></label>
-    <input type="text" name="SellerPhone" 
-           id="sellerPhone"
-           placeholder="03XX-XXXXXXX" 
-           maxlength="12"
-           required />
-</div>
                 <div class="form-group">
-                    <label>Shop Name *</label>
-                    <input type="text" name="ShopName" placeholder="Your shop name" required/>
+                    <label for="sellerAddress">Shop Address <span class="req">*</span></label>
+                    <input type="text" name="SellerAddress" id="sellerAddress"
+                           placeholder="e.g. Shop 5, Street 3, Raja Bazaar" maxlength="100" autocomplete="off" />
+                    <div class="field-error" id="err-sellerAddress"></div>
                 </div>
 
-                <div class="section-label">Shop Categories</div>
+                <div class="form-group">
+                    <label for="sellerPhone">Phone Number <span class="req">*</span></label>
+                    <input type="text" name="SellerPhone" id="sellerPhone"
+                           placeholder="03XX-XXXXXXX" maxlength="12" inputmode="numeric" autocomplete="off" />
+                    <div class="field-error" id="err-sellerPhone"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="shopName">Shop Name <span class="req">*</span></label>
+                    <input type="text" name="ShopName" id="shopName" placeholder="Your shop name" maxlength="40" autocomplete="off" />
+                    <div class="field-error" id="err-shopName"></div>
+                </div>
+
+                <div class="section-label" id="categoriesSection">Shop Categories</div>
                 <p class="hint">Click a category to select it, then pick sub-categories:</p>
 
-                <div class="main-cat-grid">
+                <div class="main-cat-grid" id="mainCatGrid">
                     <div class="main-cat-item" onclick="toggleCat('FabricTextile', this)">🧵 Fabric & Textile</div>
                     <div class="main-cat-item" onclick="toggleCat('WoolYarn', this)">🧶 Wool & Yarn</div>
                     <div class="main-cat-item" onclick="toggleCat('Leather', this)">👜 Leather</div>
@@ -151,6 +156,7 @@
                     <div class="main-cat-item" onclick="toggleCat('ResinEpoxy', this)">🔮 Resin & Epoxy</div>
                     <div class="main-cat-item" onclick="toggleCat('MetalWire', this)">⚙️ Metal & Wire</div>
                 </div>
+                <div class="field-error" id="err-categories" style="margin-top:-10px; margin-bottom:14px;"></div>
 
                 <div class="sub-cat-box" id="sub-FabricTextile">
                     <div class="sub-cat-title">🧵 Fabric & Textile</div>
@@ -159,7 +165,6 @@
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="PrintedKurtas"/> Printed Kurtas</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="TieDyeDupattas"/> Tie-Dye Dupattas</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="FabricToteBags"/> Tote Bags</label>
-                       
                     </div>
                 </div>
 
@@ -170,7 +175,6 @@
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="CrochetBags"/> Crochet Bags</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="StorageBaskets"/> Storage Baskets</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Beanies"/> Beanies</label>
-                      
                     </div>
                 </div>
 
@@ -182,7 +186,6 @@
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Belts"/> Belts</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="LeatherKeychains"/> Keychains</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Journals"/> Journals</label>
-                      
                     </div>
                 </div>
 
@@ -195,7 +198,6 @@
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ServingTrays"/> Serving Trays</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="WoodShowpieces"/> Showpieces</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="WoodKeychains"/> Keychains</label>
-                       
                     </div>
                 </div>
 
@@ -207,7 +209,6 @@
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ClayVases"/> Vases</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ClayEarrings"/> Earrings</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ClayFigurines"/> Figurines</label>
-                      
                     </div>
                 </div>
 
@@ -219,7 +220,6 @@
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Rings"/> Rings</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Bangles"/> Bangles</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="JewelEarrings"/> Earrings</label>
-                     
                     </div>
                 </div>
 
@@ -231,7 +231,6 @@
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="PaperFlowers"/> Paper Flowers</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="PaperShowpieces"/> Showpieces</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Scrapbooks"/> Scrapbooks</label>
-           
                     </div>
                 </div>
 
@@ -243,7 +242,6 @@
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Trays"/> Trays</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="DriedBouquets"/> Dried Bouquets</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="Paintings"/> Paintings</label>
-           
                     </div>
                 </div>
 
@@ -255,7 +253,6 @@
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ResinKeychains"/> Keychains</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="WallArt"/> Wall Art</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="ResinServingTrays"/> Serving Trays</label>
-              
                     </div>
                 </div>
 
@@ -267,7 +264,6 @@
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="MetalFigurines"/> Figurines</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="MetalWallArt"/> Wall Art</label>
                         <label class="sub-cat-item"><input type="checkbox" name="Categories" value="CandleHolders"/> Candle Holders</label>
-         
                     </div>
                 </div>
 
@@ -277,7 +273,7 @@
                     <strong>1 Month Free Trial</strong> — After 30 days, PKR 500/month subscription applies.
                 </div>
 
-                <button type="submit" class="btn-submit">
+                <button type="submit" class="btn-submit" id="submitBtn">
                     <i class="fas fa-rocket"></i> Launch My Shop
                 </button>
             </form>
@@ -287,39 +283,108 @@
 </div>
 
 <script>
-    document.getElementById('cnicInput')?.addEventListener('input', function () {
-        let raw = this.value.replace(/[^0-9]/g, '');
-        if (raw.length > 13) raw = raw.slice(0, 13);
-        let formatted = '';
-        if (raw.length <= 5) {
-            formatted = raw;
-        } else if (raw.length <= 12) {
-            formatted = raw.slice(0, 5) + '-' + raw.slice(5);
-        } else {
-            formatted = raw.slice(0, 5) + '-' + raw.slice(5, 12) + '-' + raw.slice(12, 13);
+    
+    const validators = {
+        ownerName: function (v) {
+            v = v.trim();
+            if (!v) return 'Full name is required.';
+            if (v.length < 3) return 'Full name must be at least 3 characters.';
+            if (v.length > 50) return 'Full name must be 50 characters or less.';
+            if (!/^[A-Za-z]+( [A-Za-z]+)*$/.test(v)) return 'Full name must contain letters only (no numbers or symbols).';
+            return '';
+        },
+        cnicInput: function (v) {
+            v = v.trim();
+            if (!v) return 'CNIC is required.';
+            if (!/^\d{5}-\d{7}-\d$/.test(v)) return 'CNIC must be 13 digits in this format: 12345-1234567-1';
+            const raw = v.replace(/-/g, '');
+            const prefix = parseInt(raw.substring(0, 2), 10);
+            if (prefix < 1 || prefix > 61) return 'Invalid CNIC: starting digits are not a valid region code.';
+            if (/^(\d)\1{12}$/.test(raw)) return 'Invalid CNIC number.';
+            return '';
+        },
+        sellerAddress: function (v) {
+            v = v.trim();
+            if (!v) return 'Shop address is required.';
+            if (v.length < 5) return 'Please enter a more complete address (at least 5 characters).';
+            if (v.length > 100) return 'Address must be 100 characters or less.';
+            if (!/[A-Za-z]/.test(v)) return 'Address must contain some letters.';
+            return '';
+        },
+        sellerPhone: function (v) {
+            const digits = v.replace(/\D/g, '');
+            if (!digits) return 'Phone number is required.';
+            if (!digits.startsWith('03')) return 'Phone number must start with 03 (e.g. 0300-1234567).';
+            if (digits.length !== 11) return 'Phone number must be exactly 11 digits (e.g. 0300-1234567).';
+            return '';
+        },
+        shopName: function (v) {
+            v = v.trim();
+            if (!v) return 'Shop name is required.';
+            if (v.length < 3) return 'Shop name must be at least 3 characters.';
+            if (v.length > 40) return 'Shop name must be 40 characters or less.';
+            if (!/^[A-Za-z0-9][A-Za-z0-9 &'.\x40\-]*$/.test(v)) return "Shop name can only contain letters, numbers, spaces and & ' . - \u0040";
+            if (!/[A-Za-z]/.test(v)) return 'Shop name must contain at least one letter.';
+            return '';
         }
-        this.value = formatted;
-    });
+    };
 
-    document.getElementById('cnicInput')?.addEventListener('blur', function () {
-        const pattern = /^\d{5}-\d{7}-\d{1}$/;
-        if (this.value && !pattern.test(this.value)) {
-            this.style.borderColor = '#e74c3c';
-            showError('Invalid CNIC! Format must be: 12345-1234567-1');
+    function showFieldError(id, msg) {
+        const input = document.getElementById(id);
+        const err = document.getElementById('err-' + id);
+        if (!input || !err) return;
+        if (msg) {
+            input.classList.add('invalid');
+            err.textContent = '⚠️ ' + msg;
+            err.classList.add('show');
         } else {
-            this.style.borderColor = '#ddd6fe';
+            input.classList.remove('invalid');
+            err.textContent = '';
+            err.classList.remove('show');
         }
-    });
+    }
 
-    // Phone masking
-    document.getElementById('sellerPhone')?.addEventListener('input', function () {
-        let val = this.value.replace(/\D/g, '');
-        if (val.length > 11) val = val.slice(0, 11);
-        if (val.length >= 2 && !val.startsWith('03')) {
-            val = '03' + val.slice(2);
+    function validateField(id) {
+        const input = document.getElementById(id);
+        if (!input) return '';
+        const msg = validators[id](input.value);
+        showFieldError(id, msg);
+        return msg;
+    }
+
+    
+    function showCatError(msg, boxToHighlight) {
+        const err = document.getElementById('err-categories');
+        document.getElementById('mainCatGrid').classList.toggle('invalid', !!msg && !boxToHighlight);
+        document.querySelectorAll('.sub-cat-box').forEach(b => b.classList.remove('invalid'));
+        if (msg) {
+            err.textContent = '⚠️ ' + msg;
+            err.classList.add('show');
+            if (boxToHighlight) boxToHighlight.classList.add('invalid');
+        } else {
+            err.textContent = '';
+            err.classList.remove('show');
         }
-        this.value = val.length > 4 ? val.slice(0, 4) + '-' + val.slice(4) : val;
-    });
+    }
+
+    function validateCategories() {
+        const selectedMain = document.querySelectorAll('.main-cat-item.selected');
+        if (selectedMain.length === 0) {
+            showCatError('Please select at least one category.', null);
+            return { msg: 'x', el: document.getElementById('mainCatGrid') };
+        }
+        
+        for (const item of selectedMain) {
+            const id = item.getAttribute('onclick').match(/'([^']+)'/)[1];
+            const box = document.getElementById('sub-' + id);
+            if (box.querySelectorAll('input[type="checkbox"]:checked').length === 0) {
+                showCatError('Please pick at least one sub-category in "' + item.textContent.trim() + '" (or unselect that category).', box);
+                return { msg: 'x', el: box };
+            }
+        }
+        showCatError('', null);
+        return null;
+    }
 
     function toggleCat(catId, el) {
         el.classList.toggle('selected');
@@ -330,73 +395,129 @@
             subBox.classList.remove('show');
             subBox.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
+        showCatError('', null);
     }
 
-    document.getElementById('setupForm')?.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const name = document.querySelector('input[name="OwnerName"]').value.trim();
-        const cnic = document.querySelector('input[name="CNIC"]').value.trim();
-        const shop = document.querySelector('input[name="ShopName"]').value.trim();
-        const address = document.querySelector('input[name="SellerAddress"]').value.trim();
-        
-        const phoneRaw = document.getElementById('sellerPhone').value.replace(/\D/g, '').trim();
-        const checked = document.querySelectorAll('input[name="Categories"]:checked');
-
-        // Name
-        if (name.length < 3) { showError('Full name must be at least 3 characters!'); return; }
-        if (!/^[a-zA-Z\s]+$/.test(name)) { showError('Full name must contain letters only!'); return; }
-
-        // CNIC
-        const cnicPattern = /^\d{5}-\d{7}-\d{1}$/;
-        const rawCnic = cnic.replace(/-/g, '');
-        if (!cnicPattern.test(cnic)) {
-            showError('Invalid CNIC format! Must be: 12345-1234567-1');
-            document.getElementById('cnicInput').style.borderColor = '#e74c3c';
-            return;
-        }
-        if (rawCnic.length !== 13) {
-            showError('CNIC must have exactly 13 digits!');
-            document.getElementById('cnicInput').style.borderColor = '#e74c3c';
-            return;
-        }
-        if (rawCnic.startsWith('00000')) {
-            showError('Invalid CNIC number!');
-            document.getElementById('cnicInput').style.borderColor = '#e74c3c';
-            return;
-        }
-
-        // Address
-        if (address.length < 5) { showError('Please enter a valid shop address!'); return; }
-
-       
-
-        // Phone
-        if (phoneRaw.length !== 11) {
-            showError('Phone number must be exactly 11 digits!');
-            return;
-        }
-        if (!phoneRaw.startsWith('03')) {
-            showError('Phone number must start with 03 (e.g. 0300-1234567)!');
-            return;
-        }
-
-        // Shop name
-        if (shop.length < 3) { showError('Shop name must be at least 3 characters!'); return; }
-
-        // Categories
-        if (checked.length === 0) { showError('Please select at least 1 sub-category!'); return; }
-
-        this.submit();
+    document.querySelectorAll('input[name="Categories"]').forEach(cb => {
+        cb.addEventListener('change', function () { showCatError('', null); });
     });
 
-    function showError(msg) {
-        const box = document.getElementById('validationError');
-        if (box) {
-            box.textContent = '⚠️ ' + msg;
-            box.style.display = 'block';
-            setTimeout(() => box.style.display = 'none', 3000);
+    
+    document.getElementById('cnicInput')?.addEventListener('input', function () {
+        let raw = this.value.replace(/[^0-9]/g, '');
+        if (raw.length > 13) raw = raw.slice(0, 13);
+        let formatted = raw;
+        if (raw.length > 12) {
+            formatted = raw.slice(0, 5) + '-' + raw.slice(5, 12) + '-' + raw.slice(12, 13);
+        } else if (raw.length > 5) {
+            formatted = raw.slice(0, 5) + '-' + raw.slice(5);
+        }
+        this.value = formatted;
+        if (this.classList.contains('invalid')) validateField('cnicInput');
+    });
+
+    document.getElementById('sellerPhone')?.addEventListener('input', function () {
+        let val = this.value.replace(/\D/g, '');
+        if (val.length > 11) val = val.slice(0, 11);
+        if (val.length >= 2 && !val.startsWith('03')) {
+            val = '03' + val.slice(2);
+        }
+        this.value = val.length > 4 ? val.slice(0, 4) + '-' + val.slice(4) : val;
+        if (this.classList.contains('invalid')) validateField('sellerPhone');
+    });
+
+    
+    (function () {
+        const nameInput = document.getElementById('ownerName');
+        if (!nameInput) return;
+
+        function cleanName(v) {
+            return v.replace(/[^A-Za-z ]/g, '').replace(/^ +/, '').replace(/ {2,}/g, ' ');
+        }
+
+        
+        nameInput.addEventListener('keydown', function (e) {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            if (e.key.length === 1 && !/[A-Za-z ]/.test(e.key)) e.preventDefault();
+        });
+
+        
+        nameInput.addEventListener('input', function () {
+            const cleaned = cleanName(this.value);
+            if (cleaned !== this.value) this.value = cleaned;
+        });
+
+        nameInput.value = cleanName(nameInput.value);
+    })();
+
+    
+    const cnicCheckCache = {};
+    async function cnicAlreadyExists(cnic) {
+        if (cnic in cnicCheckCache) return cnicCheckCache[cnic];
+        try {
+            const res = await fetch('/Account/CheckCnic?cnic=' + encodeURIComponent(cnic), { credentials: 'same-origin' });
+            if (!res.ok) return false;
+            const data = await res.json();
+            cnicCheckCache[cnic] = !!data.exists;
+            return cnicCheckCache[cnic];
+        } catch (err) {
+            return false;
         }
     }
+
+    document.getElementById('cnicInput')?.addEventListener('blur', async function () {
+        if (validateField('cnicInput')) return;
+        if (await cnicAlreadyExists(this.value.trim())) {
+            showFieldError('cnicInput', 'This CNIC is already registered with another shop.');
+        }
+    });
+
+    
+    Object.keys(validators).forEach(function (id) {
+        const input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('blur', function () { validateField(id); });
+        input.addEventListener('input', function () {
+            if (input.classList.contains('invalid')) validateField(id);
+        });
+    });
+
+   
+    document.getElementById('setupForm')?.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        let firstBad = null;
+        Object.keys(validators).forEach(function (id) {
+            const msg = validateField(id);
+            if (msg && !firstBad) firstBad = document.getElementById(id);
+        });
+
+        const catResult = validateCategories();
+        if (catResult && !firstBad) firstBad = catResult.el;
+
+        if (firstBad) {
+            firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (typeof firstBad.focus === 'function' && firstBad.tagName === 'INPUT') {
+                setTimeout(function () { firstBad.focus({ preventScroll: true }); }, 300);
+            }
+            return;
+        }
+
+      
+        const cnicEl = document.getElementById('cnicInput');
+        if (await cnicAlreadyExists(cnicEl.value.trim())) {
+            showFieldError('cnicInput', 'This CNIC is already registered with another shop.');
+            cnicEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(function () { cnicEl.focus({ preventScroll: true }); }, 300);
+            return;
+        }
+
+       
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        this.submit();
+    });
 </script>
 </body>
 </html>

@@ -36,5 +36,7 @@
 
         public string? RejectedSubCategories { get; set; }
         public string? SubCategoryRejectionReasons { get; set; }
+        public DateTime? OrdersLastSeenAt { get; set; }
+        public DateTime? ComplaintsLastSeenAt { get; set; }
     }
 }

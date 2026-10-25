@@ -48,6 +48,27 @@
                 "Fake" => "#6b7280",
                 _ => "#0369a1"
             };
+                        var statusText = Model.Status switch
+            {
+                "Open" => "Received",
+                "Forwarded" => "Sent to Seller",
+                "SellerResponded" => "Seller Replied",
+                "Escalated" => "Under Admin Review",
+                "Resolved" => "Resolved",
+                "Fake" => "Closed",
+                _ => Model.Status
+            };
+
+            var statusHelp = Model.Status switch
+            {
+                "Open" => "We have received your complaint. Our team will review it within 24 hours.",
+                "Forwarded" => "We have shared your complaint with the seller and asked for their reply. Please wait, no action is needed from you.",
+                "SellerResponded" => "The seller has replied. Please read the reply below and tell us if your issue is solved.",
+                "Escalated" => "Our admin team is now looking into your complaint personally. We will contact you soon.",
+                "Resolved" => "Your complaint has been resolved. Thank you for your patience.",
+                "Fake" => "After review, this complaint has been closed.",
+                _ => ""
+            };
 
             <div style="background:#f0f7ff; color:#007bff; padding:10px; border-radius:10px; margin-bottom:20px; font-weight:bold; font-size:0.9rem;">
                 Ticket: <span>@Model.TicketNumber</span>
@@ -55,10 +76,16 @@
 
             <div style="text-align:left; background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:20px; font-size:0.9rem;">
                 <div><strong>Name:</strong> @Model.CustomerName</div>
-                <div><strong>Status:</strong> <span style="color:@statusColor; font-weight:700;">@Model.Status</span></div>
+                               <div><strong>Status:</strong> <span style="color:@statusColor; font-weight:700;">@statusText</span></div>
                 <div><strong>Seller / Shop:</strong> @Model.SellerName</div>
                 <div><strong>Type:</strong> @Model.ComplaintType</div>
                 <div><strong>Submitted On:</strong> @Model.CreatedAt.ToString("dd MMM yyyy, hh:mm tt", new System.Globalization.CultureInfo("en-US"))</div>
+                        @if (!string.IsNullOrEmpty(statusHelp))
+            {
+                <div style="text-align:left; background:#fff8e1; border-left:3px solid @statusColor; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:0.85rem; color:#555;">
+                    @statusHelp
+                </div>
+            }
             </div>
 
             <div style="text-align:left; background:#fdf7f9; border-left:3px solid #a64d79; padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:0.88rem; color:#444;">

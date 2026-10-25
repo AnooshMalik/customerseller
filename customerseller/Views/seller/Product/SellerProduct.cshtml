@@ -505,8 +505,16 @@
                                             <div class="pi-price">PKR @product.Price</div>
                                             <div class="pi-stock">@product.Stock units</div>
                                             <div>
-                                                <span class="pi-badge @(product.Status == "Approved" ? "approved" : product.Status == "Rejected" ? "rejected" : "pending")">
-                                                    @(product.Status ?? "Pending")
+                                                @{
+                                                    string displayStatus = product.IsAdminApproved
+                                                        ? "Approved"
+                                                        : !string.IsNullOrEmpty(product.AdminRejectionReason)
+                                                            ? "Rejected"
+                                                            : "Pending";
+                                                    string badgeClass = displayStatus == "Approved" ? "approved" : displayStatus == "Rejected" ? "rejected" : "pending";
+                                                }
+                                                <span class="pi-badge @badgeClass">
+                                                    @displayStatus
                                                 </span>
                                             </div>
                                             <div style="display:flex;gap:6px;">

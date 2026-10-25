@@ -10,17 +10,19 @@ namespace customerseller.Controllers
 {
     private readonly ApplicationDbContext _context;
 
-    private static readonly HashSet<string> ReservedSystemEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-    {
-        "artisanvalley.moderator@gmail.com",
-        "artisanvalley.store@gmail.com",
-        "artisanvalley.rider@gmail.com"
-    };
+        private static readonly HashSet<string> ReservedSystemEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+{
+    "artisanvalley.moderator@gmail.com",
+    "artisanvalley.store@gmail.com",
+    "artisanvalley.rider@gmail.com"
+};
+        private readonly IConfiguration _configuration;
 
-    public AccountController(ApplicationDbContext context)
-    {
-        _context = context;
-    }
+        public AccountController(ApplicationDbContext context, IConfiguration configuration)
+        {
+            _context = context;
+            _configuration = configuration;
+        }
 
         private bool IsValidEmail(string email)
         {
@@ -59,9 +61,9 @@ namespace customerseller.Controllers
             {
                 TempData["LoginError"] = "Password must be at least 8 characters.";
                 if (isSellerPage) return RedirectToAction("Login", new { returnUrl });
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)) return Redirect(returnUrl);
                 return RedirectToAction("Index", "Home");
             }
-
             var foundUser = _context.Users.FirstOrDefault(u =>
                 u.Email.Trim().ToLower() == email.Trim().ToLower());
 
@@ -85,9 +87,17 @@ namespace customerseller.Controllers
                     if (isSellerPage) return RedirectToAction("Login", new { returnUrl });
                     return RedirectToAction("Index", "Home", new { returnUrl });
                 }
-               
+
             }
-            if (BCrypt.Net.BCrypt.Verify(password, foundUser.Password))
+            bool passwordOk = false;
+            try
+            {
+                passwordOk = !string.IsNullOrEmpty(foundUser.Password)
+                             && BCrypt.Net.BCrypt.Verify(password, foundUser.Password);
+            }
+            catch (BCrypt.Net.SaltParseException) { }
+
+            if (passwordOk)
             {
 
                 HttpContext.Session.Clear();
@@ -98,7 +108,7 @@ namespace customerseller.Controllers
 
                 bool isSellerAccount = foundUser.IsSeller || foundUser.Role == "Seller";
 
-                 string role = (isSellerPage && isSellerAccount) ? "Seller" : "Customer";
+                string role = (isSellerPage && isSellerAccount) ? "Seller" : "Customer";
 
                 HttpContext.Session.SetString("UserEmail", foundUser.Email);
                 HttpContext.Session.SetString("UserName", foundUser.FirstName);
@@ -108,7 +118,7 @@ namespace customerseller.Controllers
                 Response.Cookies.Append("UserName", foundUser.FirstName, GetCookieOptions());
                 Response.Cookies.Append("UserRole", role, GetCookieOptions());
 
-                if (!string.IsNullOrEmpty(returnUrl))
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 {
                     return Redirect(returnUrl);
                 }
@@ -123,89 +133,97 @@ namespace customerseller.Controllers
 
             TempData["LoginError"] = "Incorrect password.";
             if (isSellerPage) return RedirectToAction("Login", new { returnUrl });
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl)) return Redirect(returnUrl);
             return RedirectToAction("Index", "Home", new { returnUrl });
         }
-        [HttpGet]
-        public IActionResult Login(string returnUrl)
-        {
-            var sessionEmail = HttpContext.Session.GetString("UserEmail");
-
-            if (!string.IsNullOrEmpty(sessionEmail))
+            [HttpGet]
+            public IActionResult Login(string returnUrl)
             {
-                var role = HttpContext.Session.GetString("UserRole");
-                if (role == "Seller")
-                    return RedirectToAction("Dashboard", "Dashboard");
+                var sessionEmail = HttpContext.Session.GetString("UserEmail");
 
-                if (!string.IsNullOrEmpty(returnUrl))
-                    return Redirect(returnUrl);
+                if (!string.IsNullOrEmpty(sessionEmail))
+                {
+                    var role = HttpContext.Session.GetString("UserRole");
+                    if (role == "Seller")
+                        return RedirectToAction("Dashboard", "Dashboard");
 
-                return RedirectToAction("Index", "Home");
+                    if (!string.IsNullOrEmpty(returnUrl))
+                        return Redirect(returnUrl);
+
+                    return RedirectToAction("Index", "Home");
+                }
+
+                ViewBag.ReturnUrl = returnUrl;
+                return View();
             }
-
-            ViewBag.ReturnUrl = returnUrl;
-            return View();
-        }
-        [HttpPost]
-        public IActionResult Register(string firstName, string lastName, string email, string password, string returnUrl)
-        {
-            firstName = firstName?.Trim();
-            lastName = lastName?.Trim();
-            if (string.IsNullOrWhiteSpace(firstName) || firstName.Length < 2)
+            [HttpPost]
+            public IActionResult Register(string firstName, string lastName, string email, string password, string returnUrl)
             {
-                TempData["RegisterError"] = "Please enter a valid first name.";
-                return RedirectToAction("Index", "Home", new { returnUrl });
-            }
+                firstName = firstName?.Trim();
+                lastName = lastName?.Trim();
+                if (string.IsNullOrWhiteSpace(firstName) || firstName.Length < 2)
+                {
+                    TempData["RegisterError"] = "Please enter a valid first name.";
+                    return RedirectToAction("Index", "Home", new { returnUrl });
+                }
 
-            if (string.IsNullOrWhiteSpace(lastName) || lastName.Length < 2)
-            {
-                TempData["RegisterError"] = "Please enter a valid last name.";
-                return RedirectToAction("Index", "Home", new { returnUrl });
-            }
+                if (string.IsNullOrWhiteSpace(lastName) || lastName.Length < 2)
+                {
+                    TempData["RegisterError"] = "Please enter a valid last name.";
+                    return RedirectToAction("Index", "Home", new { returnUrl });
+                }
 
-            if (!firstName.All(char.IsLetter) || !lastName.All(char.IsLetter))
-            {
-                TempData["RegisterError"] = "Name must contain letters only.";
-                return RedirectToAction("Index", "Home", new { returnUrl });
-            }
-            if (!IsValidEmail(email))
-            {
-                TempData["RegisterError"] = "Please enter a valid email address.";
-                return RedirectToAction("Index", "Home", new { returnUrl });
-            }
+                if (!firstName.All(char.IsLetter) || !lastName.All(char.IsLetter))
+                {
+                    TempData["RegisterError"] = "Name must contain letters only.";
+                    return RedirectToAction("Index", "Home", new { returnUrl });
+                }
+                if (!IsValidEmail(email))
+                {
+                    TempData["RegisterError"] = "Please enter a valid email address.";
+                    return RedirectToAction("Index", "Home", new { returnUrl });
+                }
 
-            if (ReservedSystemEmails.Contains(email.Trim()))
-            {
-                TempData["RegisterError"] = "This email is reserved for system use and cannot be used for personal work.";
-                return RedirectToAction("Index", "Home", new { returnUrl });
-            }
+                if (ReservedSystemEmails.Contains(email.Trim()))
+                {
+                    TempData["RegisterError"] = "This email is reserved for system use and cannot be used for personal work.";
+                    return RedirectToAction("Index", "Home", new { returnUrl });
+                }
 
-            var allowedDomains = new List<string> {
+                var allowedDomains = new List<string> {
         "gmail.com", "yahoo.com", "hotmail.com",
         "outlook.com", "live.com", "icloud.com",
         "mail.com", "protonmail.com"
     };
 
-            var emailDomain = email.Split('@').Last().ToLower();
-            if (!allowedDomains.Contains(emailDomain))
-            {
-                TempData["RegisterError"] = "Please use a valid email.";
-                return RedirectToAction("Index", "Home", new { returnUrl });
-            }
-            if (string.IsNullOrEmpty(password) || password.Length < 8)
-            {
-                TempData["RegisterError"] = "Password must be at least 8 characters.";
-                return RedirectToAction("Index", "Home", new { returnUrl });
-            }
+                var emailDomain = email.Split('@').Last().ToLower();
+                if (!allowedDomains.Contains(emailDomain))
+                {
+                    TempData["RegisterError"] = "Please use a valid email.";
+                    return RedirectToAction("Index", "Home", new { returnUrl });
+                }
+                if (string.IsNullOrEmpty(password) || password.Length < 8)
+                {
+                    TempData["RegisterError"] = "Password must be at least 8 characters.";
+                    return RedirectToAction("Index", "Home", new { returnUrl });
+                }
 
-            if (_context.Users.Any(u => u.Email.ToLower() == email.ToLower()))
-            {
-                TempData["RegisterError"] = "This email is already registered.";
-                return RedirectToAction("Index", "Home", new { returnUrl });
-            }
+                if (_context.Users.Any(u => u.Email.ToLower() == email.ToLower()))
+                {
+                    TempData["RegisterError"] = "This email is already registered.";
+                    return RedirectToAction("Index", "Home", new { returnUrl });
+                }
 
-            var existingPending = _context.PendingRegistrations.FirstOrDefault(p => p.Email.ToLower() == email.ToLower());
-            if (existingPending != null)
-                _context.PendingRegistrations.Remove(existingPending);
+            try
+            {
+                _context.PendingRegistrations.RemoveRange(
+                    _context.PendingRegistrations.Where(p => p.Email.ToLower() == email.ToLower()));
+                _context.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                
+            }
 
             var token = Guid.NewGuid().ToString();
 
@@ -215,85 +233,96 @@ namespace customerseller.Controllers
                 LastName = lastName,
                 Email = email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(password),
-                Token = token
+                Token = token,
+                TokenExpiry = DateTime.Now.AddHours(24)
             });
-            _context.SaveChanges();
-            string verifyLink = string.IsNullOrEmpty(returnUrl)
-                ? $"{Request.Scheme}://{Request.Host}/Account/VerifyEmail?token={token}"
-                : $"{Request.Scheme}://{Request.Host}/Account/VerifyEmail?token={token}&returnUrl={Uri.EscapeDataString(returnUrl)}";
+            _context.SaveChanges(); string verifyLink = string.IsNullOrEmpty(returnUrl)
+                    ? $"{Request.Scheme}://{Request.Host}/Account/VerifyEmail?token={token}"
+                    : $"{Request.Scheme}://{Request.Host}/Account/VerifyEmail?token={token}&returnUrl={Uri.EscapeDataString(returnUrl)}";
 
-            try
-            {
-                var message = new MimeKit.MimeMessage();
-                message.From.Add(new MimeKit.MailboxAddress("Artisan Valley", "artisanvalley.store@gmail.com"));
-                message.To.Add(new MimeKit.MailboxAddress("", email));
-                message.Subject = "Verify Your Email - Artisan Valley";
-                message.Body = new MimeKit.TextPart("html")
+                try
                 {
-                    Text = $@"<h2>Welcome to Artisan Valley!</h2>
+                    var message = new MimeKit.MimeMessage();
+                    message.From.Add(new MimeKit.MailboxAddress("Artisan Valley", "artisanvalley.store@gmail.com"));
+                    message.To.Add(new MimeKit.MailboxAddress("", email));
+                    message.Subject = "Verify Your Email - Artisan Valley";
+                    message.Body = new MimeKit.TextPart("html")
+                    {
+                        Text = $@"<h2>Welcome to Artisan Valley!</h2>
 <p>Please click the link below to verify your email address:</p>
 <a href='{verifyLink}'>Verify My Email</a>"
-                };
+                    };
 
-                using var client = new MailKit.Net.Smtp.SmtpClient();
-                client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
-                client.Send(message);
-                client.Disconnect(true);
-            }
-            catch (Exception ex)
-            {
-                TempData["RegisterError"] = "Registered, but failed to send verification email: " + ex.Message;
+                    using var client = new MailKit.Net.Smtp.SmtpClient();
+                    client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
+                    client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
+                    client.Send(message);
+                    client.Disconnect(true);
+                }
+                catch (Exception ex)
+                {
+                    TempData["RegisterError"] = "Registered, but failed to send verification email: " + ex.Message;
+                    return RedirectToAction("Index", "Home", new { returnUrl });
+                }
+
+                TempData["RegisterSuccess"] = "Please check your email to verify your account.";
                 return RedirectToAction("Index", "Home", new { returnUrl });
             }
 
-            TempData["RegisterSuccess"] = "Please check your email to verify your account.";
-            return RedirectToAction("Index", "Home", new { returnUrl });
-        }
-
-        [HttpGet]
-        public IActionResult VerifyEmail(string token)
+            [HttpGet]
+        public IActionResult VerifyEmail(string token, string returnUrl)
         {
-            var pending = _context.PendingRegistrations.FirstOrDefault(p => p.Token == token);
+                var pending = _context.PendingRegistrations.FirstOrDefault(p => p.Token == token);
 
-            if (pending == null)
-            {
-                TempData["LoginError"] = "Invalid or expired verification link.";
-                return RedirectToAction("Index", "Home");
-            }
+                if (pending == null)
+                {
+                    TempData["LoginError"] = "Invalid or expired verification link.";
+                    return RedirectToAction("Index", "Home");
+                }
 
-            if (_context.Users.Any(u => u.Email.ToLower() == pending.Email.ToLower()))
-            {
+                if (pending.TokenExpiry < DateTime.Now)
+                {
+                    _context.PendingRegistrations.Remove(pending);
+                    _context.SaveChanges();
+                    TempData["LoginError"] = "This verification link has expired. Please register again.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                if (_context.Users.Any(u => u.Email.ToLower() == pending.Email.ToLower()))
+                {
+                    _context.PendingRegistrations.Remove(pending);
+                    _context.SaveChanges();
+                    TempData["LoginError"] = "This email is already registered. Please login.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var newUser = new User
+                {
+                    FirstName = pending.FirstName,
+                    LastName = pending.LastName,
+                    Email = pending.Email,
+                    Password = pending.PasswordHash,
+                    Role = "Customer"
+                };
+                _context.Users.Add(newUser);
                 _context.PendingRegistrations.Remove(pending);
                 _context.SaveChanges();
-                TempData["LoginError"] = "This email is already registered. Please login.";
-                return RedirectToAction("Index", "Home");
-            }
 
-            var newUser = new User
-            {
-                FirstName = pending.FirstName,
-                LastName = pending.LastName,
-                Email = pending.Email,
-                Password = pending.PasswordHash,
-                Role = "Customer"
-            };
-            _context.Users.Add(newUser);
-            _context.PendingRegistrations.Remove(pending);
-            _context.SaveChanges();
+                HttpContext.Session.Clear();
+                HttpContext.Session.SetString("UserEmail", newUser.Email);
+                HttpContext.Session.SetString("UserName", newUser.FirstName);
+                HttpContext.Session.SetString("UserRole", "Customer");
 
-            HttpContext.Session.Clear();
-            HttpContext.Session.SetString("UserEmail", newUser.Email);
-            HttpContext.Session.SetString("UserName", newUser.FirstName);
-            HttpContext.Session.SetString("UserRole", "Customer");
-
-            Response.Cookies.Append("UserEmail", newUser.Email, GetCookieOptions());
-            Response.Cookies.Append("UserName", newUser.FirstName, GetCookieOptions());
-            Response.Cookies.Append("UserRole", "Customer", GetCookieOptions());
+                Response.Cookies.Append("UserEmail", newUser.Email, GetCookieOptions());
+                Response.Cookies.Append("UserName", newUser.FirstName, GetCookieOptions());
+                Response.Cookies.Append("UserRole", "Customer", GetCookieOptions());
 
             TempData["VerifySuccess"] = "Email verified successfully! You're now logged in.";
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
             return RedirectToAction("Index", "Home");
         }
+        
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
@@ -440,7 +469,15 @@ namespace customerseller.Controllers
             cmd.Parameters.AddWithValue("@start", DateTime.Now);
             cmd.Parameters.AddWithValue("@end", DateTime.Now.AddMonths(1));
 
-            cmd.ExecuteNonQuery();
+            try
+            {
+                cmd.ExecuteNonQuery();
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 2627 || ex.Number == 2601)
+            {
+                TempData["SetupError"] = "This shop name is already taken. Please choose a different name.";
+                return RedirectToAction("ShopSetup", "Account");
+            }
             var updateUserCmd = new Microsoft.Data.SqlClient.SqlCommand("UPDATE Users SET IsSeller = 1 WHERE Email = @email", con);
             updateUserCmd.Parameters.AddWithValue("@email", email);
             updateUserCmd.ExecuteNonQuery();
@@ -493,7 +530,7 @@ namespace customerseller.Controllers
 
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
+                client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
                 client.Send(message);
                 client.Disconnect(true);
             }
@@ -533,7 +570,11 @@ namespace customerseller.Controllers
                 TempData["ResetMessage"] = "Invalid or expired reset link.";
                 return RedirectToAction("Index", "Home");
             }
-
+            if (string.IsNullOrEmpty(newPassword) || newPassword.Length < 8)
+            {
+                TempData["ResetMessage"] = "Password must be at least 8 characters.";
+                return RedirectToAction("ResetPasswordConfirm", new { token });
+            }
             user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
             user.ResetToken = null;
             user.ResetTokenExpiry = null;
@@ -551,22 +592,31 @@ namespace customerseller.Controllers
         [HttpPost]
         public IActionResult SellerRegister(string firstName, string lastName, string email, string password)
         {
-            if (string.IsNullOrWhiteSpace(firstName) || firstName.Length < 2)
+            firstName = firstName?.Trim();
+            lastName = lastName?.Trim();
+
+            if (!IsValidEmail(email))
             {
-                firstName = firstName?.Trim();
-                lastName = lastName?.Trim();
+                TempData["RegisterError"] = "Please enter a valid email address.";
+                return RedirectToAction("SellerRegister");
+            }
+
+            if (string.IsNullOrWhiteSpace(firstName) || firstName.Length < 2 || !firstName.All(char.IsLetter))
+            {
                 TempData["RegisterError"] = "Please enter a valid first name.";
                 return RedirectToAction("SellerRegister");
             }
+
+            if (string.IsNullOrWhiteSpace(lastName) || lastName.Length < 2 || !lastName.All(char.IsLetter))
+            {
+                TempData["RegisterError"] = "Please enter a valid last name.";
+                return RedirectToAction("SellerRegister");
+            }
+
             var existingUserCheck = _context.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
             if (existingUserCheck != null && existingUserCheck.IsSeller)
             {
                 TempData["RegisterError"] = "This email is already registered as a Seller.";
-                return RedirectToAction("SellerRegister");
-            }
-            if (!IsValidEmail(email))
-            {
-                TempData["RegisterError"] = "Please enter a valid email address.";
                 return RedirectToAction("SellerRegister");
             }
 
@@ -581,14 +631,13 @@ namespace customerseller.Controllers
                 TempData["RegisterError"] = "Password must be at least 8 characters.";
                 return RedirectToAction("SellerRegister");
             }
-
             var otp = new Random().Next(100000, 999999).ToString();
             HttpContext.Session.SetString("SellerOtp", otp);
             HttpContext.Session.SetString("SellerOtpExpiry", DateTime.Now.AddMinutes(5).ToString());
             HttpContext.Session.SetString("SellerRegEmail", email);
             HttpContext.Session.SetString("SellerRegFirstName", firstName);
             HttpContext.Session.SetString("SellerRegLastName", lastName);
-            HttpContext.Session.SetString("SellerRegPassword", password);
+            HttpContext.Session.SetString("SellerRegPassword", BCrypt.Net.BCrypt.HashPassword(password));
 
             try
             {
@@ -606,7 +655,7 @@ namespace customerseller.Controllers
 
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
+                client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
                 client.Send(message);
                 client.Disconnect(true);
             }
@@ -646,7 +695,7 @@ namespace customerseller.Controllers
 
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
+                client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
                 client.Send(message);
                 client.Disconnect(true);
             }
@@ -697,7 +746,7 @@ namespace customerseller.Controllers
             if (existingUser != null)
             {
                 existingUser.IsSeller = true;
-                existingUser.Password = BCrypt.Net.BCrypt.HashPassword(password);
+                existingUser.Password = password;
             }
             else
             {
@@ -706,14 +755,14 @@ namespace customerseller.Controllers
                     FirstName = firstName,
                     LastName = lastName,
                     Email = email,
-                    Password = BCrypt.Net.BCrypt.HashPassword(password),
+                    Password = password,
                     Role = "Customer",
                     IsSeller = true
                 });
             }
             _context.SaveChanges();
 
-            HttpContext.Session.SetString("IsSeller", "True");
+           
             HttpContext.Session.Clear();
             HttpContext.Session.SetString("UserEmail", email);
             HttpContext.Session.SetString("UserName", firstName);
@@ -792,7 +841,7 @@ namespace customerseller.Controllers
             HttpContext.Session.Remove("SellerLoginEmail");
             HttpContext.Session.Remove("SellerLoginReturnUrl");
 
-            if (!string.IsNullOrEmpty(returnUrl))
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
 
             return RedirectToAction("Dashboard", "Dashboard");
@@ -824,7 +873,7 @@ namespace customerseller.Controllers
 
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
+                client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
                 client.Send(message);
                 client.Disconnect(true);
             }
@@ -869,7 +918,7 @@ namespace customerseller.Controllers
 
                 using var client = new MailKit.Net.Smtp.SmtpClient();
                 client.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate("artisanvalley.store@gmail.com", "esphtmdtnnptlhuo");
+                client.Authenticate(_configuration["EmailSettings:FromEmail"], _configuration["EmailSettings:AppPassword"]);
                 client.Send(message);
                 client.Disconnect(true);
             }

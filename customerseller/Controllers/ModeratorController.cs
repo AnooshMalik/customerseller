@@ -27,10 +27,22 @@ namespace customerseller.Controllers
         [HttpPost]
         public IActionResult Login(string email, string password)
         {
-            var mod = _context.ModeratorSettings
-                .FirstOrDefault(m => m.Email.ToLower() == email.Trim().ToLower());
+            email = email?.Trim() ?? "";
+            password = password?.Trim() ?? "";
 
-            if (mod != null && mod.Password == password.Trim())
+            var mod = _context.ModeratorSettings
+                .FirstOrDefault(m => m.Email.ToLower() == email.ToLower());
+
+            bool valid = false;
+            try
+            {
+                valid = mod != null
+                        && !string.IsNullOrEmpty(mod.Password)
+                        && BCrypt.Net.BCrypt.Verify(password, mod.Password);
+            }
+            catch (BCrypt.Net.SaltParseException) { }
+
+            if (valid)
             {
                 var otp = new Random().Next(100000, 999999).ToString();
                 HttpContext.Session.SetString("ModOtp", otp);
@@ -182,7 +194,7 @@ namespace customerseller.Controllers
                 return RedirectToAction("Login");
             }
 
-            mod.Password = newPassword;
+            mod.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
             mod.ResetToken = null;
             mod.ResetTokenExpiry = null;
             _context.SaveChanges();
@@ -437,6 +449,9 @@ namespace customerseller.Controllers
         }
         public IActionResult GetStats()
         {
+            if (HttpContext.Session.GetString("ModeratorRole") == null)
+                return Json(new { error = "Unauthorized" });
+
             using var con = new Microsoft.Data.SqlClient.SqlConnection(
                 _context.Database.GetConnectionString());
             con.Open();
@@ -498,25 +513,6 @@ namespace customerseller.Controllers
             return RedirectToAction("Login");
         }
 
-        public IActionResult SeedModerator()
-        {
-            if (!_context.ModeratorSettings.Any(m => m.Email == "artisanvalley.moderator@gmail.com"))
-                _context.ModeratorSettings.Add(new ModeratorSetting
-                {
-                    Email = "artisanvalley.moderator@gmail.com",
-                    Password = "Moderator@2026"
-                });
-
-            if (!_context.ModeratorSettings.Any(m => m.Email == "artisanvalley.store@gmail.com"))
-                _context.ModeratorSettings.Add(new ModeratorSetting
-                {
-                    Email = "artisanvalley.store@gmail.com",
-                    Password = "ArtisanValley@2026"
-                });
-
-            _context.SaveChanges();
-            return Content("Seeded!");
-        }
 
         private void SendEmail(string to, string subject, string body)
         {

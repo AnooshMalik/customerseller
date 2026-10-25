@@ -557,13 +557,17 @@
         <a class="nav-item" onclick="showSection('approved', this)">
             <i class="fa-solid fa-circle-check"></i> Approved
         </a>
-        <a class="nav-item" onclick="showSection('rejected', this)">
-            <i class="fa-solid fa-circle-xmark"></i> Rejected
-        </a>
+       <a class="nav-item" onclick="showSection('rejected', this)">
+    <i class="fa-solid fa-circle-xmark"></i> Rejected
+</a>
 
-        <a class="nav-item" href="/Moderator/PaymentApprovals">
-            <i class="fa-solid fa-money-check-dollar"></i> Payment Approvals
-        </a>
+<a class="nav-item" href="/Moderator/PaymentApprovals">
+    <i class="fa-solid fa-money-check-dollar"></i> Payment Approvals
+</a>
+<a class="nav-item" href="/Chat/Messages" style="position:relative;">
+    <i class="fa-solid fa-comment-dots"></i> Messages
+    <span id="chatUnreadBadge" style="display:none; margin-left:auto; background:#dc2626; color:#fff; padding:2px 8px; border-radius:10px; font-size:0.72rem;">0</span>
+</a>
         <div class="sidebar-bottom">
             <a href="javascript:void(0)" class="logout-item" onclick="confirmLogout()">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
@@ -727,10 +731,25 @@
                     }
                 });
 
-            loadHistory('Approved', 'approvedList');
-            loadHistory('Rejected', 'rejectedList');
+          loadHistory('Approved', 'approvedList');
+loadHistory('Rejected', 'rejectedList');
 
-            function showSection(name, el) {
+document.addEventListener('DOMContentLoaded', function () {
+    const params = new URLSearchParams(window.location.search);
+    const section = params.get('section');
+    if (section === 'approved' || section === 'rejected') {
+        const navItems = document.querySelectorAll('.nav-item');
+        let targetItem = null;
+        navItems.forEach(item => {
+            if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(section)) {
+                targetItem = item;
+            }
+        });
+        if (targetItem) showSection(section, targetItem);
+    }
+});
+
+function showSection(name, el) {
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                 document.getElementById('sec-' + name).classList.add('active');

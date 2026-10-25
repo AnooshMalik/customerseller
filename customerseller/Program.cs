@@ -21,7 +21,7 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
     options.Cookie.Name = ".customerseller.Session";
 });
-
+builder.Services.AddResponseCompression(o => { o.EnableForHttps = true; });
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -32,13 +32,13 @@ else
 {
     app.UseExceptionHandler("/Home/Error");
 }
-
+app.UseResponseCompression();
 app.UseStaticFiles(new StaticFileOptions
 {
     OnPrepareResponse = ctx =>
     {
         ctx.Context.Response.Headers.Append(
-            "Cache-Control", "public,max-age=604800"); // 7 din
+                       "Cache-Control", "public,max-age=2592000"); 
     }
 });
 app.UseRouting();

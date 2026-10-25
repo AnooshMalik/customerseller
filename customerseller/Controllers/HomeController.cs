@@ -25,46 +25,78 @@ namespace customerseller.Controllers
         public IActionResult Index()
         {
             var products = _context.Products
-                .Where(p => p.IsAdminApproved)
-                .OrderByDescending(p => p.Id)
-                .Take(8)
-                .ToList();
+    .Where(p => p.IsAdminApproved && p.VideoStatus == "Approved")
+    .OrderByDescending(p => p.Id)
+    .Take(8)
+    .ToList();
+
+            var productIds = products.Select(p => p.Id).ToList();
+            var ratingsData = new Dictionary<string, dynamic>();
+
+            if (productIds.Any())
+            {
+                using var con = new Microsoft.Data.SqlClient.SqlConnection(_context.Database.GetConnectionString());
+                con.Open();
+
+                var placeholders = string.Join(",", productIds.Select((id, idx) => "@id" + idx));
+                var cmd = new Microsoft.Data.SqlClient.SqlCommand(
+                    $"SELECT ProductId, AVG(CAST(Rating AS FLOAT)) AS AvgRating, COUNT(*) AS ReviewCount " +
+                    $"FROM Reviews WHERE ProductId IN ({placeholders}) GROUP BY ProductId", con);
+
+                for (int i = 0; i < productIds.Count; i++)
+                    cmd.Parameters.AddWithValue("@id" + i, productIds[i]);
+
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    var pid = reader["ProductId"].ToString();
+                    ratingsData[pid] = new
+                    {
+                        AverageRating = Convert.ToDouble(reader["AvgRating"]),
+                        ReviewCount = Convert.ToInt32(reader["ReviewCount"])
+                    };
+                }
+            }
+
+            ViewBag.ProductRatings = ratingsData;
 
             return View(products);
         }
 
-       
+
         public IActionResult About() => View();
-       
-        public IActionResult Contact() => View();
+
+        [HttpGet]
+        public IActionResult Contact() => View(new ContactViewModel());
 
         [HttpPost]
-        public async Task<IActionResult> Contact(string Name, string Email, string Phone, string Subject, string Message)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Contact(ContactViewModel model)
         {
-            if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Email) ||
-                string.IsNullOrWhiteSpace(Subject) || string.IsNullOrWhiteSpace(Message))
-            {
-                TempData["ContactError"] = "Please fill in all required fields.";
-                return RedirectToAction("Contact");
-            }
+            if (!ModelState.IsValid)
+                return View(model);
 
-           
+            var name = model.Name.Trim();
+            var email = model.Email.Trim();
+            var phone = model.Phone.Trim();
+            var subject = model.Subject.Trim();
+            var message = model.Message.Trim();
+
             using (var con = new Microsoft.Data.SqlClient.SqlConnection(_context.Database.GetConnectionString()))
             {
                 con.Open();
                 var cmd = new Microsoft.Data.SqlClient.SqlCommand(
-                    @"INSERT INTO ContactMessages (Name, Email, Phone, Subject, Message, SubmittedAt) 
+                    @"INSERT INTO ContactMessages (Name, Email, Phone, Subject, Message, SubmittedAt)
               VALUES (@name, @email, @phone, @subject, @message, @submittedAt)", con);
-                cmd.Parameters.AddWithValue("@name", Name);
-                cmd.Parameters.AddWithValue("@email", Email);
-                cmd.Parameters.AddWithValue("@phone", (object)Phone ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@subject", Subject);
-                cmd.Parameters.AddWithValue("@message", Message);
+                cmd.Parameters.AddWithValue("@name", name);
+                cmd.Parameters.AddWithValue("@email", email);
+                cmd.Parameters.AddWithValue("@phone", phone);
+                cmd.Parameters.AddWithValue("@subject", subject);
+                cmd.Parameters.AddWithValue("@message", message);
                 cmd.Parameters.AddWithValue("@submittedAt", DateTime.Now);
                 cmd.ExecuteNonQuery();
             }
 
-           
             try
             {
                 var fromEmail = _config["EmailSettings:FromEmail"];
@@ -75,11 +107,11 @@ namespace customerseller.Controllers
                 var mimeMessage = new MimeMessage();
                 mimeMessage.From.Add(new MailboxAddress("Artisan Valley Contact Form", fromEmail));
                 mimeMessage.To.Add(new MailboxAddress("Artisan Valley", fromEmail));
-                mimeMessage.ReplyTo.Add(new MailboxAddress(Name, Email));
-                mimeMessage.Subject = $"New Contact Message: {Subject}";
+                mimeMessage.ReplyTo.Add(new MailboxAddress(name, email));
+                mimeMessage.Subject = $"New Contact Message: {subject}";
                 mimeMessage.Body = new TextPart("plain")
                 {
-                    Text = $"Name: {Name}\nEmail: {Email}\nPhone: {Phone}\n\nMessage:\n{Message}"
+                    Text = $"Name: {name}\nEmail: {email}\nPhone: {phone}\n\nMessage:\n{message}"
                 };
 
                 using var client = new SmtpClient();
@@ -91,7 +123,6 @@ namespace customerseller.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Contact form email failed to send");
-                
             }
 
             TempData["ContactSuccess"] = "Thank you! Your message has been sent. We'll get back to you soon.";
@@ -110,9 +141,9 @@ namespace customerseller.Controllers
         [HttpPost]
         public IActionResult SubscribeNewsletter(string email)
         {
-            if (string.IsNullOrWhiteSpace(email))
+            if (string.IsNullOrWhiteSpace(email) ||
+                !System.Text.RegularExpressions.Regex.IsMatch(email.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
                 return Json(new { success = false, message = "Please enter a valid email." });
-
             using (var con = new Microsoft.Data.SqlClient.SqlConnection(_context.Database.GetConnectionString()))
             {
                 con.Open();

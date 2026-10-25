@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace customerseller.Models
 {
-    public class CourierCompany
+    public class RiderCompany
     {
         [Key]
         public int Id { get; set; }

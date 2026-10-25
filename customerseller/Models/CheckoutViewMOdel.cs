@@ -4,12 +4,10 @@ namespace customerseller.Models
 {
     public class CheckoutViewModel
     {
-       
+
         [Required(ErrorMessage = "Mobile number is required")]
         [RegularExpression(@"^03\d{9}$", ErrorMessage = "Please enter a valid mobile number")]
-        public string Email { get; set; }
-
-        
+        public string Phone { get; set; }
         public string Country { get; set; } = "Pakistan";
         public string FirstName { get; set; }
         public string LastName { get; set; }

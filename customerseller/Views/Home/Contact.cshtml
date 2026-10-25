@@ -1,46 +1,63 @@
-﻿@{
+﻿@model customerseller.Models.ContactViewModel
+@{
     ViewData["Title"] = "Contact";
 }
 
 <main class="contact-container">
     <h1>Contact Us</h1>
+
     @if (TempData["ContactSuccess"] != null)
-{
-    <div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:12px 16px; margin-bottom:20px; color:#2e7d32;">
-        @TempData["ContactSuccess"]
-    </div>
-}
-@if (TempData["ContactError"] != null)
-{
-    <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:8px; padding:12px 16px; margin-bottom:20px; color:#c62828;">
-        @TempData["ContactError"]
-    </div>
-}
+    {
+        <div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:12px 16px; margin-bottom:20px; color:#2e7d32;">
+            @TempData["ContactSuccess"]
+        </div>
+    }
+    @if (TempData["ContactError"] != null)
+    {
+        <div style="background:#ffebee; border:1px solid #ffcdd2; border-radius:8px; padding:12px 16px; margin-bottom:20px; color:#c62828;">
+            @TempData["ContactError"]
+        </div>
+    }
+
     <section>
         <p>
             If you have any questions, suggestions, or need support regarding our handmade products,
             please reach out to us. We’d love to hear from you!
+        </p>
+        <p>
+            You can also email us directly at <strong>artisanvalley.store@gmail.com</strong>.
         </p>
     </section>
 
     <section>
         <h2>Send Us a Message</h2>
 
-        <form asp-controller="Home" asp-action="Contact" method="post">
-            <label>Full Name</label>
-            <input type="text" name="Name" placeholder="Your full name" required>
+        <form asp-controller="Home" asp-action="Contact" method="post" novalidate>
+            <div asp-validation-summary="ModelOnly" class="field-error"></div>
 
-            <label>Email Address</label>
-            <input type="email" name="Email" placeholder="Your email" required>
+            <label asp-for="Name">Full Name</label>
+            <input asp-for="Name" type="text" placeholder="Your full name"
+                   maxlength="50" autocomplete="name" />
+            <span asp-validation-for="Name" class="field-error"></span>
 
-            <label>Phone Number</label>
-            <input type="tel" name="Phone" placeholder="Your phone number" required>
+            <label asp-for="Email">Email Address</label>
+            <input asp-for="Email" type="email" placeholder="Your email"
+                   maxlength="100" autocomplete="email" />
+            <span asp-validation-for="Email" class="field-error"></span>
 
-            <label>Subject</label>
-            <input type="text" name="Subject" placeholder="Subject" required>
+            <label asp-for="Phone">Phone Number</label>
+            <input asp-for="Phone" type="tel" placeholder="03001234567"
+                   maxlength="13" inputmode="tel" autocomplete="tel" />
+            <span asp-validation-for="Phone" class="field-error"></span>
 
-            <label>Message</label>
-            <textarea name="Message" rows="6" placeholder="Write your message here..." required></textarea>
+            <label asp-for="Subject">Subject</label>
+            <input asp-for="Subject" type="text" placeholder="Subject" maxlength="100" />
+            <span asp-validation-for="Subject" class="field-error"></span>
+
+            <label asp-for="Message">Message</label>
+            <textarea asp-for="Message" rows="6" maxlength="1000"
+                      placeholder="Write your message here..."></textarea>
+            <span asp-validation-for="Message" class="field-error"></span>
 
             <button type="submit">Send Message</button>
         </form>
@@ -50,3 +67,32 @@
         Thank you for supporting our handmade small business ❤️
     </footer>
 </main>
+
+@section Scripts {
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('Name').addEventListener('input', function () {
+            this.value = this.value.replace(/[^A-Za-z\s.'-]/g, '');
+        });
+
+        document.getElementById('Phone').addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9+]/g, '');
+        });
+    </script>
+}
+
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        
+        document.getElementById('Name').addEventListener('input', function () {
+            this.value = this.value.replace(/[^A-Za-z\s.'-]/g, '');
+        });
+
+        
+        document.getElementById('Phone').addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9+]/g, '');
+        });
+    </script>
+}
