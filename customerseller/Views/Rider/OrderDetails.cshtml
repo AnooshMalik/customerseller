@@ -1,0 +1,145 @@
+﻿@model customerseller.Models.Order
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order #@Model.OrderId — ArtisanValley</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #f5f3ff; min-height: 100vh; padding: 30px 20px; }
+        .wrap { max-width: 680px; margin: 0 auto; }
+        .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: #a64d79; font-weight: 600; font-size: 0.88rem;
+            text-decoration: none; margin-bottom: 18px;
+        }
+        .card {
+            background: #fff; border-radius: 16px; padding: 26px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 18px;
+        }
+        .header-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+        }
+        .order-id { font-family: monospace; font-size: 1.1rem; color: #7c3aed; font-weight: 700; }
+        .badge { padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; }
+        .badge-assigned { background: #fff3e0; color: #e65100; }
+        .badge-pickedup { background: #e3f2fd; color: #1565c0; }
+        .badge-delivered { background: #d1fae5; color: #059669; }
+        .badge-cancelled { background: #fee2e2; color: #c62828; }
+        .section-title {
+            font-size: 0.72rem; font-weight: 700; color: #8b5cf6;
+            text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px;
+        }
+        .address-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+        .address-box { background: #f8f5ff; border-radius: 10px; padding: 14px 16px; }
+        .address-box .name { font-size: 0.9rem; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+        .address-box .addr { font-size: 0.84rem; color: #555; margin-bottom: 4px; }
+        .address-box .phone a { color: #a64d79; font-weight: 600; text-decoration: none; font-size: 0.84rem; }
+        .cost-row {
+            display: flex; justify-content: space-between; padding: 10px 0;
+            border-top: 1px solid #f0f0f0; font-size: 0.88rem; color: #555;
+        }
+        .cost-row.total { font-weight: 700; color: #a64d79; font-size: 1rem; }
+        .info-line { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.86rem; }
+        .info-line label { color: #888; }
+        .info-line span { color: #1a1a2e; font-weight: 600; }
+        .note-box {
+            background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px;
+            padding: 12px 16px; font-size: 0.85rem; color: #92400e; margin-top: 14px;
+        }
+        .note-box.cancelled { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <a href="javascript:history.back()" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back to My Deliveries
+        </a>
+
+        <div class="card">
+            <div class="header-row">
+                <span class="order-id">#@Model.OrderId</span>
+                @{
+                    var statusClass = Model.RiderStatus switch
+                    {
+                        "Assigned" => "badge-assigned",
+                        "PickedUp" => "badge-pickedup",
+                        "Delivered" => "badge-delivered",
+                        "Cancelled" => "badge-cancelled",
+                        _ => "badge-assigned"
+                    };
+                }
+                <span class="badge @statusClass">@Model.RiderStatus</span>
+            </div>
+
+            <div class="section-title">Order Info</div>
+            <div class="info-line"><label>Order Date</label><span>@(Model.OrderDate.ToString("dd MMM yyyy, hh:mm tt"))</span></div>
+            @if (!string.IsNullOrEmpty(Model.ProductName))
+            {
+                <div class="info-line"><label>Item</label><span>@Model.ProductName</span></div>
+            }
+            @if (Model.DeliveredAt.HasValue)
+            {
+                <div class="info-line"><label>Delivered At</label><span>@Model.DeliveredAt.Value.ToString("dd MMM yyyy, hh:mm tt")</span></div>
+            }
+            @if (Model.CancelledDate.HasValue)
+            {
+                <div class="info-line"><label>Cancelled At</label><span>@Model.CancelledDate.Value.ToString("dd MMM yyyy, hh:mm tt")</span></div>
+            }
+        </div>
+
+        <div class="card">
+            <div class="address-grid">
+                <div class="address-box">
+                    <div class="section-title" style="margin-bottom:8px;"><i class="fas fa-store"></i> Pickup From (Seller)</div>
+                    <div class="addr">@(Model.SellerPickupAddress ?? "Address not set")</div>
+                    <div class="phone" style="margin-top:6px;">
+                        <i class="fas fa-phone"></i> <a href="tel:@Model.SellerPhone">@(Model.SellerPhone ?? "N/A")</a>
+                    </div>
+                </div>
+                <div class="address-box">
+                    <div class="section-title" style="margin-bottom:8px;"><i class="fas fa-map-marker-alt"></i> Deliver To (Customer)</div>
+                    <div class="name">@Model.FirstName @Model.LastName</div>
+                    <div class="addr">@(Model.CustomerAddress ?? Model.Address)</div>
+                    <div class="phone" style="margin-top:6px;">
+                        <i class="fas fa-phone"></i> <a href="tel:@Model.CustomerPhone">@(Model.CustomerPhone ?? Model.Email)</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cost-row">
+                <span>Product Cost</span>
+                <span>Rs. @((Model.Total - (Model.DeliveryFee ?? 0)).ToString("N0"))</span>
+            </div>
+            <div class="cost-row">
+                <span>Delivery Fee</span>
+                <span>Rs. @((Model.DeliveryFee ?? 0).ToString("N0"))</span>
+            </div>
+            <div class="cost-row total">
+                <span>Total (COD)</span>
+                <span>Rs. @Model.Total.ToString("N0")</span>
+            </div>
+
+            @if (Model.RiderStatus == "Delivered")
+            {
+                <div class="note-box">
+                    <i class="fas fa-money-bill-wave"></i>
+                    @(Model.PaymentReceived == true ? "Payment was received successfully." : $"Payment was NOT received. Reason: {Model.PaymentNotReceivedReason}")
+                </div>
+            }
+            else if (Model.RiderStatus == "Cancelled")
+            {
+                <div class="note-box cancelled">
+                    <i class="fas fa-ban"></i> Order Cancelled — @Model.PaymentNotReceivedReason
+                </div>
+            }
+        </div>
+    </div>
+</body>
+</html>

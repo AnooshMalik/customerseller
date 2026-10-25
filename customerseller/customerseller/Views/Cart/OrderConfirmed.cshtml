@@ -1,0 +1,328 @@
+﻿@model customerseller.Models.Order
+@{
+    ViewData["Title"] = "Order Confirmed";
+    var orderId = Model?.OrderId ?? TempData["OrderId"]?.ToString() ?? "";
+    var trackingId = Model?.TrackingId ?? TempData["TrackingId"]?.ToString() ?? "";
+        var total = Model?.Total ?? Convert.ToDecimal(TempData["Total"] ?? 0);
+    var related = ViewBag.RelatedOrders as List<customerseller.Models.Order> ?? new List<customerseller.Models.Order>();
+    var grandTotal = total + related.Sum(r => r.Total);
+}
+
+<style>
+    .confirmation-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 40px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 32px rgba(160, 50, 95, 0.08);
+        text-align: center;
+        font-family: sans-serif;
+    }
+    .success-icon {
+        width: 80px; height: 80px;
+        background: #4caf50;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 25px auto;
+        color: white; font-size: 40px;
+    }
+    .order-items-list {
+        margin: 20px 0; text-align: left;
+        border: 1px solid #eee; border-radius: 8px;
+        overflow: hidden; background: #fff;
+    }
+    .item-row {
+        display: flex; align-items: center;
+        padding: 15px; border-bottom: 1px solid #eee; gap: 15px;
+    }
+    .item-row img {
+        width: 60px; height: 60px;
+        object-fit: cover; border-radius: 6px; border: 1px solid #eee;
+    }
+    .item-info { flex-grow: 1; }
+    .item-price { font-weight: bold; color: #a64d79; }
+    .order-details {
+        background: #f9f9f9; padding: 20px;
+        border-radius: 8px; text-align: left;
+        margin-bottom: 20px; border: 1px solid #eee; line-height: 1.8;
+    }
+    .history-card {
+        border: 1px solid #eee; padding: 15px;
+        margin-bottom: 15px; border-radius: 10px;
+        text-align: left; position: relative; background: #fff;
+    }
+    .btn-track {
+        background: #2196F3; color: white; border: none;
+        padding: 15px; border-radius: 8px; cursor: pointer;
+        font-weight: bold; width: 100%; margin-top: 20px;
+        display: block; text-align: center; text-decoration: none;
+    }
+    .btn-complain {
+        background: #fff; color: #c0392b;
+        border: 1.5px solid #e8a0a0;
+        padding: 7px 14px; border-radius: 7px;
+        cursor: pointer; font-size: 0.82rem; font-weight: 600;
+        font-family: sans-serif;
+        display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-complain:hover { background: #fff5f5; border-color: #c0392b; }
+    
+    @@media (max-width: 600px) {
+        .confirmation-container {
+            margin: 20px auto;
+            padding: 24px 18px;
+        }
+
+        .item-row {
+            flex-wrap: wrap;
+            padding: 12px;
+        }
+
+            .item-row img {
+                width: 50px;
+                height: 50px;
+            }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-field.full {
+            grid-column: 1;
+        }
+
+        .priority-row {
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 18px 20px 14px;
+        }
+
+        .modal-body {
+            padding: 18px 20px 20px;
+        }
+
+        .modal-footer {
+            flex-direction: column;
+        }
+
+        .btn-cancel-modal, .btn-submit-complaint {
+            width: 100%;
+        }
+    }
+</style>
+
+
+
+
+<div class="confirmation-container">
+    <div class="success-icon">✓</div>
+    <h1>Order Confirmed!</h1>
+    <p style="font-size: 1.1rem; color: #444;">Thank you for shopping with <strong>Artisan Valley</strong>!</p>
+
+    @if (Model != null)
+    {
+        <p style="color: #666; margin-top: -10px;">We have received your order details and are preparing it for shipment.</p>
+
+        <div class="order-items-list">
+            @foreach (var item in Model.Items)
+            {
+                <div class="item-row">
+                    <img src="@item.ImageUrl" alt="Product">
+                    <div class="item-info">
+                        <small style="color:#a64d79; font-weight:700; display:block; margin-bottom:2px;">🏪 @item.SellerShopName</small>
+                        <div style="font-weight:600;">@item.Title</div>
+                        <small style="color:#888;">Qty: @item.Quantity</small><br />
+                        <small style="color: #2196F3; font-weight: bold;">Order ID: @orderId</small>
+                    </div>
+                    <div class="item-price">Rs. @((item.Price * item.Quantity).ToString("N0"))</div>
+                </div>
+            }
+        </div>
+
+               <div class="order-details">
+            <div><strong>Order ID:</strong> #@orderId</div>
+            <div><strong>Tracking ID:</strong> <span style="color:#2196F3; font-weight:700;">@trackingId</span></div>
+                       <div><strong>@(related.Any() ? "This order total" : "Total Amount"):</strong> Rs. @total.ToString("N0")</div>
+            @if (related.Any())
+            {
+                <div><strong>Grand Total (all orders):</strong> Rs. @grandTotal.ToString("N0")</div>
+            }
+        </div>
+
+        @if (related.Any())
+        {
+            <div style="text-align:left; margin:20px 0;">
+                <div style="font-weight:700; color:#a64d79; margin-bottom:6px;">Your other orders from this checkout</div>
+                <p style="font-size:0.85rem; color:#888; margin:0 0 12px;">Your items are from different sellers, so each seller has its own order and tracking ID.</p>
+                @foreach (var r in related)
+                {
+                    <div class="history-card">
+                        <div style="font-size:0.85rem; color:#888; margin-bottom:10px;">
+                            <strong style="color:#a64d79;">🏪 @(r.Items.FirstOrDefault()?.SellerShopName)</strong><br />
+                            Order ID: <strong style="color:#2196F3;">#@r.OrderId</strong><br />
+                            Tracking ID: <strong style="color:#2196F3;">@r.TrackingId</strong>
+                        </div>
+                        @foreach (var it in r.Items)
+                        {
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                <img src="@it.ImageUrl" style="width:45px; height:45px; border-radius:6px; object-fit:cover; border:1px solid #eee;">
+                                <div style="flex-grow:1; font-size:0.9rem;">@it.Title <span style="color:#999;">× @it.Quantity</span></div>
+                                <div style="font-size:0.85rem; font-weight:bold; color:#a64d79;">Rs. @((it.Price * it.Quantity).ToString("N0"))</div>
+                            </div>
+                        }
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #f5f5f5; padding-top:8px; margin-top:8px;">
+                            <span style="font-weight:bold;">Total: Rs. @r.Total.ToString("N0")</span>
+                            <a href="/Cart/TrackOrder?orderId=@r.TrackingId" style="color:#2196F3; font-weight:700; text-decoration:none; font-size:0.85rem;">Track →</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        <p style="font-size:0.85rem; color:#888; margin-top:-10px;">📌 Save your <strong>Tracking ID</strong> — you'll need it to track this order later.</p>
+    }
+        else
+{
+    <div id="noOrderPlaceholder" style="padding: 30px 20px; background:#f9f9f9; border-radius:8px; margin: 20px 0; text-align:center;">
+        <p style="color:#888; font-size:1rem; margin:0;">No order placed yet.</p>
+    </div>
+}
+        <div id="orderHistoryContainer"></div>
+
+                      <a href="/Cart/TrackOrder" class="btn-track" style="display:block; text-align:center; text-decoration:none;">
+        🔍 Track Your Order
+    </a>
+    @if (Model != null && Model.Status == "Delivered")
+    {
+        <a href="#" id="complaintLink"
+           class="btn-track"
+           style="background:#fff; color:#c0392b; border:2px solid #e74c3c; margin-top:10px; display:block; text-align:center; text-decoration:none; padding:15px; border-radius:8px; font-weight:bold;">
+            🚩 File a Complaint
+        </a>
+    }
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    saveOrderData();
+    renderHistory();
+    setupComplaintLink();
+});
+
+function setupComplaintLink() {
+    let id = "@orderId";
+    let amt = "@total.ToString("N0")";
+    if (!id || id === "") {
+        const history = JSON.parse(localStorage.getItem('myOrders')) || [];
+        if (history.length > 0) {
+            id = history[0].id;
+            amt = history[0].total;
+        }
+    }
+       const link = document.getElementById('complaintLink');
+    if (link && id) {
+        link.href = '/Cart/Complaint?orderId=' + id + '&amount=' + amt;
+    }
+
+    const isSeller = @(Context.Session.GetString("UserRole") == "Seller" ? "true" : "false");
+    if (link && isSeller) {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            alert('Sellers cannot file complaints. Please use a customer account.');
+        });
+    }
+}
+function goToTracking() {
+    let orderId = "@orderId";
+    if (!orderId || orderId === "") {
+        const history = JSON.parse(localStorage.getItem('myOrders')) || [];
+        if (history.length > 0) orderId = history[0].id;
+    }
+    if (orderId) location.href = '/Cart/TrackOrder?orderId=' + orderId;
+    else location.href = '/Cart/TrackOrder';
+}
+
+function saveOrderData() {
+    const orderId = "@orderId";
+    const hasModel = "@(Model != null ? "true" : "false")" === "true";
+    if (!hasModel || !orderId || orderId === "" || orderId === "0") return;
+
+    let history = JSON.parse(localStorage.getItem('myOrders')) || [];
+    if (!history.find(o => o.id === orderId)) {
+           let items = @Html.Raw(Model != null ? System.Text.Json.JsonSerializer.Serialize(Model.Items.Select(i => new
+        {
+            img = i.ImageUrl,
+            title = i.Title,
+            shop = i.SellerShopName,
+            price = "Rs. " + (i.Price * i.Quantity).ToString("N0")
+    })) : "[]");
+
+               history.unshift({
+            id: orderId,
+            trackingId: "@trackingId",
+            total: "@total.ToString("N0")",
+            date: new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }),
+            items: items
+        });
+        if (history.length > 5) history = history.slice(0, 5);
+        localStorage.setItem('myOrders', JSON.stringify(history));
+    }
+}
+
+    function renderHistory() {
+        const history = JSON.parse(localStorage.getItem('myOrders')) || [];
+        const container = document.getElementById('orderHistoryContainer');
+        const currentId = "@orderId";
+        const oldOrders = history.filter(o => o.id !== currentId || currentId === "");
+
+        const noOrderMsg = document.getElementById('noOrderPlaceholder');
+        if (noOrderMsg && oldOrders.length > 0) noOrderMsg.style.display = 'none';
+
+        if (oldOrders.length === 0) { container.innerHTML = ''; return; }
+
+    let html = '<div style="text-align:left; margin-top:40px; margin-bottom:15px; color:#888; font-weight:bold; font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">Previous Orders History</div>';
+
+    oldOrders.forEach(order => {
+               html += `
+        <div class="history-card">
+            <button onclick="deleteOrder('${order.id}')"
+                style="position:absolute; top:10px; right:10px; background:none; border:none; font-size:1.3rem; color:#ccc; cursor:pointer; line-height:1;"
+                onmouseover="this.style.color='red'"
+                onmouseout="this.style.color='#ccc'">&times;</button>
+                       <div style="font-size:0.85rem; color:#888; margin-bottom:10px;">
+                Order ID: <strong style="color:#2196F3;">#${order.id}</strong> | Placed on: <strong>${order.date}</strong>
+                ${order.trackingId ? `<br>Tracking ID: <strong style="color:#2196F3;">${order.trackingId}</strong>` : ''}
+            </div>
+               ${order.items.map(item => `
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+            <img src="${item.img}" style="width:45px; height:45px; border-radius:6px; object-fit:cover; border:1px solid #eee;">
+            <div style="flex-grow:1;">
+                <small style="color:#a64d79; font-weight:700; display:block;"> ${item.shop || ''}</small>
+                <div style="font-size:0.9rem; color:#333;">${item.title}</div>
+            </div>
+            <div style="font-size:0.85rem; font-weight:bold; color:#a64d79;">${item.price}</div>
+        </div>
+    `).join('')}
+                       <div style="border-top:1px solid #f5f5f5; padding-top:10px; margin-top:10px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                <span style="font-weight:bold;">Total Paid: Rs. ${order.total}</span>
+            </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function deleteOrder(orderId) {
+    let history = JSON.parse(localStorage.getItem('myOrders')) || [];
+    history = history.filter(o => o.id !== orderId);
+    localStorage.setItem('myOrders', JSON.stringify(history));
+    renderHistory();
+}
+
+</script>
+
+<script>
+    localStorage.removeItem('cart');
+    localStorage.removeItem('buyNowItem');
+</script>
